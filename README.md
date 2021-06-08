@@ -93,7 +93,7 @@ Prerequisites:
    deployment.apps/mongodb created
    deployment.apps/mongoku created
    ingress.networking.k8s.io/mongodb created
-   $ curl -s http://localhost | grep "<title>"
+   $ curl -f -s http://localhost | grep "<title>" || echo "FAILED"
      <title>Mongoku</title>
    ```
    
@@ -113,7 +113,7 @@ Prerequisites:
 1. Install a MongoDB database for testing
    
    Install the MongoDB as you would do when you need it for a service and check if the operator will
-   provide a secret:
+   provide a secret.
      
    ```console
    $ kubectl kustomize kustomize/overlays/test/
@@ -125,12 +125,12 @@ Prerequisites:
    apiVersion: persistence.sda-se.com/v1beta1
    kind: MongoDb
    metadata:
-     name: test
+     name: local-test-db
      namespace: local-test
    spec: {}
    $ kubectl apply -k kustomize/overlays/test/
    namespace/local-test created
-   mongodb.persistence.sda-se.com/test created
+   mongodb.persistence.sda-se.com/local-test-db created
    $ kubectl get -n local-test mongo
    NAME   AGE
    test   33s
@@ -140,7 +140,7 @@ Prerequisites:
    
 1. Cleanup
    
-   To value resources of your Docker installation, delete the local cluster:
+   To value resources of your Docker installation, delete the local cluster.
    
    ```console
    $ kind delete cluster --name mongodb-operator-cluster

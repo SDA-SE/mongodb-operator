@@ -5,4 +5,4 @@ namespace: local-test
 
 resources:
   - local-test-ns.yaml
-  - test-mongo.yaml
+  - local-test-db-mongo.yaml

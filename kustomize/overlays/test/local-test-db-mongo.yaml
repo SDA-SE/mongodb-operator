@@ -1,5 +1,5 @@
 apiVersion: persistence.sda-se.com/v1beta1
 kind: MongoDb
 metadata:
-  name: test
+  name: local-test-db
 spec: {}
