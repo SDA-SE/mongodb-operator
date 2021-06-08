@@ -126,27 +126,31 @@ Prerequisites:
    To be used locally, the operator image must be pushed to the registry created above.
    
    ```console
-   $ docker build -t localhost:5000/mongodb-operator:local .
-   [+] Building 0.2s (5/5) FINISHED                                                                                                                                                                                                                                                                                        
-    => [internal] load build definition from Dockerfile                                                                                                                                                                                                                                                               0.0s
-    => => transferring dockerfile: 123B                                                                                                                                                                                                                                                                               0.0s
-    => [internal] load .dockerignore                                                                                                                                                                                                                                                                                  0.0s
-    => => transferring context: 2B                                                                                                                                                                                                                                                                                    0.0s
-    => [internal] load metadata for docker.io/library/nginx:latest                                                                                                                                                                                                                                                    0.0s
-    => [1/1] FROM docker.io/library/nginx                                                                                                                                                                                                                                                                             0.1s
-    => exporting to image                                                                                                                                                                                                                                                                                             0.0s
-    => => exporting layers                                                                                                                                                                                                                                                                                            0.0s
-    => => writing image sha256:4c0932b7341ac6d882d0dcea6d1ce0d38b796414f5fbd9b9ef72ded245d7651e                                                                                                                                                                                                                       0.0s
-    => => naming to localhost:5000/mongodb-operator:local
-   $ docker push localhost:5000/mongodb-operator:local
-   The push refers to repository [localhost:5000/mongodb-operator]
-   6b93c0e56d01: Pushed 
-   2f2780a1a18d: Pushed 
-   7278048f2330: Pushed 
-   fc621d08b12b: Pushed 
-   2230366c7c6c: Pushed 
-   14a1ca976738: Pushed 
-   local: digest: sha256:de97907522dc30885426c5125098d000982065e000ed41f2b47178a82479bd75 size: 1570
+   $ ./gradlew jib -Djib.to.image=localhost:5000/mongodb-operator:local -Djib.allowInsecureRegistries=true
+   > Task :jib
+   
+   Containerizing application to localhost:5000/mongodb-operator:local...
+   Base image 'quay.io/sdase/openjdk-runtime:11-hotspot-distroless' does not use a specific image digest - build may not be reproducible
+   The credential helper (docker-credential-desktop) has nothing for server URL: localhost:5000
+   
+   Got output:
+   
+   credentials not found in native keychain
+   
+   Cannot verify server at https://localhost:5000/v2/. Attempting again with no TLS verification.
+   Failed to connect to https://localhost:5000/v2/ over HTTPS. Attempting again with HTTP.
+   Using base image with digest: sha256:c987f9fd30e233c4763a48cbf9d1164ac3eaf7ea01eda1f98d446cc8fcc33571
+   
+   Container entrypoint set to [java, -cp, /app/resources:/app/classes:/app/libs/*, com.sdase.k8s.operator.mongodb.MongoDbOperator]
+   Container program arguments set to []
+   
+   Built and pushed image as localhost:5000/mongodb-operator:local
+   Executing tasks:
+   [==============================] 100,0% complete
+   
+   
+   BUILD SUCCESSFUL in 7s
+   2 actionable tasks: 1 executed, 1 up-to-date
    ```
    
 1. Install the operator
