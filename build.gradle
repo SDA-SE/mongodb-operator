@@ -1,0 +1,24 @@
+plugins {
+  id "idea"
+  id "java"
+  id "com.diffplug.spotless" version "5.12.4"
+}
+
+repositories {
+  mavenCentral()
+}
+
+group "com.sdase.k8s.operator.mongodb"
+
+idea.module.inheritOutputDirs = true
+
+spotless {
+  java { googleJavaFormat('1.9') }
+  enforceCheck = false
+}
+
+wrapper { gradleVersion = '6.5' }
+
+version = System.getenv('SEMANTIC_VERSION')
+
+
