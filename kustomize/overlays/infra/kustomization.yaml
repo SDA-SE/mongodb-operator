@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
+  - local-registry-hosting-cm.yaml

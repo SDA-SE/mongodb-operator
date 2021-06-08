@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-operator
+  annotations:
+    kube-score/ignore: pod-networkpolicy,container-resources
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      serverpod: mongodb-operator
+  template:
+    metadata:
+      labels:
+        serverpod: mongodb-operator
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: operator
+          image: localhost:5000/mongodb-operator:local
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              memory: 96Mi
