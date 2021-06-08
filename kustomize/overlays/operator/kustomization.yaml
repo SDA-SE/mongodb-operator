@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: mongodb-operator
 
 resources:
+  - mongodb-operator-ns.yaml
   - ../../bases/operator
 
 # TODO create mongo admin secret for operator
