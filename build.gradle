@@ -2,6 +2,7 @@ plugins {
   id "idea"
   id "java"
   id "com.diffplug.spotless" version "5.12.4"
+  id "com.google.cloud.tools.jib" version "3.0.0"
 }
 
 repositories {
@@ -15,6 +16,25 @@ idea.module.inheritOutputDirs = true
 spotless {
   java { googleJavaFormat('1.9') }
   enforceCheck = false
+}
+
+jib {
+  container.ports = []
+  container.args = []
+  from.image = 'quay.io/sdase/openjdk-runtime:11-hotspot-distroless'
+  container.user = 10001
+  to.image = "$rootProject.name:latest"
+}
+
+project.ext {
+  fabric8Version = "5.0.1"
+  slf4jVersion = "1.7.30"
+}
+
+dependencies {
+  implementation "io.fabric8:kubernetes-client:${fabric8Version}"
+  implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+  implementation "org.slf4j:slf4j-simple:${slf4jVersion}"
 }
 
 wrapper { gradleVersion = '6.5' }

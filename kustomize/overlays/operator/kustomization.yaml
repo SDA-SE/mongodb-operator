@@ -8,3 +8,15 @@ resources:
   - ../../bases/operator
 
 # TODO create mongo admin secret for operator
+
+# FIXME need to support the cluster role in a more general way but deploy the operator to
+# desired namespace
+patchesJson6902:
+  - target:
+      kind: RoleBinding
+      name: mongodb-operator
+      group: rbac.authorization.k8s.io
+      version: v1
+    patch: |
+      - op: remove
+        path: /metadata/namespace

@@ -3,4 +3,7 @@ kind: Kustomization
 
 resources:
   - mongodbs-crd.yaml
+  - mongodb-operator-sa.yaml
+  - mongodb-operator-cr.yaml
+  - mongodb-operator-crb.yaml
   - mongodb-operator-deploy.yaml

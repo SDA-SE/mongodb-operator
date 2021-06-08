@@ -15,7 +15,8 @@ spec:
       labels:
         serverpod: mongodb-operator
     spec:
-      automountServiceAccountToken: false
+      serviceAccountName: mongodb-operator
+      automountServiceAccountToken: true
       containers:
         - name: operator
           image: localhost:5000/mongodb-operator:local

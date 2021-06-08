@@ -1,0 +1,11 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mongodb-operator
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "delete", "list", "update"]
+  - apiGroups: ["persistence.sda-se.com"]
+    resources: ["mongodbs"]
+    verbs: ["watch", "list", "get"]
