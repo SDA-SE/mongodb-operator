@@ -7,7 +7,10 @@ resources:
   - mongodb-operator-ns.yaml
   - ../../bases/operator
 
-# TODO create mongo admin secret for operator
+secretGenerator:
+  - name: mongodb-operator
+    literals:
+      - mongodbConnectionString=mongodb://test-root:test-s3cr3t@mongodb.mongodb
 
 # FIXME need to support the cluster role in a more general way but deploy the operator to
 # desired namespace

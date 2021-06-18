@@ -26,19 +26,37 @@ jib {
   to.image = "$rootProject.name:latest"
 }
 
+test {
+  useJUnitPlatform()
+  testLogging {
+    events "passed", "skipped", "failed"
+  }
+}
+
 project.ext {
   fabric8Version = "5.0.1"
+  mongoDbDriverVersion = "4.2.3"
   slf4jVersion = "1.7.30"
 }
 
 dependencies {
+
   implementation "io.fabric8:kubernetes-client:${fabric8Version}"
-  implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+  implementation "org.mongodb:mongodb-driver-sync:${mongoDbDriverVersion}"
   implementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+  implementation "org.apache.commons:commons-lang3:3.12.0"
+  implementation "org.hibernate.validator:hibernate-validator:7.0.0.Final"
+  implementation "jakarta.el:jakarta.el-api:4.0.0"
+
+
+  testImplementation platform("org.junit:junit-bom:5.7.2")
+  testImplementation "org.junit.jupiter:junit-jupiter"
+  testImplementation "org.junit-pioneer:junit-pioneer:1.4.2"
+  testImplementation "org.assertj:assertj-core:3.20.1"
+  testImplementation "de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.0.0"
+  testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
 }
 
 wrapper { gradleVersion = '6.5' }
 
 version = System.getenv('SEMANTIC_VERSION')
-
-
