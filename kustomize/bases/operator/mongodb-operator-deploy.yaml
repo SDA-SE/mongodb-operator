@@ -21,6 +21,12 @@ spec:
         - name: operator
           image: localhost:5000/mongodb-operator:local
           imagePullPolicy: Always
+          env:
+            - name: MONGODB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-operator
+                  key: mongodbConnectionString
           resources:
             limits:
               memory: 128Mi
