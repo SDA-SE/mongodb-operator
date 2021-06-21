@@ -7,7 +7,6 @@ import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import io.javaoperatorsdk.operator.api.Context;
 import io.javaoperatorsdk.operator.api.DeleteControl;
 import io.javaoperatorsdk.operator.api.RetryInfo;
-import io.javaoperatorsdk.operator.api.UpdateControl;
 import io.javaoperatorsdk.operator.processing.event.EventList;
 import java.util.List;
 import java.util.Optional;
