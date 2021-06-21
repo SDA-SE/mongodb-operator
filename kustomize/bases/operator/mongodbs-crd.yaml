@@ -19,8 +19,23 @@ spec:
           properties:
             spec:
               type: object
-              properties: {}
-              # TODO define and document spec properties
+              properties:
+                secret:
+                  description: Specifies how the secret should be created.
+                  type: object
+                  properties:
+                    usernameKey:
+                      description: |
+                        The name of the key in the `data` section where the username is located.
+                      type: string
+                      default: username
+                      example: MONGODB_USERNAME
+                    passwordKey:
+                      description: |
+                        The name of the key in the `data` section where the password is located.
+                      type: string
+                      default: password
+                      example: MONGODB_PASSWORD
   # either Namespaced or Cluster
   scope: Namespaced
   names:
