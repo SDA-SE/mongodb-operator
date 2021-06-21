@@ -18,13 +18,51 @@ TODO
 
 ## Local Deployment
 
-Prerequisites: 
+### Prerequisites: 
 
 - a running Docker Desktop installation.
 - properly installed [Kind](https://kind.sigs.k8s.io/docs/user/quick-start)
 - Kubernetes CLI [kubectl 1.21.1+](https://kubectl.docs.kubernetes.io/)
 - [kubectx](https://github.com/ahmetb/kubectx) (optional)
 - a shell with the root of this project as working directory
+
+### Start
+
+The local setup can be created with a single command:
+
+```console
+$ ./start.sh
+🏗 Creating a local Docker registry …
+🏗 Creating local Kubernetes cluster with KinD …
+🏗 Connecting local Kubernetes cluster to local Docker registry …
+🏗 Installing infrastructure components in local Kubernetes cluster …
+⏳ Waiting until Ingress Controller is ready …
+🏗 Installing MongoDB in local Kubernetes cluster …
+⏳ Waiting for Mongoku to be ready …
+🏗 Build MongoDB operator and publish to connected registry …
+🏗 Installing MongoDB operator in local Kubernetes cluster …
+⏳ Wait for MongoDB operator to be ready …
+🏗 You can now install MongoDB custom resources and watch how secrets and databases are created by the operator:
+   $ kubectl apply -k kustomize/overlays/test/
+``` 
+
+When things go wrong, please refer to the [manual installation](#manual-installation) documentation
+where all steps are described in detail.
+In most cases, errors are caused by timing issues.
+In this case `start.sh` can be retried.
+It will check for things that are already done if they can't be executed twice.
+
+### Stop
+
+To stop the manual setup and free resources just run:
+
+```console
+$ ./stop.sh
+💣 Removing local Kubernetes cluster with KinD …
+💣 Removing local Docker registry …
+```
+
+### Manual installation
 
 1. Create local Docker Registry
    
