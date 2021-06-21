@@ -1,5 +1,6 @@
 package com.sdase.k8s.operator.mongodb;
 
+import com.sdase.k8s.operator.mongodb.controller.KubernetesClientAdapter;
 import com.sdase.k8s.operator.mongodb.controller.MongoDbController;
 import com.sdase.k8s.operator.mongodb.controller.V1SecretBuilder;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
@@ -25,7 +26,9 @@ public class MongoDbOperator {
     KubernetesClient client = new DefaultKubernetesClient();
     try (var operator = new Operator(client, DefaultConfigurationService.instance())) {
       operator.register(
-          new MongoDbController(client, new V1SecretBuilder(() -> UUID.randomUUID().toString())));
+          new MongoDbController(
+              new KubernetesClientAdapter(client),
+              new V1SecretBuilder(() -> UUID.randomUUID().toString())));
       keepAlive();
     }
   }
