@@ -1,0 +1,15 @@
+// code: language=groovy
+@Library('jenkins-pipeline') _
+
+def args = [
+    slackChannel: 'mrkaplan-security',
+    productTags: 'mrkaplan operator',
+    // productName: '', // optional, fetched from git if not specified
+    javaVersion: '11', // optional
+    // imageName: "quay.io/sdase/openjdk-development:" + env.JAVA_VERSION + "-hotspot", // optional
+    buildCommand: './gradlew', // optional
+    buildParameter: 'clean compileJava -x test', // optional
+    scanPath: '**/output/runtime/*.jar', // optional
+    // isFindingInactive: false // Optional, in case the service is in a cluster and is getting scanned with Dep. Check, this should be set to true
+]
+owaspDependencyCheck args
