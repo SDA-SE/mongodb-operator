@@ -3,9 +3,11 @@ kind: Kustomization
 
 namespace: mongodb-operator
 
+bases:
+  - ../../bases/operator
+
 resources:
   - mongodb-operator-ns.yaml
-  - ../../bases/operator
 
 secretGenerator:
   - name: mongodb-operator
