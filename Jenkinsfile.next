@@ -1,0 +1,254 @@
+@Library('jenkins-pipeline') _
+
+repoName = "mongodb-operator"
+imageRegistry = 'quay.io'
+imageRegistryOrg = 'sdase'
+githubSecretId = 'sdabot-github-token'
+pushDockerContainerSecretId = 'quay-io-sdase-docker-auth'
+
+boolean enableBranchDeployment = true
+
+imageName = [imageRegistry, imageRegistryOrg, repoName].join('/')
+
+pipeline {
+  agent none
+
+  options {
+    disableConcurrentBuilds()
+    timeout time: 1, unit: 'HOURS'
+  }
+
+  stages {
+    stage('Generate Semantic Release') {
+      agent {
+        docker {
+          image 'quay.io/sdase/semantic-release:15.13.3'
+        }
+      }
+
+      steps {
+        script {
+          env.SEMANTIC_VERSION = semanticRelease dryRun: 'true', secretId: githubSecretId
+          env.LATEST_SEMANTIC_VERSION = sh(script: "#!/usr/bin/env sh\nset -o errexit\ncat ${WORKSPACE}/semantic.out | grep -i 'Found git tag ' | sed -r 's/.*([[:digit:]]+\\.[[:digit:]]+\\.[[:digit:]]+)/\\1/g'", returnStdout: true).trim()
+        }
+      }
+    }
+
+    stage('Prepare variables') {
+      agent {
+        docker {
+          image 'quay.io/sdase/centos-development:8'
+        }
+      }
+
+      steps {
+        script {
+          (
+          namespace,
+          branch,
+          _,
+          imageTag,
+          masterOrDevelop,
+          subDomain
+          ) = getFeatureBranchVariables(
+              repository: imageRegistryOrg,
+              registry: 'https://' + imageRegistry)
+          env.IMAGE_TAG = imageTag
+          env.NAMESPACE = namespace
+          env.BRANCH = branch
+          env.MASTER_OR_DEVELOP = masterOrDevelop
+          env.SUB_DOMAIN = subDomain
+          env.PUSH_DOCKER_CONTAINER = true
+
+          if (env.BRANCH_NAME == 'master') {
+            if (env.SEMANTIC_VERSION != "") {
+              env.IMAGE_TAG = env.SEMANTIC_VERSION
+            } else {
+              // If there were no changes to the version, we don't want to push the image but
+              // still want to apply changes to e.g. the test deployment. We then reuse the image
+              // that is already stored in the registry
+              env.IMAGE_TAG = env.LATEST_SEMANTIC_VERSION
+              env.PUSH_DOCKER_CONTAINER = false
+            }
+          }
+        }
+      }
+    }
+
+    stage('Build') {
+      parallel {
+
+        stage('Service') {
+          agent {
+            docker {
+              image 'quay.io/sdase/openjdk-development:11-hotspot'
+            }
+          }
+
+          stages {
+            stage('Test') {
+              steps {
+                javaGradlew gradleCommand: 'check jacocoTestReport', secretId: githubSecretId
+                // stash for SonarCloud
+                stash includes: 'build/**', name: 'build'
+              }
+
+              post {
+                always {
+                  junit testResults: 'build/test-results/test/*.xml', allowEmptyResults: true
+                }
+              }
+            }
+
+            stage("Build Docker Image") {
+              when {
+                beforeAgent true
+                not { environment name: 'IMAGE_TAG', value: '' }
+              }
+
+              steps {
+                // use jibBuildTar to do a dry-run
+                javaGradlew gradleCommand: \
+                    'jibBuildTar' + \
+                    ' -Djib.useOnlyProjectCache=true' + \
+                    ' -Djib.disableUpdateChecks=true'
+              }
+            }
+
+            stage("Push Docker Image") {
+              when {
+                beforeAgent true
+                not { changeRequest() }
+                not { branch 'dependabot/**' }
+                anyOf {
+                  branch 'develop'
+                  branch 'master'
+                  expression {
+                    enableBranchDeployment
+                  }
+                }
+                environment name: 'PUSH_DOCKER_CONTAINER', value: 'true'
+              }
+
+              steps {
+                buildJibContainer(
+                    repoName: repoName,
+                    imageName: imageName,
+                    imageRegistry: imageRegistry,
+                    imageRegistryOrg: imageRegistryOrg,
+                    imageTag: env.IMAGE_TAG,
+                    secretId: githubSecretId,
+                    registrySecretId: pushDockerContainerSecretId
+                )
+              }
+            }
+          }
+        }
+
+        stage('Fossa') {
+          agent {
+            docker {
+              image 'quay.io/sdase/openjdk-development:11-hotspot'
+            }
+          }
+
+          stages {
+            stage('License analysis') {
+              steps {
+
+                fossaLicenseAnalysis project: repoName, apiKey: 'api-key-service', secretId: githubSecretId
+              }
+            }
+          }
+        }
+
+      }
+    }
+
+    stage('Checks') {
+
+      parallel {
+
+        stage("Verify Distroless Image") {
+          when {
+            beforeAgent true
+            not { changeRequest() }
+            not { branch 'dependabot/**' }
+            anyOf {
+              branch 'develop'
+              branch 'master'
+              expression {
+                enableBranchDeployment
+              }
+            }
+            environment name: 'PUSH_DOCKER_CONTAINER', value: 'true'
+          }
+          agent {
+            node {
+              label 'docker'
+            }
+          }
+
+          steps {
+            script {
+              docker.withRegistry('https://' + imageRegistry, pushDockerContainerSecretId) {
+                sh "docker run --rm --entrypoint=\"echo\" ${imageName}:${env.IMAGE_TAG} 'image is not distroless' && exit 1 || echo 'image is distroless'"
+              }
+            }
+          }
+        }
+
+
+        stage('SonarCloud Analysis') {
+          agent {
+            docker {
+              image 'quay.io/sdase/sonar-scanner:4'
+            }
+          }
+          steps {
+            unstash 'build'
+            sonarAnalysis project: 'SDA-SE_' + repoName, projectName: repoName, projectVersion: env.BRANCH_NAME == 'master' ? env.SEMANTIC_VERSION : null, javaDirs: ['.']
+          }
+        }
+
+      }
+    }
+
+
+    // Publishes the documentation to Backstage
+    // Learn more about this step at https://catalog.sda.dev/docs/sda-se/Component/jenkins-pipeline/steps/publishTechDocs
+    /* No tech docs yet
+    stage('Publish TechDocs') {
+      agent {
+        docker {
+          image 'quay.io/sdase/techdocs:1'
+        }
+      }
+      steps {
+        publishTechDocs(
+            publishBranch: 'master',
+            entities: [
+                [name: "mongodb-operator"]
+            ]
+        )
+      }
+    }
+    */
+
+    stage('Create Release') {
+      when {
+        beforeAgent true
+        branch 'master'
+        not { environment name: 'SEMANTIC_VERSION', value: '' }
+      }
+      agent {
+        docker {
+          image 'quay.io/sdase/semantic-release:15.13.3'
+        }
+      }
+      steps {
+        semanticRelease secretId: githubSecretId
+      }
+    }
+  }
+}
