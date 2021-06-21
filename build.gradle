@@ -73,6 +73,11 @@ test {
 
 wrapper { gradleVersion = '6.5' }
 
+spotless {
+  java { googleJavaFormat('1.9') }
+  enforceCheck = false
+}
+
 configurations.all {
   resolutionStrategy {
     // fail eagerly on version conflict (includes transitive dependencies)
