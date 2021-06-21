@@ -5,7 +5,6 @@ import com.sdase.k8s.operator.mongodb.controller.MongoDbController;
 import com.sdase.k8s.operator.mongodb.controller.V1SecretBuilder;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.javaoperatorsdk.operator.Operator;
 import io.javaoperatorsdk.operator.config.runtime.DefaultConfigurationService;
 import java.util.UUID;
@@ -17,8 +16,8 @@ public class MongoDbOperator {
     var config = new EnvironmentConfig();
     var mongoDbService = new MongoDbService(config.getMongodbConnectionString());
 
-    KubernetesClient client = new DefaultKubernetesClient();
-    try (var operator = new Operator(client, DefaultConfigurationService.instance())) {
+    try (var client = new DefaultKubernetesClient();
+        var operator = new Operator(client, DefaultConfigurationService.instance())) {
       operator.register(
           new MongoDbController(
               new KubernetesClientAdapter(client),
