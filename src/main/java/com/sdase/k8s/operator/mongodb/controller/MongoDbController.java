@@ -1,7 +1,6 @@
 package com.sdase.k8s.operator.mongodb.controller;
 
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.javaoperatorsdk.operator.api.Context;
 import io.javaoperatorsdk.operator.api.Controller;
 import io.javaoperatorsdk.operator.api.DeleteControl;
@@ -15,11 +14,12 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
 
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbController.class);
 
-  private final KubernetesClient kubernetesClient;
+  private final KubernetesClientAdapter kubernetesClientAdapter;
   private final V1SecretBuilder v1SecretBuilder;
 
-  public MongoDbController(KubernetesClient kubernetesClient, V1SecretBuilder v1SecretBuilder) {
-    this.kubernetesClient = kubernetesClient;
+  public MongoDbController(
+      KubernetesClientAdapter kubernetesClientAdapter, V1SecretBuilder v1SecretBuilder) {
+    this.kubernetesClientAdapter = kubernetesClientAdapter;
     this.v1SecretBuilder = v1SecretBuilder;
   }
 
@@ -41,10 +41,8 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
         resource.getMetadata().getNamespace(),
         resource.getMetadata().getName());
     var secret = v1SecretBuilder.createSecretForOwner(resource);
-    kubernetesClient
-        .secrets()
-        .inNamespace(resource.getMetadata().getNamespace())
-        .create(secret.getSecret());
+    kubernetesClientAdapter.createSecretInNamespace(
+        resource.getMetadata().getNamespace(), secret.getSecret());
     return UpdateControl.noUpdate();
   }
 }
