@@ -2,4 +2,7 @@ apiVersion: persistence.sda-se.com/v1beta1
 kind: MongoDb
 metadata:
   name: local-test-db
-spec: {}
+spec:
+  secret:
+    usernameKey: u
+    passwordKey: p
