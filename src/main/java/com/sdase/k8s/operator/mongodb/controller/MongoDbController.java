@@ -1,6 +1,6 @@
 package com.sdase.k8s.operator.mongodb.controller;
 
-import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDb;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Controller
-public class MongoDbController implements ResourceController<MongoDb> {
+public class MongoDbController implements ResourceController<MongoDbCustomResource> {
 
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbController.class);
 
@@ -30,7 +30,7 @@ public class MongoDbController implements ResourceController<MongoDb> {
   }
 
   @Override
-  public DeleteControl deleteResource(MongoDb resource, Context<MongoDb> context) {
+  public DeleteControl deleteResource(MongoDbCustomResource resource, Context<MongoDbCustomResource> context) {
     LOG.info(
         "MongoDb {}/{} deleted",
         resource.getMetadata().getNamespace(),
@@ -39,7 +39,7 @@ public class MongoDbController implements ResourceController<MongoDb> {
   }
 
   @Override
-  public UpdateControl<MongoDb> createOrUpdateResource(MongoDb resource, Context<MongoDb> context) {
+  public UpdateControl<MongoDbCustomResource> createOrUpdateResource(MongoDbCustomResource resource, Context<MongoDbCustomResource> context) {
     LOG.info(
         "MongoDb {}/{} created or updated",
         resource.getMetadata().getNamespace(),
@@ -51,7 +51,7 @@ public class MongoDbController implements ResourceController<MongoDb> {
 
   // TODO all below this line should be in a separate service
 
-  private Secret createSecretForOwner(MongoDb resource) {
+  private Secret createSecretForOwner(MongoDbCustomResource resource) {
     var secret = new Secret();
     secret.setData(
         Map.of(
@@ -64,7 +64,7 @@ public class MongoDbController implements ResourceController<MongoDb> {
     return secret;
   }
 
-  private ObjectMeta createMetaDataFromOwnerResource(MongoDb resource) {
+  private ObjectMeta createMetaDataFromOwnerResource(MongoDbCustomResource resource) {
     var secretMetadata = new ObjectMeta();
     secretMetadata.setName(resource.getMetadata().getName());
     secretMetadata.setNamespace(resource.getMetadata().getNamespace());
@@ -72,7 +72,7 @@ public class MongoDbController implements ResourceController<MongoDb> {
     return secretMetadata;
   }
 
-  private OwnerReference createOwnerReference(MongoDb resource) {
+  private OwnerReference createOwnerReference(MongoDbCustomResource resource) {
     var ownerReference = new OwnerReference();
     ownerReference.setApiVersion(resource.getApiVersion());
     ownerReference.setKind(resource.getKind());

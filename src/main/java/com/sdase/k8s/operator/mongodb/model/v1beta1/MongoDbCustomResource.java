@@ -9,4 +9,4 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Version("v1beta1")
 @Group("persistence.sda-se.com")
 @Kind("MongoDb")
-public class MongoDb extends CustomResource<MongoDbSpec, MongoDbStatus> implements Namespaced {}
+public class MongoDbCustomResource extends CustomResource<MongoDbSpec, MongoDbStatus> implements Namespaced {}
