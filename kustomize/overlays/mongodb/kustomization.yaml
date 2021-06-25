@@ -18,4 +18,4 @@ secretGenerator:
       - password=test-s3cr3t
   - name: mongoku-mongodb-admin
     literals:
-      - mongoDbConnectionUrl=mongodb://test-root:test-s3cr3t@mongodb
+      - mongoDbConnectionUrl=mongodb://test-root:test-s3cr3t@mongodb.mongodb

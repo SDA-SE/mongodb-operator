@@ -14,6 +14,9 @@ echo "🏗 Installing infrastructure components in local Kubernetes cluster …"
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml || exit 1
 kubectl apply -f kustomize/overlays/infra/local-registry-hosting-cm.yaml || exit 1
 
+# maybe just temporarily needed:
+kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission
+
 echo "⏳ Waiting until Ingress Controller is ready …"
 sleep 5
 kubectl wait -n ingress-nginx --for=condition=ready pod -l=app.kubernetes.io/component=controller --timeout=180s || exit 1
@@ -26,7 +29,7 @@ while [[ "FAILED" == $(kubectl apply -k kustomize/overlays/mongodb/ || echo -n "
 done
 
 echo "⏳ Waiting for Mongoku to be ready …"
-while [[ "FAILED" ==  $(curl -s http://localhost 2>/dev/null | grep "<title>" || echo -n "FAILED") ]]; do
+while [[ "FAILED" ==  $(curl -s http://localhost/servers 2>/dev/null | grep "<title>Mongoku</title>" || echo -n "FAILED") ]]; do
   echo -n "."
   sleep 1
 done
