@@ -3,6 +3,9 @@ package com.sdase.k8s.operator.mongodb.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import com.sdase.k8s.operator.mongodb.controller.tasks.CreateDatabaseTask;
+import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
+import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -17,11 +20,11 @@ class V1SecretBuilderTest {
   private static final String TEST_DB_UID = UUID.randomUUID().toString();
   private static final String PLAIN_TEST_PASSWORD = "static-test-password";
 
-  V1SecretBuilder builder = new V1SecretBuilder(() -> PLAIN_TEST_PASSWORD);
+  V1SecretBuilder builder = new V1SecretBuilder();
 
   @Test
   void shouldUseNameAndNamespaceFromOwner() {
-    var given = mongoDbTestDbInMyNamespace();
+    var given = taskWithMongoDbTestDbInMyNamespace();
 
     var actual = builder.createSecretForOwner(given);
     var actualSecret = actual.getSecret();
@@ -33,7 +36,7 @@ class V1SecretBuilderTest {
 
   @Test
   void shouldSetOwner() {
-    var given = mongoDbTestDbInMyNamespace();
+    var given = taskWithMongoDbTestDbInMyNamespace();
 
     var actual = builder.createSecretForOwner(given);
     var actualSecret = actual.getSecret();
@@ -51,7 +54,7 @@ class V1SecretBuilderTest {
 
   @Test
   void shouldCreateUniqueUsername() {
-    var given = mongoDbTestDbInMyNamespace();
+    var given = taskWithMongoDbTestDbInMyNamespace();
 
     var actual = builder.createSecretForOwner(given);
     var actualSecret = actual.getSecret();
@@ -63,8 +66,8 @@ class V1SecretBuilderTest {
 
   @Test
   void shouldCreateUniqueUsernameAndPlaceItInConfiguredDataKey() {
-    var given = mongoDbTestDbInMyNamespace();
-    given.getSpec().setSecret(secretSpecWithShortenedKeys());
+    var given = taskWithMongoDbTestDbInMyNamespace();
+    given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
 
     var actual = builder.createSecretForOwner(given);
     var actualSecret = actual.getSecret();
@@ -76,7 +79,7 @@ class V1SecretBuilderTest {
 
   @Test
   void shouldCreatePassword() {
-    var given = mongoDbTestDbInMyNamespace();
+    var given = taskWithMongoDbTestDbInMyNamespace();
 
     var actual = builder.createSecretForOwner(given);
     var actualSecret = actual.getSecret();
@@ -88,8 +91,8 @@ class V1SecretBuilderTest {
 
   @Test
   void shouldCreatePasswordAndPlaceItInConfiguredPasswordKey() {
-    var given = mongoDbTestDbInMyNamespace();
-    given.getSpec().setSecret(secretSpecWithShortenedKeys());
+    var given = taskWithMongoDbTestDbInMyNamespace();
+    given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
 
     var actual = builder.createSecretForOwner(given);
     var actualSecret = actual.getSecret();
@@ -99,7 +102,7 @@ class V1SecretBuilderTest {
         .isEqualTo(actual.getPlainPassword().getBytes(StandardCharsets.UTF_8));
   }
 
-  private MongoDbCustomResource mongoDbTestDbInMyNamespace() {
+  private CreateDatabaseTask taskWithMongoDbTestDbInMyNamespace() {
     var objectMeta = new ObjectMeta();
     objectMeta.setName("test-db");
     objectMeta.setNamespace("my-namespace");
@@ -107,7 +110,11 @@ class V1SecretBuilderTest {
     var mongoDbCustomResource = new MongoDbCustomResource();
     mongoDbCustomResource.setMetadata(objectMeta);
 
-    return mongoDbCustomResource;
+    return TaskFactory.customFactory(
+            NamingUtil::fromNamespaceAndName,
+            mdbCr -> PLAIN_TEST_PASSWORD,
+            NamingUtil::fromNamespaceAndName)
+        .newCreateTask(mongoDbCustomResource);
   }
 
   private MongoDbSpec.SecretSpec secretSpecWithShortenedKeys() {

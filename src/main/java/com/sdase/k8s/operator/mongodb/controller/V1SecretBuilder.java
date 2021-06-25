@@ -1,5 +1,6 @@
 package com.sdase.k8s.operator.mongodb.controller;
 
+import com.sdase.k8s.operator.mongodb.controller.tasks.CreateDatabaseTask;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -8,21 +9,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class V1SecretBuilder {
 
-  private final Supplier<String> passwordCreator;
-
-  public V1SecretBuilder(Supplier<String> passwordCreator) {
-    this.passwordCreator = passwordCreator;
-  }
-
-  SecretHolder createSecretForOwner(MongoDbCustomResource owner) {
+  SecretHolder createSecretForOwner(CreateDatabaseTask createDatabaseTask) {
     var secret = new Secret();
-    var ownerMetadata = owner.getMetadata();
-    var username = String.join("_", ownerMetadata.getNamespace(), ownerMetadata.getName());
-    var password = passwordCreator.get();
+    var owner = createDatabaseTask.getSource();
+    var username = createDatabaseTask.getUsername();
+    var password = createDatabaseTask.getPassword();
     secret.setData(
         Map.of(
             owner.getSpec().getSecret().getUsernameKey(),
