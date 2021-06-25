@@ -27,7 +27,14 @@ jobs:
           warning_on_retry: false
           command: ./start.sh
 
-      # TODO add tests here
+      - name: Run tests
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 10
+          retry_wait_seconds: 10
+          warning_on_retry: false
+          command: ./test.sh
 
       - name: Tear down environment
         uses: nick-invision/retry@v2
