@@ -136,6 +136,14 @@ $ ./stop.sh
    $ kubectl wait -n ingress-nginx --for=condition=ready pod -l=app.kubernetes.io/component=controller --timeout=90s
    pod/ingress-nginx-controller-6c74dd986c-vkjfv condition met
    ```
+   
+   It may be needed to [remove the `ValidatingWebhookConfiguration`](https://stackoverflow.com/a/62044090) for the
+   Ingress resource:
+   
+   ```console
+   $ kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission
+   validatingwebhookconfiguration.admissionregistration.k8s.io "ingress-nginx-admission" deleted
+   ```
 
 1. Install MongoDB
    
