@@ -53,6 +53,52 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
   }
 
   @Test
+  void shouldDropUser() {
+    // given
+    mongoDbService.createDatabaseWithUser("test-db", UUID.randomUUID().toString());
+
+    // when
+    var actual = mongoDbService.dropDatabaseUser("test-db", "test-db");
+
+    // then
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  void shouldConfirmIfUserDidNotExist() {
+    // given … nothing
+
+    // when
+    var actual = mongoDbService.dropDatabaseUser("test-db", "test-db");
+
+    // then
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  void shouldDropDatabase() {
+    // given
+    createDb("test-db-to-drop");
+
+    // when
+    var actual = mongoDbService.dropDatabase("test-db-to-drop");
+
+    // then
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  void shouldConfirmIfDbDidNotExist() {
+    // given … nothing
+
+    // when
+    var actual = mongoDbService.dropDatabase("test-db-to-drop");
+
+    // then
+    assertThat(actual).isTrue();
+  }
+
+  @Test
   void shouldIdentifyExistingUser() {
     // given
     mongoDbService.createDatabaseWithUser("test-db", UUID.randomUUID().toString());

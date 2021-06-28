@@ -1,11 +1,14 @@
 package com.sdase.k8s.operator.mongodb.db.manager;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoIterable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +37,23 @@ public class MongoDbService {
       return !users.isEmpty();
     }
     return false;
+  }
+
+  /**
+   * Deletes the given user that has access to the given database.
+   *
+   * @param databaseName the databaseName where the user has access to
+   * @param username the name of the user who should be deleted
+   * @return if the user is gone
+   */
+  public boolean dropDatabaseUser(String databaseName, String username) {
+    try {
+      var dropUserCommand = new BasicDBObject("dropUser", username);
+      var document = mongoClient.getDatabase(databaseName).runCommand(dropUserCommand);
+      return isOk(document);
+    } catch (MongoCommandException e) {
+      return !userExists(databaseName, username);
+    }
   }
 
   /**
@@ -82,6 +102,27 @@ public class MongoDbService {
       LOG.error("createDatabaseWithUser: {}@{}: failed", username, databaseName, e);
       return false;
     }
+  }
+
+  /**
+   * Drops the database and all it's content.
+   *
+   * @param databaseName the name of the database to drop
+   * @return if the database is gone
+   */
+  public boolean dropDatabase(String databaseName) {
+    try {
+      mongoClient.getDatabase(databaseName).drop();
+      return !databaseExists(databaseName);
+    } catch (MongoCommandException e) {
+      return !databaseExists(databaseName);
+    }
+  }
+
+  private boolean databaseExists(String databaseName) {
+    MongoIterable<String> existingDatabases = mongoClient.listDatabaseNames();
+    return StreamSupport.stream(existingDatabases.spliterator(), false)
+        .anyMatch(databaseName::equals);
   }
 
   private boolean createUser(String databaseName, String username, String password) {

@@ -7,11 +7,14 @@ public class DeleteDatabaseTask {
   private final MongoDbCustomResource source;
   private final String databaseName;
   private final String username;
+  private final boolean pruneDb;
 
-  public DeleteDatabaseTask(MongoDbCustomResource source, String databaseName, String username) {
+  public DeleteDatabaseTask(
+      MongoDbCustomResource source, String databaseName, String username, boolean pruneDb) {
     this.source = source;
     this.databaseName = databaseName;
     this.username = username;
+    this.pruneDb = pruneDb;
   }
 
   public MongoDbCustomResource getSource() {
@@ -24,5 +27,9 @@ public class DeleteDatabaseTask {
 
   public String getUsername() {
     return username;
+  }
+
+  public boolean isPruneDb() {
+    return pruneDb;
   }
 }
