@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class V1SecretBuilder {
 
-  SecretHolder createSecretForOwner(CreateDatabaseTask createDatabaseTask) {
+  Secret createSecretForOwner(CreateDatabaseTask createDatabaseTask) {
     var secret = new Secret();
     var owner = createDatabaseTask.getSource();
     var database = createDatabaseTask.getDatabaseName();
@@ -28,7 +28,7 @@ public class V1SecretBuilder {
             base64(password)));
     ObjectMeta secretMetadata = createMetaDataFromOwnerResource(owner);
     secret.setMetadata(secretMetadata);
-    return new SecretHolder(username, password, secret);
+    return secret;
   }
 
   private ObjectMeta createMetaDataFromOwnerResource(MongoDbCustomResource resource) {
@@ -51,30 +51,5 @@ public class V1SecretBuilder {
 
   private static String base64(String in) {
     return Base64.getEncoder().encodeToString(in.getBytes(StandardCharsets.UTF_8));
-  }
-
-  public static class SecretHolder {
-
-    private final String plainUsername;
-    private final String plainPassword;
-    private final Secret secret;
-
-    public SecretHolder(String plainUsername, String plainPassword, Secret secret) {
-      this.plainUsername = plainUsername;
-      this.plainPassword = plainPassword;
-      this.secret = secret;
-    }
-
-    public String getPlainUsername() {
-      return plainUsername;
-    }
-
-    public String getPlainPassword() {
-      return plainPassword;
-    }
-
-    public Secret getSecret() {
-      return secret;
-    }
   }
 }
