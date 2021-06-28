@@ -7,7 +7,7 @@ import com.sdase.k8s.operator.mongodb.controller.tasks.CreateDatabaseTask;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
-import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import java.nio.charset.StandardCharsets;
@@ -117,7 +117,7 @@ class V1SecretBuilderTest {
         .newCreateTask(mongoDbCustomResource);
   }
 
-  private MongoDbSpec.SecretSpec secretSpecWithShortenedKeys() {
-    return new MongoDbSpec.SecretSpec().setUsernameKey("u").setPasswordKey("p");
+  private SecretSpec secretSpecWithShortenedKeys() {
+    return new SecretSpec().setUsernameKey("u").setPasswordKey("p");
   }
 }
