@@ -71,8 +71,7 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
       // maybe update status in the future but probably requires write access to the MongoDB CR
       throw new IllegalStateException("Failed to create database");
     }
-    kubernetesClientAdapter.createSecretInNamespace(
-        resource.getMetadata().getNamespace(), secret.getSecret());
+    kubernetesClientAdapter.createSecretInNamespace(resource.getMetadata().getNamespace(), secret);
     return UpdateControl.noUpdate();
   }
 }

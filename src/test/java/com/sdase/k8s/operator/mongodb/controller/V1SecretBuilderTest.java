@@ -27,9 +27,8 @@ class V1SecretBuilderTest {
     var given = taskWithMongoDbTestDbInMyNamespace();
 
     var actual = builder.createSecretForOwner(given);
-    var actualSecret = actual.getSecret();
 
-    assertThat(actualSecret.getMetadata())
+    assertThat(actual.getMetadata())
         .extracting("name", "namespace")
         .containsExactly("test-db", "my-namespace");
   }
@@ -39,9 +38,8 @@ class V1SecretBuilderTest {
     var given = taskWithMongoDbTestDbInMyNamespace();
 
     var actual = builder.createSecretForOwner(given);
-    var actualSecret = actual.getSecret();
 
-    assertThat(actualSecret.getMetadata().getOwnerReferences())
+    assertThat(actual.getMetadata().getOwnerReferences())
         .extracting(
             OwnerReference::getApiVersion,
             OwnerReference::getKind,
@@ -57,11 +55,9 @@ class V1SecretBuilderTest {
     var given = taskWithMongoDbTestDbInMyNamespace();
 
     var actual = builder.createSecretForOwner(given);
-    var actualSecret = actual.getSecret();
 
-    assertThat(actual.getPlainUsername()).isEqualTo("my-namespace_test-db");
-    assertThat(Base64.getDecoder().decode(actualSecret.getData().get("username")))
-        .isEqualTo(actual.getPlainUsername().getBytes(StandardCharsets.UTF_8));
+    assertThat(Base64.getDecoder().decode(actual.getData().get("username")))
+        .isEqualTo("my-namespace_test-db".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test
@@ -70,11 +66,9 @@ class V1SecretBuilderTest {
     given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
 
     var actual = builder.createSecretForOwner(given);
-    var actualSecret = actual.getSecret();
 
-    assertThat(actual.getPlainUsername()).isEqualTo("my-namespace_test-db");
-    assertThat(Base64.getDecoder().decode(actualSecret.getData().get("u")))
-        .isEqualTo(actual.getPlainUsername().getBytes(StandardCharsets.UTF_8));
+    assertThat(Base64.getDecoder().decode(actual.getData().get("u")))
+        .isEqualTo("my-namespace_test-db".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test
@@ -82,11 +76,9 @@ class V1SecretBuilderTest {
     var given = taskWithMongoDbTestDbInMyNamespace();
 
     var actual = builder.createSecretForOwner(given);
-    var actualSecret = actual.getSecret();
 
-    assertThat(actual.getPlainPassword()).isEqualTo(PLAIN_TEST_PASSWORD);
-    assertThat(Base64.getDecoder().decode(actualSecret.getData().get("password")))
-        .isEqualTo(actual.getPlainPassword().getBytes(StandardCharsets.UTF_8));
+    assertThat(Base64.getDecoder().decode(actual.getData().get("password")))
+        .isEqualTo(PLAIN_TEST_PASSWORD.getBytes(StandardCharsets.UTF_8));
   }
 
   @Test
@@ -95,11 +87,9 @@ class V1SecretBuilderTest {
     given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
 
     var actual = builder.createSecretForOwner(given);
-    var actualSecret = actual.getSecret();
 
-    assertThat(actual.getPlainPassword()).isEqualTo(PLAIN_TEST_PASSWORD);
-    assertThat(Base64.getDecoder().decode(actualSecret.getData().get("p")))
-        .isEqualTo(actual.getPlainPassword().getBytes(StandardCharsets.UTF_8));
+    assertThat(Base64.getDecoder().decode(actual.getData().get("p")))
+        .isEqualTo(PLAIN_TEST_PASSWORD.getBytes(StandardCharsets.UTF_8));
   }
 
   @Test
@@ -107,9 +97,8 @@ class V1SecretBuilderTest {
     var given = taskWithMongoDbTestDbInMyNamespace();
 
     var actual = builder.createSecretForOwner(given);
-    var actualSecret = actual.getSecret();
 
-    assertThat(Base64.getDecoder().decode(actualSecret.getData().get("database")))
+    assertThat(Base64.getDecoder().decode(actual.getData().get("database")))
         .isEqualTo("my-namespace_test-db".getBytes(StandardCharsets.UTF_8));
   }
 
@@ -119,9 +108,8 @@ class V1SecretBuilderTest {
     given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
 
     var actual = builder.createSecretForOwner(given);
-    var actualSecret = actual.getSecret();
 
-    assertThat(Base64.getDecoder().decode(actualSecret.getData().get("d")))
+    assertThat(Base64.getDecoder().decode(actual.getData().get("d")))
         .isEqualTo("my-namespace_test-db".getBytes(StandardCharsets.UTF_8));
   }
 
