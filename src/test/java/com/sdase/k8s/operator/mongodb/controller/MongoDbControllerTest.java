@@ -107,7 +107,7 @@ class MongoDbControllerTest {
     givenMetadata.setName("the-name");
     var given = new MongoDbCustomResource();
     given.setMetadata(givenMetadata);
-    given.getSpec().getDatabase().setPruneOnDelete(true);
+    given.getSpec().getDatabase().setPruneAfterDelete(true);
 
     var actual = mongoDbController.deleteResource(given, new MongoDbCustomResourceContext());
 
@@ -128,7 +128,7 @@ class MongoDbControllerTest {
     givenMetadata.setName("the-name");
     var given = new MongoDbCustomResource();
     given.setMetadata(givenMetadata);
-    given.getSpec().getDatabase().setPruneOnDelete(true);
+    given.getSpec().getDatabase().setPruneAfterDelete(true);
 
     var givenContext = new MongoDbCustomResourceContext();
 

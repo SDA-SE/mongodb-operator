@@ -2,14 +2,14 @@ package com.sdase.k8s.operator.mongodb.model.v1beta1;
 
 public class DatabaseSpec {
 
-  private boolean pruneOnDelete;
+  private boolean pruneAfterDelete;
 
-  public boolean isPruneOnDelete() {
-    return pruneOnDelete;
+  public boolean isPruneAfterDelete() {
+    return pruneAfterDelete;
   }
 
-  public DatabaseSpec setPruneOnDelete(boolean pruneOnDelete) {
-    this.pruneOnDelete = pruneOnDelete;
+  public DatabaseSpec setPruneAfterDelete(boolean pruneAfterDelete) {
+    this.pruneAfterDelete = pruneAfterDelete;
     return this;
   }
 }
