@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.UUID;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,18 +29,6 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
   }
 
   @Test
-  void shouldListDatabases() {
-    // given
-    createDb("foo");
-
-    // when
-    var actual = mongoDbService.listDatabases();
-
-    // then
-    assertThat(actual).contains("foo");
-  }
-
-  @Test
   void shouldCreateUser() {
     // given … nothing
 
@@ -53,20 +40,41 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
   }
 
   @Test
-  void shouldNotCreateUserForExistingDatabase() {
+  void shouldNotCreateUserThatAlreadyExists() {
     // given
-    createDb("existing-test-db");
+    mongoDbService.createDatabaseWithUser("existing-test-db", UUID.randomUUID().toString());
 
     // when
     var actual =
         mongoDbService.createDatabaseWithUser("existing-test-db", UUID.randomUUID().toString());
 
     // then
-    SoftAssertions.assertSoftly(
-        softly -> {
-          softly.assertThat(actual).isFalse();
-          softly.assertThat(mongoDbService.databaseExists("existing-test-db")).isTrue();
-        });
+    assertThat(actual).isFalse();
+  }
+
+  @Test
+  void shouldIdentifyExistingUser() {
+    // given
+    mongoDbService.createDatabaseWithUser("test-db", UUID.randomUUID().toString());
+
+    // when
+    var actual = mongoDbService.userExists("test-db", "test-db");
+
+    // then
+    assertThat(actual).isTrue();
+  }
+
+  @Test
+  void shouldNotIdentifyAbsentUser() {
+    // given
+    mongoDbService.createDatabaseWithUser("test-db1", UUID.randomUUID().toString());
+    mongoDbService.createDatabaseWithUser("test-db2", UUID.randomUUID().toString());
+
+    // when
+    var actual = mongoDbService.userExists("test-db3", "test-db3");
+
+    // then
+    assertThat(actual).isFalse();
   }
 
   @Test
