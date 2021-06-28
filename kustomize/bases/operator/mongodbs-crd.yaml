@@ -20,6 +20,24 @@ spec:
             spec:
               type: object
               properties:
+                database:
+                  description: Specifies handling of the database
+                  type: object
+                  properties:
+                    pruneAfterDelete:
+                      description: |
+                        If the database **including it's content** should be deleted after the
+                        custom resource is removed.
+                        This does not affect deletion of the provided secret and the created
+                        database user.
+                        The secret and the user will be always removed.
+
+                        In development cluster it is useful to clean up databases, especially of PR
+                        deployments to keep the database instance small.
+                        In a production environment you most likely want to avoid deleting the
+                        content accidentially.
+                      type: boolean
+                      default: false
                 secret:
                   description: Specifies how the secret should be created.
                   type: object

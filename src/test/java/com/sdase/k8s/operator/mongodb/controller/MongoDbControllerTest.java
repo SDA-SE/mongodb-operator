@@ -19,7 +19,7 @@ import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
-import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec.SecretSpec;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClientException;
