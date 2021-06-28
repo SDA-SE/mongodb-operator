@@ -23,5 +23,4 @@ public class MongoDbSpec {
     this.secret = secret;
     return this;
   }
-
 }
