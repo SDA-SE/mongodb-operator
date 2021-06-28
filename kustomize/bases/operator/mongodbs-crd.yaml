@@ -54,6 +54,13 @@ spec:
                   description: Specifies how the secret should be created.
                   type: object
                   properties:
+                    databaseKey:
+                      description: |
+                        The name of the key in the `data` section where the name of the provided
+                        database is located.
+                      type: string
+                      default: database
+                      example: MONGODB_USERNAME
                     usernameKey:
                       description: |
                         The name of the key in the `data` section where the username is located.

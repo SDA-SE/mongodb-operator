@@ -102,6 +102,29 @@ class V1SecretBuilderTest {
         .isEqualTo(actual.getPlainPassword().getBytes(StandardCharsets.UTF_8));
   }
 
+  @Test
+  void shouldCreateDatabaseName() {
+    var given = taskWithMongoDbTestDbInMyNamespace();
+
+    var actual = builder.createSecretForOwner(given);
+    var actualSecret = actual.getSecret();
+
+    assertThat(Base64.getDecoder().decode(actualSecret.getData().get("database")))
+        .isEqualTo("my-namespace_test-db".getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Test
+  void shouldCreateDatabaseAndPlaceItInConfiguredPasswordKey() {
+    var given = taskWithMongoDbTestDbInMyNamespace();
+    given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
+
+    var actual = builder.createSecretForOwner(given);
+    var actualSecret = actual.getSecret();
+
+    assertThat(Base64.getDecoder().decode(actualSecret.getData().get("d")))
+        .isEqualTo("my-namespace_test-db".getBytes(StandardCharsets.UTF_8));
+  }
+
   private CreateDatabaseTask taskWithMongoDbTestDbInMyNamespace() {
     var objectMeta = new ObjectMeta();
     objectMeta.setName("test-db");
@@ -118,6 +141,6 @@ class V1SecretBuilderTest {
   }
 
   private SecretSpec secretSpecWithShortenedKeys() {
-    return new SecretSpec().setUsernameKey("u").setPasswordKey("p");
+    return new SecretSpec().setDatabaseKey("d").setUsernameKey("u").setPasswordKey("p");
   }
 }

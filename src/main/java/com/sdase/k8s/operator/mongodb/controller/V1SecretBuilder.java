@@ -15,10 +15,13 @@ public class V1SecretBuilder {
   SecretHolder createSecretForOwner(CreateDatabaseTask createDatabaseTask) {
     var secret = new Secret();
     var owner = createDatabaseTask.getSource();
+    var database = createDatabaseTask.getDatabaseName();
     var username = createDatabaseTask.getUsername();
     var password = createDatabaseTask.getPassword();
     secret.setData(
         Map.of(
+            owner.getSpec().getSecret().getDatabaseKey(),
+            base64(database),
             owner.getSpec().getSecret().getUsernameKey(),
             base64(username),
             owner.getSpec().getSecret().getPasswordKey(),
