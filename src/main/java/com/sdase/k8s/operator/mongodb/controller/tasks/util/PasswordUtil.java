@@ -10,8 +10,7 @@ public class PasswordUtil {
   private static final String UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   private static final String LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
   private static final String DIGITS = "0123456789";
-  // FIXME HPC-906 some of these characters can't be handled by sda-commons test and bundle
-  private static final String SPECIAL_CHARS = "~`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?";
+  private static final String SPECIAL_CHARS = "~`!#^&*()-_=+[{]}\\|;'\",<.>?";
   private static final char[] CHARS =
       (UPPER_CASE + LOWER_CASE + DIGITS + SPECIAL_CHARS).toCharArray();
 
