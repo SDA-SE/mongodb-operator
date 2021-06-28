@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +21,7 @@ import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -57,15 +59,85 @@ class MongoDbControllerTest {
 
   @Test
   void shouldPerformDefaultDelete() {
+    when(mongoDbServiceMock.dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name"))
+        .thenReturn(true);
 
-    var actual =
-        mongoDbController.deleteResource(
-            new MongoDbCustomResource(), new MongoDbCustomResourceContext());
+    var givenMetadata = new ObjectMeta();
+    givenMetadata.setNamespace("the-namespace");
+    givenMetadata.setName("the-name");
+    var given = new MongoDbCustomResource();
+    given.setMetadata(givenMetadata);
 
-    // TODO HPC-898 need to check if database is cleaned up as well
+    var actual = mongoDbController.deleteResource(given, new MongoDbCustomResourceContext());
 
     // By default owned resources (like the created secret) will be deleted as well.
     assertThat(actual).isEqualTo(DeleteControl.DEFAULT_DELETE);
+    verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
+    verifyNoMoreInteractions(mongoDbServiceMock);
+  }
+
+  @Test
+  void shouldFailWhenUserCantBeDeleted() {
+    when(mongoDbServiceMock.dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name"))
+        .thenReturn(false);
+
+    var givenMetadata = new ObjectMeta();
+    givenMetadata.setNamespace("the-namespace");
+    givenMetadata.setName("the-name");
+    var given = new MongoDbCustomResource();
+    given.setMetadata(givenMetadata);
+
+    var givenContext = new MongoDbCustomResourceContext();
+
+    assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> mongoDbController.deleteResource(given, givenContext));
+
+    // By default owned resources (like the created secret) will be deleted as well.
+    verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
+  }
+
+  @Test
+  void shouldPerformDeleteWithPruneDb() {
+    when(mongoDbServiceMock.dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name"))
+        .thenReturn(true);
+    when(mongoDbServiceMock.dropDatabase("the-namespace_the-name")).thenReturn(true);
+
+    var givenMetadata = new ObjectMeta();
+    givenMetadata.setNamespace("the-namespace");
+    givenMetadata.setName("the-name");
+    var given = new MongoDbCustomResource();
+    given.setMetadata(givenMetadata);
+    given.getSpec().getDatabase().setPruneOnDelete(true);
+
+    var actual = mongoDbController.deleteResource(given, new MongoDbCustomResourceContext());
+
+    // By default owned resources (like the created secret) will be deleted as well.
+    assertThat(actual).isEqualTo(DeleteControl.DEFAULT_DELETE);
+    verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
+    verify(mongoDbServiceMock).dropDatabase("the-namespace_the-name");
+  }
+
+  @Test
+  void shouldShouldFailWhenPruneDbNotPossible() {
+    when(mongoDbServiceMock.dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name"))
+        .thenReturn(true);
+    when(mongoDbServiceMock.dropDatabase("the-namespace_the-name")).thenReturn(false);
+
+    var givenMetadata = new ObjectMeta();
+    givenMetadata.setNamespace("the-namespace");
+    givenMetadata.setName("the-name");
+    var given = new MongoDbCustomResource();
+    given.setMetadata(givenMetadata);
+    given.getSpec().getDatabase().setPruneOnDelete(true);
+
+    var givenContext = new MongoDbCustomResourceContext();
+
+    assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> mongoDbController.deleteResource(given, givenContext));
+
+    // By default owned resources (like the created secret) will be deleted as well.
+    verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
+    verify(mongoDbServiceMock).dropDatabase("the-namespace_the-name");
   }
 
   @Test

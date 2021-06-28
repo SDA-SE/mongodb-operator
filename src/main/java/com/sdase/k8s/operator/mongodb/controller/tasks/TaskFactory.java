@@ -46,6 +46,7 @@ public class TaskFactory {
     return new DeleteDatabaseTask(
         mongoDbCustomResource,
         databaseNameCreator.apply(mongoDbCustomResource),
-        usernameCreator.apply(mongoDbCustomResource));
+        usernameCreator.apply(mongoDbCustomResource),
+        mongoDbCustomResource.getSpec().getDatabase().isPruneOnDelete());
   }
 }

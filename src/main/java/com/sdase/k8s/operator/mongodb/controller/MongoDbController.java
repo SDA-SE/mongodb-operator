@@ -39,6 +39,19 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
         "MongoDb {}/{} deleted",
         resource.getMetadata().getNamespace(),
         resource.getMetadata().getName());
+    var deleteDatabaseTask = taskFactory.newDeleteTask(resource);
+    var userDropped =
+        mongoDbService.dropDatabaseUser(
+            deleteDatabaseTask.getDatabaseName(), deleteDatabaseTask.getUsername());
+    if (!userDropped) {
+      throw new IllegalStateException("Failed to drop user");
+    }
+    if (deleteDatabaseTask.isPruneDb()) {
+      boolean databaseDeleted = mongoDbService.dropDatabase(deleteDatabaseTask.getDatabaseName());
+      if (!databaseDeleted) {
+        throw new IllegalStateException("Failed to drop database");
+      }
+    }
     return DeleteControl.DEFAULT_DELETE;
   }
 
@@ -56,7 +69,7 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
             task.getDatabaseName(), task.getUsername(), task.getPassword());
     if (!databaseCreated) {
       // maybe update status in the future but probably requires write access to the MongoDB CR
-      throw new IllegalStateException();
+      throw new IllegalStateException("Failed to create database");
     }
     kubernetesClientAdapter.createSecretInNamespace(
         resource.getMetadata().getNamespace(), secret.getSecret());
