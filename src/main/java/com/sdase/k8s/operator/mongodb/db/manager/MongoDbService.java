@@ -47,7 +47,6 @@ public class MongoDbService {
    *       <li>the database already exists
    *       <li>the {@code createUser} command fails
    *     </ul>
-   *     >
    */
   public boolean createDatabaseWithUser(String databaseAndUserName, String password) {
     return createDatabaseWithUser(databaseAndUserName, databaseAndUserName, password);
@@ -67,7 +66,6 @@ public class MongoDbService {
    *       <li>the database already exists
    *       <li>the {@code createUser} command fails
    *     </ul>
-   *     >
    */
   public boolean createDatabaseWithUser(String databaseName, String username, String password) {
     LOG.info("createDatabaseWithUser: {}@{}: check if database exists", username, databaseName);
