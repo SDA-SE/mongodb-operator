@@ -42,6 +42,9 @@ metadata:
       When the MongoDB resource is deleted, the database user and the secret are deleted as well.
       If `spec.database.pruneAfterDelete` is true, the whole database with all content will be
       deleted.
+
+      With an appriopriate Kustomize configuration (similar to the configuration required for Sealed
+      Secrets), databases created this way can be used in PR deployments with name suffix.
 spec:
   type: service
   lifecycle: experimental
