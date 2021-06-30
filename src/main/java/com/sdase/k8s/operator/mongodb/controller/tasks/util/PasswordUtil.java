@@ -10,7 +10,7 @@ public class PasswordUtil {
   private static final String UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   private static final String LOWER_CASE = "abcdefghijklmnopqrstuvwxyz";
   private static final String DIGITS = "0123456789";
-  private static final String SPECIAL_CHARS = "~`!#^&*()-_=+[{]}\\|;'\",<.>?";
+  private static final String SPECIAL_CHARS = "-_,.";
   private static final char[] CHARS =
       (UPPER_CASE + LOWER_CASE + DIGITS + SPECIAL_CHARS).toCharArray();
 

@@ -35,7 +35,7 @@ class PasswordUtilTest {
   void shouldAlwaysHaveSpecialCharacters() {
     var actual = PasswordUtil.createPassword();
     assertThat(actual.toCharArray())
-        .containsAnyOf("~`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?".toCharArray());
+        .containsAnyOf("-_,.".toCharArray());
   }
 
   @RepeatedTest(1000)
