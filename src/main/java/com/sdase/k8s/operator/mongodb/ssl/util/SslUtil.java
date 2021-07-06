@@ -2,9 +2,7 @@ package com.sdase.k8s.operator.mongodb.ssl.util;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -27,20 +25,22 @@ public class SslUtil {
     // this is a utility
   }
 
-  public static SSLContext createSslContext(KeyStore keyStore)
-      throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-    String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-    var trustManagerFactory = TrustManagerFactory.getInstance(tmfAlgorithm);
-    trustManagerFactory.init(keyStore);
+  public static SSLContext createSslContext(KeyStore keyStore) {
+    try {
+      String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+      var trustManagerFactory = TrustManagerFactory.getInstance(tmfAlgorithm);
+      trustManagerFactory.init(keyStore);
 
-    var sslContext = SSLContext.getInstance("TLSv1.2");
-    sslContext.init(null, trustManagerFactory.getTrustManagers(), createSecureRandom());
+      var sslContext = SSLContext.getInstance("TLSv1.2");
+      sslContext.init(null, trustManagerFactory.getTrustManagers(), createSecureRandom());
 
-    return sslContext;
+      return sslContext;
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
   }
 
-  public static KeyStore createTruststoreFromPemKey(String certificateAsString)
-      throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
+  public static KeyStore createTruststoreFromPemKey(String certificateAsString) {
     try (var parser = new PEMParser(new StringReader(certificateAsString))) {
       var keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
       keyStore.load(null, null);
@@ -51,6 +51,8 @@ public class SslUtil {
         i += 1;
       }
       return keyStore;
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
     }
   }
 
