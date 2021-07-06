@@ -5,10 +5,14 @@ import com.sdase.k8s.operator.mongodb.controller.MongoDbController;
 import com.sdase.k8s.operator.mongodb.controller.V1SecretBuilder;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
+import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
+import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.javaoperatorsdk.operator.Operator;
 import io.javaoperatorsdk.operator.config.runtime.DefaultConfigurationService;
+import java.util.Optional;
+import javax.net.ssl.SSLContext;
 
 public class MongoDbOperator {
 
@@ -21,12 +25,21 @@ public class MongoDbOperator {
 
   private MongoDbController createMongoDbController(KubernetesClient kubernetesClient) {
     var config = new EnvironmentConfig();
-    var mongoDbService = new MongoDbService(config.getMongodbConnectionString());
+    var mongoDbService =
+        createSslContext(config.getTrustedCertificatesDir())
+            .map(sc -> new MongoDbService(config.getMongodbConnectionString(), sc))
+            .orElseGet(() -> new MongoDbService(config.getMongodbConnectionString()));
     return new MongoDbController(
         new KubernetesClientAdapter(kubernetesClient),
         TaskFactory.defaultFactory(),
         mongoDbService,
         new V1SecretBuilder());
+  }
+
+  private Optional<SSLContext> createSslContext(String trustedCertificatesDir) {
+    var certificateCollector = new CertificateCollector(trustedCertificatesDir);
+    final Optional<String> certificates = certificateCollector.readCertificates();
+    return certificates.map(SslUtil::createTruststoreFromPemKey).map(SslUtil::createSslContext);
   }
 
   private void keepRunning() {

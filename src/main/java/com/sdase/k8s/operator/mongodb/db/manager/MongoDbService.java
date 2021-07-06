@@ -1,6 +1,8 @@
 package com.sdase.k8s.operator.mongodb.db.manager;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -9,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
+import javax.net.ssl.SSLContext;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,15 @@ public class MongoDbService {
 
   public MongoDbService(String mongoDbConnectionString) {
     mongoClient = MongoClients.create(mongoDbConnectionString);
+  }
+
+  public MongoDbService(String mongoDbConnectionString, SSLContext sslContext) {
+    var mongoClientSettings =
+        MongoClientSettings.builder()
+            .applyConnectionString(new ConnectionString(mongoDbConnectionString))
+            .applyToSslSettings(builder -> builder.context(sslContext))
+            .build();
+    mongoClient = MongoClients.create(mongoClientSettings);
   }
 
   /**
