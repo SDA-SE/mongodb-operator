@@ -25,6 +25,32 @@ class EnvironmentConfigTest {
   }
 
   @Test
+  @SetEnvironmentVariable(
+      key = "MONGODB_CONNECTION_STRING",
+      value = "mongodb://only.to.avoid.failure")
+  @ClearEnvironmentVariable(key = "TRUSTED_CERTIFICATES_DIR")
+  void shouldUseDefaultTrustedCertificatesDir() {
+    var environmentConfig = new EnvironmentConfig();
+
+    assertThat(environmentConfig)
+        .extracting(EnvironmentConfig::getTrustedCertificatesDir)
+        .isEqualTo("/var/trust/certificates");
+  }
+
+  @Test
+  @SetEnvironmentVariable(
+      key = "MONGODB_CONNECTION_STRING",
+      value = "mongodb://only.to.avoid.failure")
+  @SetEnvironmentVariable(key = "TRUSTED_CERTIFICATES_DIR", value = "/var/example/test")
+  void shouldConfigureTrustedCertificatesDir() {
+    var environmentConfig = new EnvironmentConfig();
+
+    assertThat(environmentConfig)
+        .extracting(EnvironmentConfig::getTrustedCertificatesDir)
+        .isEqualTo("/var/example/test");
+  }
+
+  @Test
   @ClearEnvironmentVariable(key = "MONGODB_CONNECTION_STRING")
   void shouldRejectAbsentMongoDbConfiguration() {
     assertThatExceptionOfType(ValidationException.class).isThrownBy(EnvironmentConfig::new);

@@ -1,8 +1,13 @@
 package com.sdase.k8s.operator.mongodb.db.manager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
+import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
+import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -134,5 +139,37 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
 
     // then
     assertThat(actual).isFalse();
+  }
+
+  @Test
+  void shouldKeepUseSslFromConnectionStringSoThatCaCertificatesCanBeAddedInAdvance()
+      throws URISyntaxException {
+
+    var givenPathToDirectoryWithCertificates =
+        Path.of(getClass().getResource("/ssl").toURI()).toString();
+
+    var sslContextOptional =
+        new CertificateCollector(givenPathToDirectoryWithCertificates)
+            .readCertificates()
+            .map(SslUtil::createTruststoreFromPemKey)
+            .map(SslUtil::createSslContext);
+    var sslContext = sslContextOptional.orElseGet(() -> fail("No SSL Context"));
+    var service =
+        sslContextOptional
+            .map(sc -> new MongoDbService(getMongoDbConnectionString(), sc))
+            .orElseGet(() -> fail("No SSL Context"));
+
+    assertThat(service)
+        .extracting("mongoClient")
+        .extracting("settings")
+        .extracting("sslSettings")
+        .extracting("enabled")
+        .isEqualTo(false);
+    assertThat(service)
+        .extracting("mongoClient")
+        .extracting("settings")
+        .extracting("sslSettings")
+        .extracting("context")
+        .isSameAs(sslContext);
   }
 }
