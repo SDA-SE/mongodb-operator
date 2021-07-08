@@ -152,6 +152,13 @@ public class MongoDbService {
   }
 
   private boolean isOk(Document response) {
-    return Double.compare(response.get("ok", Double.class), 1.0d) == 0;
+    var okValue = response.get("ok", Object.class);
+    if (okValue instanceof Double) {
+      return Double.compare((Double) okValue, 1.0D) == 0;
+    } else if (okValue instanceof Integer) {
+      return (Integer) okValue == 1;
+    } else {
+      return false;
+    }
   }
 }
