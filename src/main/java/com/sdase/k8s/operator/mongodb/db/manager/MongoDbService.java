@@ -152,10 +152,13 @@ public class MongoDbService {
   }
 
   private boolean isOk(Document response) {
+    // be generous with the type: different MongoDB API implementations return different types
     var okValue = response.get("ok", Object.class);
     if (okValue instanceof Double) {
+      // MongoDB returns Double
       return Double.compare((Double) okValue, 1.0D) == 0;
     } else if (okValue instanceof Integer) {
+      // AWS DocumentDB returns Integer
       return (Integer) okValue == 1;
     } else {
       return false;
