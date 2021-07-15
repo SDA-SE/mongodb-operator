@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 import javax.net.ssl.SSLContext;
+import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +24,11 @@ public class MongoDbService {
 
   private final MongoClient mongoClient;
 
+  private final boolean connectedToDocumentDb;
+
   public MongoDbService(String mongoDbConnectionString) {
     mongoClient = MongoClients.create(mongoDbConnectionString);
+    connectedToDocumentDb = checkDocumentDb();
   }
 
   public MongoDbService(String mongoDbConnectionString, SSLContext sslContext) {
@@ -33,6 +38,7 @@ public class MongoDbService {
             .applyToSslSettings(builder -> builder.context(sslContext))
             .build();
     mongoClient = MongoClients.create(mongoClientSettings);
+    connectedToDocumentDb = checkDocumentDb();
   }
 
   /**
@@ -42,10 +48,14 @@ public class MongoDbService {
    *     databaseName}
    */
   public boolean userExists(String databaseName, String username) {
-    var command = new BasicDBObject("usersInfo", Map.of("user", username, "db", databaseName));
-    var result = mongoClient.getDatabase(databaseName).runCommand(command);
+    LOG.info("userExists: Testing if user {}@{} exists.", username, databaseName);
+    var command =
+        new BasicDBObject("usersInfo", Map.of("user", username, "db", userDatabase(databaseName)));
+    var result = mongoClient.getDatabase(userDatabase(databaseName)).runCommand(command);
+    LOG.debug("userExists: received result from usersInfo command: {}", result);
     if (result.get("users") instanceof Collection) {
       var users = (Collection<?>) result.get("users");
+      LOG.info("userExists: Found {} results", users.size());
       return !users.isEmpty();
     }
     return false;
@@ -61,7 +71,8 @@ public class MongoDbService {
   public boolean dropDatabaseUser(String databaseName, String username) {
     try {
       var dropUserCommand = new BasicDBObject("dropUser", username);
-      var document = mongoClient.getDatabase(databaseName).runCommand(dropUserCommand);
+      var document =
+          mongoClient.getDatabase(userDatabase(databaseName)).runCommand(dropUserCommand);
       return isOk(document);
     } catch (MongoCommandException e) {
       return !userExists(databaseName, username);
@@ -131,6 +142,7 @@ public class MongoDbService {
     }
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean databaseExists(String databaseName) {
     MongoIterable<String> existingDatabases = mongoClient.listDatabaseNames();
     return StreamSupport.stream(existingDatabases.spliterator(), false)
@@ -145,10 +157,15 @@ public class MongoDbService {
             .append(
                 "roles",
                 List.of(new BasicDBObject("role", "readWrite").append("db", databaseName)));
-    Document response = mongoClient.getDatabase(databaseName).runCommand(createUserCommand);
+    Document response =
+        mongoClient.getDatabase(userDatabase(databaseName)).runCommand(createUserCommand);
     var created = isOk(response);
     LOG.info("createUser: {}@{}: created: {}", username, databaseName, created);
     return created;
+  }
+
+  private String userDatabase(String accessibleDatabase) {
+    return connectedToDocumentDb ? "admin" : accessibleDatabase;
   }
 
   private boolean isOk(Document response) {
@@ -161,6 +178,22 @@ public class MongoDbService {
       // AWS DocumentDB returns Integer
       return (Integer) okValue == 1;
     } else {
+      return false;
+    }
+  }
+
+  private boolean checkDocumentDb() {
+    var serverStatus =
+        mongoClient
+            .getDatabase("admin")
+            .runCommand(new BsonDocument("serverStatus", new BsonString("")));
+    var host = serverStatus.get("host");
+    LOG.info("Host from server status is:\n{}", host);
+    if (host != null && host.toString().matches("^.*\\.docdb\\.amazonaws\\.com(:\\d+)?$")) {
+      LOG.info("Assuming to be connected to a AWS DocumentDB.");
+      return true;
+    } else {
+      LOG.info("Assuming to be connected to a MongoDB.");
       return false;
     }
   }

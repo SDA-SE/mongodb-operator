@@ -78,6 +78,27 @@ pipeline {
     stage('Build') {
       parallel {
 
+        stage('Test DocumentDB') {
+          agent {
+            docker {
+              image 'quay.io/sdase/openjdk-development:11-hotspot'
+            }
+          }
+          steps {
+            javaGradlewWithDocumentDb(
+                gradleCommand: 'check jacocoTestReport --info',
+                documentDbSecretId: 'documentdb_testing_account',
+                documentDbHostsId: 'documentdb_testing_url'
+            )
+          }
+
+          post {
+            always {
+              junit testResults: '**/build/test-results/test/*.xml', allowEmptyResults: true
+            }
+          }
+        }
+
         stage('Service') {
           agent {
             docker {

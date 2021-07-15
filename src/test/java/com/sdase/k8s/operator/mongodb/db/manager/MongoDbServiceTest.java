@@ -38,7 +38,9 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
     // given … nothing
 
     // when
-    var actual = mongoDbService.createDatabaseWithUser("test-db", UUID.randomUUID().toString());
+    var actual =
+        mongoDbService.createDatabaseWithUser(
+            registerTestDb("test-db"), UUID.randomUUID().toString());
 
     // then
     assertThat(actual).isTrue();
@@ -47,11 +49,13 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
   @Test
   void shouldNotCreateUserThatAlreadyExists() {
     // given
-    mongoDbService.createDatabaseWithUser("existing-test-db", UUID.randomUUID().toString());
+    mongoDbService.createDatabaseWithUser(
+        registerTestDb("existing-test-db"), UUID.randomUUID().toString());
 
     // when
     var actual =
-        mongoDbService.createDatabaseWithUser("existing-test-db", UUID.randomUUID().toString());
+        mongoDbService.createDatabaseWithUser(
+            registerTestDb("existing-test-db"), UUID.randomUUID().toString());
 
     // then
     assertThat(actual).isFalse();
@@ -60,10 +64,13 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
   @Test
   void shouldDropUser() {
     // given
-    mongoDbService.createDatabaseWithUser("test-db", UUID.randomUUID().toString());
+    mongoDbService.createDatabaseWithUser(
+        registerTestDb("test-db-to-be-dropped"), UUID.randomUUID().toString());
 
     // when
-    var actual = mongoDbService.dropDatabaseUser("test-db", "test-db");
+    var actual =
+        mongoDbService.dropDatabaseUser(
+            registerTestDb("test-db-to-be-dropped"), registerTestDb("test-db-to-be-dropped"));
 
     // then
     assertThat(actual).isTrue();
@@ -74,7 +81,9 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
     // given … nothing
 
     // when
-    var actual = mongoDbService.dropDatabaseUser("test-db", "test-db");
+    var actual =
+        mongoDbService.dropDatabaseUser(
+            registerTestDb("test-db-not-existing"), registerTestDb("test-db-not-existing"));
 
     // then
     assertThat(actual).isTrue();
@@ -83,10 +92,10 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
   @Test
   void shouldDropDatabase() {
     // given
-    createDb("test-db-to-drop");
+    createDb(registerTestDb("test-db-to-drop"));
 
     // when
-    var actual = mongoDbService.dropDatabase("test-db-to-drop");
+    var actual = mongoDbService.dropDatabase(registerTestDb("test-db-to-drop"));
 
     // then
     assertThat(actual).isTrue();
@@ -97,7 +106,7 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
     // given … nothing
 
     // when
-    var actual = mongoDbService.dropDatabase("test-db-to-drop");
+    var actual = mongoDbService.dropDatabase(registerTestDb("test-db-does-not-exist"));
 
     // then
     assertThat(actual).isTrue();
@@ -106,10 +115,13 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
   @Test
   void shouldIdentifyExistingUser() {
     // given
-    mongoDbService.createDatabaseWithUser("test-db", UUID.randomUUID().toString());
+    mongoDbService.createDatabaseWithUser(
+        registerTestDb("test-db-existing-user"), UUID.randomUUID().toString());
 
     // when
-    var actual = mongoDbService.userExists("test-db", "test-db");
+    var actual =
+        mongoDbService.userExists(
+            registerTestDb("test-db-existing-user"), registerTestDb("test-db-existing-user"));
 
     // then
     assertThat(actual).isTrue();
@@ -118,11 +130,11 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
   @Test
   void shouldNotIdentifyAbsentUser() {
     // given
-    mongoDbService.createDatabaseWithUser("test-db1", UUID.randomUUID().toString());
-    mongoDbService.createDatabaseWithUser("test-db2", UUID.randomUUID().toString());
+    mongoDbService.createDatabaseWithUser(registerTestDb("test-db1"), UUID.randomUUID().toString());
+    mongoDbService.createDatabaseWithUser(registerTestDb("test-db2"), UUID.randomUUID().toString());
 
     // when
-    var actual = mongoDbService.userExists("test-db3", "test-db3");
+    var actual = mongoDbService.userExists(registerTestDb("test-db3"), registerTestDb("test-db3"));
 
     // then
     assertThat(actual).isFalse();
