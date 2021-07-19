@@ -9,47 +9,12 @@ metadata:
     - kubernetes
     - operator
   annotations:
-    sda.se/summary: |
-      A Kubernetes Operator that creates users and databases in existing MongoDB clusters based on a
-      custom resource.
-
-      Based on the resource name, a secret is created that contains the dynamically generated
-      database name, username and password.
-
-      When the operator is installed in a cluster, a database can be requested with a MongoDB
-      resource:
-
-      ```yaml
-      apiVersion: persistence.sda-se.com/v1beta1
-      kind: MongoDb
-      metadata:
-        name: my-db
-        namespace: test-namespace
-      spec:
-        database:
-          pruneAfterDelete: true # optional, default false
-        secret:
-          databaseKey: d # optional, default 'database'
-          usernameKey: u # optional, default 'username'
-          passwordKey: p # optional, default 'password'
-      ```
-
-      This will create a database named `test-namespace_my-db` and the user `test-namespace_my-db`
-      with read-write access to that database and a secret named `my-db` in `test-namespace`.
-      The secret will provide the data `d: test-namespace_my-db`, `u: test-namespace_my-db` and
-      `p: <random-password>` (with base64 encoded values).
-
-      When the MongoDB resource is deleted, the database user and the secret are deleted as well.
-      If `spec.database.pruneAfterDelete` is true, the whole database with all content will be
-      deleted.
-
-      With an appriopriate Kustomize configuration (similar to the configuration required for Sealed
-      Secrets), databases created this way can be used in PR deployments with name suffix.
+    sda.se/summary:
+      $text: docs/index.md
 spec:
   type: service
   lifecycle: experimental
   owner: team-mrkaplan
-  # TODO: Add a system
   providesApis:
     - mongodbs-crd
 ---
@@ -78,7 +43,6 @@ spec:
   # Although not officially supported, we can use this type. The spec will be shown as source.
   type: crd
   owner: team-mrkaplan
-  # TODO: Add a system
   lifecycle: experimental
   definition:
     $text: ./kustomize/bases/operator/mongodbs-crd.yaml
