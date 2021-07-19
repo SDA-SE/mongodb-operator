@@ -1,0 +1,10 @@
+site_name: 'MongoDB Operator'
+
+nav:
+  - MongoDB Operator: index.md
+  - Deployment: deployment.md
+  - Usage: usage.md
+
+plugins:
+  - techdocs-core
+

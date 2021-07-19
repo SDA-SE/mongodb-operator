@@ -238,7 +238,6 @@ pipeline {
 
     // Publishes the documentation to Backstage
     // Learn more about this step at https://catalog.sda.dev/docs/sda-se/Component/jenkins-pipeline/steps/publishTechDocs
-    /* No tech docs yet
     stage('Publish TechDocs') {
       agent {
         docker {
@@ -254,7 +253,6 @@ pipeline {
         )
       }
     }
-    */
 
     stage('Create Release') {
       when {
