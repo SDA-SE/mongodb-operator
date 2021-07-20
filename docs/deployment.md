@@ -74,8 +74,8 @@ The following environment variables can be used to configure the Docker containe
 
 #### MongoDB
 
-When connecting to the MongoDB, the host is read from the `serverStatus` command.
-If it ends with `.docdb.amazonaws.com`, a connection to AWS DocumentDB is assumed, and the behavior
+When connecting to the MongoDB, the configured hosts are checked.
+If any ends with `.docdb.amazonaws.com`, a connection to AWS DocumentDB is assumed, and the behavior
 slightly changes.
 While users for requested databases are created in the database when using MongoDB, all users will
 be created in the `admin` database when AWS DocumentDB is used.

@@ -10,10 +10,9 @@ import com.mongodb.client.MongoIterable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.StreamSupport;
 import javax.net.ssl.SSLContext;
-import org.bson.BsonDocument;
-import org.bson.BsonString;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ public class MongoDbService {
 
   public MongoDbService(String mongoDbConnectionString) {
     mongoClient = MongoClients.create(mongoDbConnectionString);
-    connectedToDocumentDb = checkDocumentDb();
+    connectedToDocumentDb = checkDocumentDb(mongoDbConnectionString);
   }
 
   public MongoDbService(String mongoDbConnectionString, SSLContext sslContext) {
@@ -38,7 +37,7 @@ public class MongoDbService {
             .applyToSslSettings(builder -> builder.context(sslContext))
             .build();
     mongoClient = MongoClients.create(mongoClientSettings);
-    connectedToDocumentDb = checkDocumentDb();
+    connectedToDocumentDb = checkDocumentDb(mongoDbConnectionString);
   }
 
   /**
@@ -182,14 +181,15 @@ public class MongoDbService {
     }
   }
 
-  private boolean checkDocumentDb() {
-    var serverStatus =
-        mongoClient
-            .getDatabase("admin")
-            .runCommand(new BsonDocument("serverStatus", new BsonString("")));
-    var host = serverStatus.get("host");
-    LOG.info("Host from server status is:\n{}", host);
-    if (host != null && host.toString().matches("^.*\\.docdb\\.amazonaws\\.com(:\\d+)?$")) {
+  private boolean checkDocumentDb(String mongoDbConnectionString) {
+    var connectionString = new ConnectionString(mongoDbConnectionString);
+    var hosts = connectionString.getHosts();
+    LOG.info("Configured hosts are:\n{}", hosts);
+    var includesAnyDocumentDbHost =
+        hosts.stream()
+            .filter(Objects::nonNull)
+            .anyMatch(h -> h.matches("^.*\\.docdb\\.amazonaws\\.com(:\\d+)?$"));
+    if (includesAnyDocumentDbHost) {
       LOG.info("Assuming to be connected to a AWS DocumentDB.");
       return true;
     } else {
