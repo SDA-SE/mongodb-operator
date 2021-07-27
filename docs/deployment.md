@@ -15,8 +15,8 @@ Operator.
 
 #### Service Account
 
-The MongoDB Operator requires a service a `ServiceAccount` with some privileges for the Kubernetes
-API from a `ClusterRole`:
+The MongoDB Operator requires a `ServiceAccount` with some privileges for the Kubernetes API from a
+`ClusterRole`:
 
 * For the resource `mongodbs` the following verbs are required:
     * `watch`
@@ -89,3 +89,11 @@ be created in the `admin` database when AWS DocumentDB is used.
       The configuration is ignored if no files are mounted.
       Startup will fail if the directory is not readable.
     * Default: `/var/trust/certificates`
+
+### Endpoints
+
+The image exposes port `8081` for monitoring purposes.
+
+It provides the following endpoints:
+
+* Readiness: `http://{serviceUrl}:8081/health/readiness`

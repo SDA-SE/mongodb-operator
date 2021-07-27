@@ -12,10 +12,15 @@ import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServerExtension;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Map;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.Spark;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
@@ -33,6 +39,7 @@ import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 class MongoDbOperatorTest extends AbstractMongoDbTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbOperatorTest.class);
+  private static int port;
 
   @SystemStub
   EnvironmentVariables environmentVariables =
@@ -44,6 +51,9 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
   @BeforeAll
   static void beforeAll() throws IOException {
     startDb();
+    try (ServerSocket serverSocket = new ServerSocket(0)) {
+      port = serverSocket.getLocalPort();
+    }
   }
 
   @AfterAll
@@ -77,15 +87,23 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
         .withPath("/apis/persistence.sda-se.com/v1beta1/mongodbs?watch=true")
         .andReturn(200, new ArrayList<>())
         .always();
+    server
+        .expect()
+        .get()
+        .withPath("/version")
+        .andReturn(200, Map.of("major", "1", "minor", "2"))
+        .always();
 
-    var testThread = new Thread(() -> new MongoDbOperator(client));
+    var testThread = new Thread(() -> new MongoDbOperator(client, port));
     try {
       testThread.start();
       await().untilAsserted(() -> assertThat(server.getRequestCount()).isGreaterThan(2));
       assertThat(testThread.isAlive()).isTrue();
       assertThat(testThread.getState()).isEqualTo(Thread.State.WAITING);
+      await().untilAsserted(this::assertReadinessEndpointAvailable);
     } finally {
       testThread.interrupt();
+      Spark.stop();
     }
   }
 
@@ -97,5 +115,14 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
         new ObjectMapper(new YAMLFactory()).readValue(crdYaml, CustomResourceDefinition.class);
     LOG.info("Read CRD {}", crd);
     return crd;
+  }
+
+  private void assertReadinessEndpointAvailable() throws IOException {
+    var pingEndpoint = String.format("http://localhost:%d/health/readiness", port);
+    var request = new Request.Builder().url(pingEndpoint).get().build();
+    var httpClient = new OkHttpClient();
+    try (Response response = httpClient.newCall(request).execute()) {
+      assertThat(response.isSuccessful()).isTrue();
+    }
   }
 }

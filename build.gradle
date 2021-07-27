@@ -22,7 +22,7 @@ tasks.withType(JavaCompile) {
 }
 
 jib {
-  container.ports = []
+  container.ports = ['8081']
   container.args = []
   from.image = 'quay.io/sdase/openjdk-runtime:11-hotspot-distroless'
   container.user = 10001
@@ -58,6 +58,9 @@ dependencies {
   implementation "org.hibernate.validator:hibernate-validator:7.0.0.Final"
   implementation "jakarta.el:jakarta.el-api:4.0.0"
   implementation "org.bouncycastle:bcpkix-jdk15on:1.68"
+  implementation "com.sparkjava:spark-core:2.9.3", {
+    exclude group: "org.slf4j"
+  }
 
 
   testImplementation enforcedPlatform("org.junit:junit-bom:5.7.2")
