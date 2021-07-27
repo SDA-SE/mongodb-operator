@@ -184,7 +184,7 @@ public class MongoDbService {
   private boolean checkDocumentDb(String mongoDbConnectionString) {
     var connectionString = new ConnectionString(mongoDbConnectionString);
     var hosts = connectionString.getHosts();
-    LOG.info("Configured hosts are:\n{}", hosts);
+    LOG.info("Configured hosts are: {}", hosts);
     var includesAnyDocumentDbHost =
         hosts.stream()
             .filter(Objects::nonNull)
