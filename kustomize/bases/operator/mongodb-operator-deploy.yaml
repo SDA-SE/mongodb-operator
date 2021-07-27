@@ -32,3 +32,8 @@ spec:
               memory: 128Mi
             requests:
               memory: 96Mi
+          readinessProbe:
+            httpGet:
+              port: 8081
+              path: /health/readiness
+            initialDelaySeconds: 10
