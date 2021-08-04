@@ -37,7 +37,7 @@ class MonitoringServerTest {
   void shouldProvidePingEndpointForReadinessReady() {
     READY.set(true);
     var httpClient = new OkHttpClient();
-    var request = pingEndpointRequest();
+    var request = readinessEndpointRequest();
     await()
         .untilAsserted(
             () -> {
@@ -54,7 +54,7 @@ class MonitoringServerTest {
   void shouldProvidePingEndpointForReadinessNotReady() {
     READY.set(false);
     var httpClient = new OkHttpClient();
-    var request = pingEndpointRequest();
+    var request = readinessEndpointRequest();
     await()
         .untilAsserted(
             () -> {
@@ -67,8 +67,29 @@ class MonitoringServerTest {
             });
   }
 
-  private Request pingEndpointRequest() {
+  @Test
+  void shouldProvidePingEndpointForLiveness() {
+    var httpClient = new OkHttpClient();
+    var request = livenessEndpointRequest();
+    await()
+        .untilAsserted(
+            () -> {
+              try (Response response = httpClient.newCall(request).execute()) {
+                assertThat(response.header("Content-type")).isEqualTo("text/plain");
+                assertThat(response.code()).isEqualTo(200);
+                assertThat(response.body()).isNotNull();
+                assertThat(response.body().string()).isEqualTo("UP");
+              }
+            });
+  }
+
+  private Request readinessEndpointRequest() {
     var pingEndpoint = String.format("http://localhost:%d/health/readiness", port);
+    return new Request.Builder().url(pingEndpoint).get().build();
+  }
+
+  private Request livenessEndpointRequest() {
+    var pingEndpoint = String.format("http://localhost:%d/health/liveness", port);
     return new Request.Builder().url(pingEndpoint).get().build();
   }
 }

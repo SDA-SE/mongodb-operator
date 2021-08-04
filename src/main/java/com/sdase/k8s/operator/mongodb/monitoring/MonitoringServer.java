@@ -26,5 +26,13 @@ public class MonitoringServer {
           res.status(ready ? 200 : 503);
           return ready ? "UP" : "OUT_OF_SERVICE";
         });
+
+    Spark.get(
+        "/health/liveness",
+        (req, res) -> {
+          res.type("text/plain");
+          res.status(200);
+          return "UP";
+        });
   }
 }

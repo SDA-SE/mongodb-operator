@@ -97,3 +97,4 @@ The image exposes port `8081` for monitoring purposes.
 It provides the following endpoints:
 
 * Readiness: `http://{serviceUrl}:8081/health/readiness`
+* Liveness: `http://{serviceUrl}:8081/health/liveness`
