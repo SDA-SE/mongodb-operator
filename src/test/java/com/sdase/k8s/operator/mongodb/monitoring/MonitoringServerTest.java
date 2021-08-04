@@ -5,6 +5,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -23,7 +24,7 @@ class MonitoringServerTest {
   static void setUp() throws IOException {
     try (ServerSocket serverSocket = new ServerSocket(0)) {
       port = serverSocket.getLocalPort();
-      new MonitoringServer(port, READY::get).start();
+      new MonitoringServer(port, List.of(READY::get)).start();
     }
   }
 

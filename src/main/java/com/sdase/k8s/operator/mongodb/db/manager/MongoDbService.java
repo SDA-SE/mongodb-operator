@@ -7,10 +7,13 @@ import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoIterable;
+import com.sdase.k8s.operator.mongodb.db.manager.model.User;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.net.ssl.SSLContext;
 import org.bson.Document;
@@ -25,9 +28,12 @@ public class MongoDbService {
 
   private final boolean connectedToDocumentDb;
 
+  private final String myUsername;
+
   public MongoDbService(String mongoDbConnectionString) {
     mongoClient = MongoClients.create(mongoDbConnectionString);
     connectedToDocumentDb = checkDocumentDb(mongoDbConnectionString);
+    myUsername = findMyUsername(mongoDbConnectionString);
   }
 
   public MongoDbService(String mongoDbConnectionString, SSLContext sslContext) {
@@ -38,6 +44,7 @@ public class MongoDbService {
             .build();
     mongoClient = MongoClients.create(mongoClientSettings);
     connectedToDocumentDb = checkDocumentDb(mongoDbConnectionString);
+    myUsername = findMyUsername(mongoDbConnectionString);
   }
 
   /**
@@ -48,14 +55,10 @@ public class MongoDbService {
    */
   public boolean userExists(String databaseName, String username) {
     LOG.info("userExists: Testing if user {}@{} exists.", username, databaseName);
-    var command =
-        new BasicDBObject("usersInfo", Map.of("user", username, "db", userDatabase(databaseName)));
-    var result = mongoClient.getDatabase(userDatabase(databaseName)).runCommand(command);
-    LOG.debug("userExists: received result from usersInfo command: {}", result);
-    if (result.get("users") instanceof Collection) {
-      var users = (Collection<?>) result.get("users");
-      LOG.info("userExists: Found {} results", users.size());
-      return !users.isEmpty();
+    var user = findUser(databaseName, username);
+    if (user.isPresent()) {
+      LOG.info("userExists: Found user {}@{}", username, databaseName);
+      return true;
     }
     return false;
   }
@@ -139,6 +142,42 @@ public class MongoDbService {
     } catch (MongoCommandException e) {
       return !databaseExists(databaseName);
     }
+  }
+
+  public Optional<User> whoAmI() {
+    return findUser("admin", myUsername).map(this::mapToUser);
+  }
+
+  private User mapToUser(Document userDocument) {
+    return new User(
+        userDocument.getString("_id"),
+        userDocument.getString("user"),
+        userDocument.getList("roles", Document.class).stream()
+            .map(d -> new User.UserRole(d.getString("role"), d.getString("db")))
+            .collect(Collectors.toList()));
+  }
+
+  private Optional<Document> findUser(String databaseName, String username) {
+    LOG.debug("findUser: loading user {}@{} with usersInfo command", username, databaseName);
+    var command =
+        new BasicDBObject("usersInfo", Map.of("user", username, "db", userDatabase(databaseName)));
+    var result = mongoClient.getDatabase(userDatabase(databaseName)).runCommand(command);
+    LOG.debug("findUser: received result from usersInfo command: {}", result);
+    if (result.get("users") instanceof Collection) {
+      var users = (Collection<?>) result.get("users");
+      if (users.size() == 1) {
+        var firstAndOnlyResult = users.iterator().next();
+        LOG.debug("findUser: Found user {}@{}", username, databaseName);
+        return Optional.of((Document) firstAndOnlyResult);
+      }
+    }
+    LOG.info("findUser: User {}@{} not found", username, databaseName);
+    return Optional.empty();
+  }
+
+  private String findMyUsername(String mongoDbConnectionString) {
+    var connectionString = new ConnectionString(mongoDbConnectionString);
+    return connectionString.getUsername();
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")

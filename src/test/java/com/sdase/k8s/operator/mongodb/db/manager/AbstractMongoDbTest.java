@@ -128,7 +128,9 @@ public abstract class AbstractMongoDbTest {
     var createUserCommand =
         new BasicDBObject("createUser", username)
             .append("pwd", password)
-            .append("roles", List.of(new BasicDBObject("role", "userAdmin").append("db", "admin")));
+            .append(
+                "roles",
+                List.of(new BasicDBObject("role", "userAdminAnyDatabase").append("db", "admin")));
     mongo.getDatabase("admin").runCommand(createUserCommand);
   }
 
