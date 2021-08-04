@@ -44,7 +44,7 @@ deployment of the MongoDB Operator.
 A user for MongoDB Operator must be created.
 
 The user of the MongoDB Operator must be granted
-[`userAdminAllDatabases`](https://docs.mongodb.com/v4.4/reference/built-in-roles/#mongodb-authrole-userAdminAnyDatabase)
+[`userAdminAnyDatabase`](https://docs.mongodb.com/v4.4/reference/built-in-roles/#mongodb-authrole-userAdminAnyDatabase)
 to function properly.
 
 [`dbAdminAnyDatabase`](https://docs.mongodb.com/v4.4/reference/built-in-roles/#mongodb-authrole-dbAdminAnyDatabase)
