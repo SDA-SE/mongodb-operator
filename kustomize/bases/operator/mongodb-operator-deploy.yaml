@@ -37,3 +37,8 @@ spec:
               port: 8081
               path: /health/readiness
             initialDelaySeconds: 10
+          livenessProbe:
+            httpGet:
+              port: 8081
+              path: /health/liveness
+            initialDelaySeconds: 10

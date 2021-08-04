@@ -12,6 +12,7 @@ import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServerExtension;
 import java.io.IOException;
+import java.lang.Thread.State;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -98,8 +99,9 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
     try {
       testThread.start();
       await().untilAsserted(() -> assertThat(server.getRequestCount()).isGreaterThan(2));
-      assertThat(testThread.isAlive()).isTrue();
-      assertThat(testThread.getState()).isEqualTo(Thread.State.WAITING);
+      await().untilAsserted(() -> assertThat(testThread.isAlive()).isTrue());
+      await().untilAsserted(() -> assertThat(testThread.getState()).isEqualTo(State.WAITING));
+      await().untilAsserted(this::assertLivenessEndpointAvailable);
       await().untilAsserted(this::assertReadinessEndpointAvailable);
     } finally {
       testThread.interrupt();
@@ -115,6 +117,15 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
         new ObjectMapper(new YAMLFactory()).readValue(crdYaml, CustomResourceDefinition.class);
     LOG.info("Read CRD {}", crd);
     return crd;
+  }
+
+  private void assertLivenessEndpointAvailable() throws IOException {
+    var pingEndpoint = String.format("http://localhost:%d/health/liveness", port);
+    var request = new Request.Builder().url(pingEndpoint).get().build();
+    var httpClient = new OkHttpClient();
+    try (Response response = httpClient.newCall(request).execute()) {
+      assertThat(response.isSuccessful()).isTrue();
+    }
   }
 
   private void assertReadinessEndpointAvailable() throws IOException {
