@@ -43,3 +43,10 @@ Secrets), databases created this way can be used in PR deployments with name suf
 * The `authSource` is the allowed database itself for MongoDB instances and the admin database for
   DocumentDB instances. As DocumentDB uses the admin database for all users, there is no need to
   configure `authSource`.
+* There is a hard limit of 64 characters for the database name.
+  The database name is built from `<metadata.namespace>_<metadata.name>`.
+  The namespace is used to avoid collisions and therefore data security issues.
+  Be aware that the length of `metadata.namespace` plus the length of `metadata.name` does not
+  exceed 63 characters.
+  This error can be recognized in the log of the Operator and by the fact that no Secret is created
+  for the MongoDb resource.
