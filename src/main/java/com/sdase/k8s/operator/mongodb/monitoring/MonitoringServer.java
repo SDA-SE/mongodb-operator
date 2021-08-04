@@ -1,5 +1,6 @@
 package com.sdase.k8s.operator.mongodb.monitoring;
 
+import java.util.Collection;
 import java.util.function.Supplier;
 import spark.Spark;
 
@@ -8,9 +9,9 @@ public class MonitoringServer {
   private final int port;
   private final Supplier<Boolean> isReady;
 
-  public MonitoringServer(int port, Supplier<Boolean> isReady) {
+  public MonitoringServer(int port, Collection<ReadinessCheck> readinessChecks) {
     this.port = port;
-    this.isReady = isReady;
+    this.isReady = () -> readinessChecks.stream().allMatch(ReadinessCheck::isReady);
   }
 
   public void start() {

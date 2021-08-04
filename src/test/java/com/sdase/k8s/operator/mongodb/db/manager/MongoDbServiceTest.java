@@ -2,7 +2,9 @@ package com.sdase.k8s.operator.mongodb.db.manager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.tuple;
 
+import com.sdase.k8s.operator.mongodb.db.manager.model.User;
 import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
 import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
 import java.io.IOException;
@@ -183,5 +185,23 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
         .extracting("sslSettings")
         .extracting("context")
         .isSameAs(sslContext);
+  }
+
+  @Test
+  void shouldFindOutWhoIAm() {
+
+    var user = mongoDbService.whoAmI();
+
+    assertThat(user)
+        .isPresent()
+        .hasValueSatisfying(
+            u -> {
+              // not checking exact values, just proof the mapping
+              assertThat(u.getId()).isNotBlank();
+              assertThat(u.getUsername()).isNotBlank();
+              assertThat(u.getRoles())
+                  .extracting(User.UserRole::getRole, User.UserRole::getDb)
+                  .containsAnyOf(tuple("userAdminAnyDatabase", "admin"), tuple("root", "admin"));
+            });
   }
 }

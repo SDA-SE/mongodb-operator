@@ -5,13 +5,16 @@ import com.sdase.k8s.operator.mongodb.controller.MongoDbController;
 import com.sdase.k8s.operator.mongodb.controller.V1SecretBuilder;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
+import com.sdase.k8s.operator.mongodb.monitoring.MongoDbPrivilegesCheck;
 import com.sdase.k8s.operator.mongodb.monitoring.MonitoringServer;
+import com.sdase.k8s.operator.mongodb.monitoring.ReadinessCheck;
 import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
 import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.javaoperatorsdk.operator.Operator;
 import io.javaoperatorsdk.operator.config.runtime.DefaultConfigurationService;
+import java.util.List;
 import java.util.Optional;
 import javax.net.ssl.SSLContext;
 
@@ -19,24 +22,33 @@ public class MongoDbOperator {
 
   public MongoDbOperator(KubernetesClient kubernetesClient, int monitoringPort) {
     try (var operator = new Operator(kubernetesClient, DefaultConfigurationService.instance())) {
-      operator.register(createMongoDbController(kubernetesClient));
+      var mongoDbService = createMongoDbService();
+      var mongoDbPrivilegesCheck = verifyPrivileges(mongoDbService);
+      operator.register(createMongoDbController(kubernetesClient, mongoDbService));
       operator.start(); // adds some checks and produces some logs, exits on error
-      startMonitoringServer(monitoringPort);
+      startMonitoringServer(monitoringPort, mongoDbPrivilegesCheck);
       keepRunning();
     }
   }
 
-  private MongoDbController createMongoDbController(KubernetesClient kubernetesClient) {
-    var config = new EnvironmentConfig();
-    var mongoDbService =
-        createSslContext(config.getTrustedCertificatesDir())
-            .map(sc -> new MongoDbService(config.getMongodbConnectionString(), sc))
-            .orElseGet(() -> new MongoDbService(config.getMongodbConnectionString()));
+  private MongoDbPrivilegesCheck verifyPrivileges(MongoDbService mongoDbService) {
+    return new MongoDbPrivilegesCheck(mongoDbService);
+  }
+
+  private MongoDbController createMongoDbController(
+      KubernetesClient kubernetesClient, MongoDbService mongoDbService) {
     return new MongoDbController(
         new KubernetesClientAdapter(kubernetesClient),
         TaskFactory.defaultFactory(),
         mongoDbService,
         new V1SecretBuilder());
+  }
+
+  private MongoDbService createMongoDbService() {
+    var config = new EnvironmentConfig();
+    return createSslContext(config.getTrustedCertificatesDir())
+        .map(sc -> new MongoDbService(config.getMongodbConnectionString(), sc))
+        .orElseGet(() -> new MongoDbService(config.getMongodbConnectionString()));
   }
 
   private Optional<SSLContext> createSslContext(String trustedCertificatesDir) {
@@ -45,8 +57,8 @@ public class MongoDbOperator {
     return certificates.map(SslUtil::createTruststoreFromPemKey).map(SslUtil::createSslContext);
   }
 
-  private void startMonitoringServer(int port) {
-    new MonitoringServer(port, () -> true).start();
+  private void startMonitoringServer(int port, ReadinessCheck... readinessChecks) {
+    new MonitoringServer(port, List.of(readinessChecks)).start();
   }
 
   /*
