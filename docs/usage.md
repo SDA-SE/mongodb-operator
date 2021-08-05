@@ -50,3 +50,170 @@ Secrets), databases created this way can be used in PR deployments with name suf
   exceed 63 characters.
   This error can be recognized in the log of the Operator and by the fact that no Secret is created
   for the MongoDb resource.
+
+
+## Kustomize
+
+When using [Kustomize](https://kustomize.io/) with `namePrefix` or `nameSuffix`, the MongoDb
+resource must be treated the same way as a Secret, because a Secret with the same name will be
+created by the MongoDB Operator.
+
+The following configuration needs to be added to the `kustomization.yaml`.
+It is derived from the built in `Secret` configuration. 
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configurations:
+  - mongodb-configuration.yaml
+```
+
+```yaml
+# mongodb-configuration.yaml
+nameReference:
+
+  # MongoDbs must be treated like Secrets when used in conjunction with name suffix or prefix
+  - group: persistence.sda-se.com
+    version: v1beta1
+    kind: MongoDb
+    fieldSpecs:
+      # taken from the specs of v1/Secret
+      # https://github.com/kubernetes-sigs/kustomize/blob/master/api/konfig/builtinpluginconsts/namereference.go#L120
+      - path: spec/volumes/secret/secretName
+        version: v1
+        kind: Pod
+      - path: spec/containers/env/valueFrom/secretKeyRef/name
+        version: v1
+        kind: Pod
+      - path: spec/initContainers/env/valueFrom/secretKeyRef/name
+        version: v1
+        kind: Pod
+      - path: spec/containers/envFrom/secretRef/name
+        version: v1
+        kind: Pod
+      - path: spec/initContainers/envFrom/secretRef/name
+        version: v1
+        kind: Pod
+      - path: spec/imagePullSecrets/name
+        version: v1
+        kind: Pod
+      - path: spec/volumes/projected/sources/secret/name
+        version: v1
+        kind: Pod
+      - path: spec/template/spec/volumes/secret/secretName
+        kind: Deployment
+      - path: spec/template/spec/containers/env/valueFrom/secretKeyRef/name
+        kind: Deployment
+      - path: spec/template/spec/initContainers/env/valueFrom/secretKeyRef/name
+        kind: Deployment
+      - path: spec/template/spec/containers/envFrom/secretRef/name
+        kind: Deployment
+      - path: spec/template/spec/initContainers/envFrom/secretRef/name
+        kind: Deployment
+      - path: spec/template/spec/imagePullSecrets/name
+        kind: Deployment
+      - path: spec/template/spec/volumes/projected/sources/secret/name
+        kind: Deployment
+      - path: spec/template/spec/volumes/secret/secretName
+        kind: ReplicaSet
+      - path: spec/template/spec/containers/env/valueFrom/secretKeyRef/name
+        kind: ReplicaSet
+      - path: spec/template/spec/initContainers/env/valueFrom/secretKeyRef/name
+        kind: ReplicaSet
+      - path: spec/template/spec/containers/envFrom/secretRef/name
+        kind: ReplicaSet
+      - path: spec/template/spec/initContainers/envFrom/secretRef/name
+        kind: ReplicaSet
+      - path: spec/template/spec/imagePullSecrets/name
+        kind: ReplicaSet
+      - path: spec/template/spec/volumes/projected/sources/secret/name
+        kind: ReplicaSet
+      - path: spec/template/spec/volumes/secret/secretName
+        kind: DaemonSet
+      - path: spec/template/spec/containers/env/valueFrom/secretKeyRef/name
+        kind: DaemonSet
+      - path: spec/template/spec/initContainers/env/valueFrom/secretKeyRef/name
+        kind: DaemonSet
+      - path: spec/template/spec/containers/envFrom/secretRef/name
+        kind: DaemonSet
+      - path: spec/template/spec/initContainers/envFrom/secretRef/name
+        kind: DaemonSet
+      - path: spec/template/spec/imagePullSecrets/name
+        kind: DaemonSet
+      - path: spec/template/spec/volumes/projected/sources/secret/name
+        kind: DaemonSet
+      - path: spec/template/spec/volumes/secret/secretName
+        kind: StatefulSet
+      - path: spec/template/spec/containers/env/valueFrom/secretKeyRef/name
+        kind: StatefulSet
+      - path: spec/template/spec/initContainers/env/valueFrom/secretKeyRef/name
+        kind: StatefulSet
+      - path: spec/template/spec/containers/envFrom/secretRef/name
+        kind: StatefulSet
+      - path: spec/template/spec/initContainers/envFrom/secretRef/name
+        kind: StatefulSet
+      - path: spec/template/spec/imagePullSecrets/name
+        kind: StatefulSet
+      - path: spec/template/spec/volumes/projected/sources/secret/name
+        kind: StatefulSet
+      - path: spec/template/spec/volumes/secret/secretName
+        kind: Job
+      - path: spec/template/spec/containers/env/valueFrom/secretKeyRef/name
+        kind: Job
+      - path: spec/template/spec/initContainers/env/valueFrom/secretKeyRef/name
+        kind: Job
+      - path: spec/template/spec/containers/envFrom/secretRef/name
+        kind: Job
+      - path: spec/template/spec/initContainers/envFrom/secretRef/name
+        kind: Job
+      - path: spec/template/spec/imagePullSecrets/name
+        kind: Job
+      - path: spec/template/spec/volumes/projected/sources/secret/name
+        kind: Job
+      - path: spec/jobTemplate/spec/template/spec/volumes/secret/secretName
+        kind: CronJob
+      - path: spec/jobTemplate/spec/template/spec/volumes/projected/sources/secret/name
+        kind: CronJob
+      - path: spec/jobTemplate/spec/template/spec/containers/env/valueFrom/secretKeyRef/name
+        kind: CronJob
+      - path: spec/jobTemplate/spec/template/spec/initContainers/env/valueFrom/secretKeyRef/name
+        kind: CronJob
+      - path: spec/jobTemplate/spec/template/spec/containers/envFrom/secretRef/name
+        kind: CronJob
+      - path: spec/jobTemplate/spec/template/spec/initContainers/envFrom/secretRef/name
+        kind: CronJob
+      - path: spec/jobTemplate/spec/template/spec/imagePullSecrets/name
+        kind: CronJob
+      - path: spec/tls/secretName
+        kind: Ingress
+      - path: metadata/annotations/ingress.kubernetes.io\/auth-secret
+        kind: Ingress
+      - path: metadata/annotations/nginx.ingress.kubernetes.io\/auth-secret
+        kind: Ingress
+      - path: metadata/annotations/nginx.ingress.kubernetes.io\/auth-tls-secret
+        kind: Ingress
+      - path: spec/tls/secretName
+        kind: Ingress
+      - path: imagePullSecrets/name
+        kind: ServiceAccount
+      - path: parameters/secretName
+        kind: StorageClass
+      - path: parameters/adminSecretName
+        kind: StorageClass
+      - path: parameters/userSecretName
+        kind: StorageClass
+      - path: parameters/secretRef
+        kind: StorageClass
+      - path: rules/resourceNames
+        kind: Role
+      - path: rules/resourceNames
+        kind: ClusterRole
+      - path: spec/template/spec/containers/env/valueFrom/secretKeyRef/name
+        kind: Service
+        group: serving.knative.dev
+        version: v1
+      - path: spec/azureFile/secretName
+        kind: PersistentVolume
+
+```
