@@ -1,6 +1,7 @@
 package com.sdase.k8s.operator.mongodb.controller;
 
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
+import com.sdase.k8s.operator.mongodb.controller.tasks.util.IllegalNameException;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import io.javaoperatorsdk.operator.api.Context;
@@ -39,18 +40,26 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
         "MongoDb {}/{} deleted",
         resource.getMetadata().getNamespace(),
         resource.getMetadata().getName());
-    var deleteDatabaseTask = taskFactory.newDeleteTask(resource);
-    var userDropped =
-        mongoDbService.dropDatabaseUser(
-            deleteDatabaseTask.getDatabaseName(), deleteDatabaseTask.getUsername());
-    if (!userDropped) {
-      throw new IllegalStateException("Failed to drop user");
-    }
-    if (deleteDatabaseTask.isPruneDb()) {
-      boolean databaseDeleted = mongoDbService.dropDatabase(deleteDatabaseTask.getDatabaseName());
-      if (!databaseDeleted) {
-        throw new IllegalStateException("Failed to drop database");
+    try {
+      var deleteDatabaseTask = taskFactory.newDeleteTask(resource);
+      var userDropped =
+          mongoDbService.dropDatabaseUser(
+              deleteDatabaseTask.getDatabaseName(), deleteDatabaseTask.getUsername());
+      if (!userDropped) {
+        throw new IllegalStateException("Failed to drop user");
       }
+      if (deleteDatabaseTask.isPruneDb()) {
+        boolean databaseDeleted = mongoDbService.dropDatabase(deleteDatabaseTask.getDatabaseName());
+        if (!databaseDeleted) {
+          throw new IllegalStateException("Failed to drop database");
+        }
+      }
+    } catch (IllegalNameException e) {
+      LOG.warn(
+          "Ignoring delete request for MongoDb {}/{}, name is invalid. The database may not exist.",
+          resource.getMetadata().getNamespace(),
+          resource.getMetadata().getName(),
+          e);
     }
     return DeleteControl.DEFAULT_DELETE;
   }
