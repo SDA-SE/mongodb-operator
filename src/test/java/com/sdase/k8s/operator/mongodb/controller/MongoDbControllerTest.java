@@ -31,6 +31,7 @@ import io.javaoperatorsdk.operator.api.RetryInfo;
 import io.javaoperatorsdk.operator.processing.event.EventList;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -138,6 +139,25 @@ class MongoDbControllerTest {
     // By default owned resources (like the created secret) will be deleted as well.
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
     verify(mongoDbServiceMock).dropDatabase("the-namespace_the-name");
+  }
+
+  @Test
+  void shouldAllowDeleteIfDatabaseNameIsInvalid() {
+    var givenMetadata = new ObjectMeta();
+    givenMetadata.setNamespace("the-namespace" + StringUtils.repeat("-123456789", 3));
+    givenMetadata.setName("the-name" + StringUtils.repeat("-123456789", 3));
+    var given = new MongoDbCustomResource();
+    given.setMetadata(givenMetadata);
+    given.getSpec().getDatabase().setPruneAfterDelete(true);
+
+    var givenContext = new MongoDbCustomResourceContext();
+
+    var actual = mongoDbController.deleteResource(given, givenContext);
+
+    assertThat(actual).isEqualTo(DeleteControl.DEFAULT_DELETE);
+
+    verifyZeroInteractions(mongoDbServiceMock);
+    verifyZeroInteractions(mongoDbServiceMock);
   }
 
   @Test

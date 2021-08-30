@@ -7,14 +7,15 @@ public class NamingUtil {
     // utility class
   }
 
-  public static String fromNamespaceAndName(MongoDbCustomResource mongoDbCustomResource) {
+  public static String fromNamespaceAndName(MongoDbCustomResource mongoDbCustomResource)
+      throws IllegalNameException {
     final String namespace = mongoDbCustomResource.getMetadata().getNamespace();
     final String name = mongoDbCustomResource.getMetadata().getName();
     var result = String.join("_", namespace, name);
     if (result.length() < 64) {
       return result;
     }
-    throw new IllegalStateException(
+    throw new IllegalNameException(
         String.format(
             "Unable to create valid name with less than 64 characters "
                 + "from namespace %s and name %s",
