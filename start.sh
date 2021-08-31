@@ -11,15 +11,24 @@ docker network inspect kind | grep "\"kind-registry\"" || docker network connect
 
 echo "🏗 Installing infrastructure components in local Kubernetes cluster …"
 # Need to apply without kustomize for GitHub Action that uses an older version of kustomize in kubectl
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml || exit 1
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.40.2/deploy/static/provider/kind/deploy.yaml || exit 1
 kubectl apply -f kustomize/overlays/infra/local-registry-hosting-cm.yaml || exit 1
 
 # maybe just temporarily needed:
 kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission
 
 echo "⏳ Waiting until Ingress Controller is ready …"
-sleep 5
-kubectl wait -n ingress-nginx --for=condition=ready pod -l=app.kubernetes.io/component=controller --timeout=180s || exit 1
+tries=0
+success=1
+while [[ "$success" != "0" ]]; do
+  if [[ "$tries" > "5" ]]; then
+    exit 1
+  fi
+  sleep 5
+  kubectl wait -n ingress-nginx --for=condition=ready pod -l=app.kubernetes.io/component=controller --timeout=180s
+  success="$?"
+  tries=$((tries+1))
+done
 
 echo "🏗 Installing MongoDB in local Kubernetes cluster …"
 # Ingress fails sometimes at this point, something seems not to be ready
