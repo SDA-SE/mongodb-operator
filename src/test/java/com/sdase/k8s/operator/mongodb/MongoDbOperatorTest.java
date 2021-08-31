@@ -1,6 +1,7 @@
 package com.sdase.k8s.operator.mongodb;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -119,21 +120,25 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
     return crd;
   }
 
-  private void assertLivenessEndpointAvailable() throws IOException {
+  private void assertLivenessEndpointAvailable() {
     var pingEndpoint = String.format("http://localhost:%d/health/liveness", port);
     var request = new Request.Builder().url(pingEndpoint).get().build();
     var httpClient = new OkHttpClient();
     try (Response response = httpClient.newCall(request).execute()) {
       assertThat(response.isSuccessful()).isTrue();
+    } catch (IOException e) {
+      fail("Could not access liveness endpoint", e);
     }
   }
 
-  private void assertReadinessEndpointAvailable() throws IOException {
+  private void assertReadinessEndpointAvailable() {
     var pingEndpoint = String.format("http://localhost:%d/health/readiness", port);
     var request = new Request.Builder().url(pingEndpoint).get().build();
     var httpClient = new OkHttpClient();
     try (Response response = httpClient.newCall(request).execute()) {
       assertThat(response.isSuccessful()).isTrue();
+    } catch (IOException e) {
+      fail("Could not access readiness endpoint", e);
     }
   }
 }
