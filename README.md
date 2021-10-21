@@ -250,6 +250,5 @@ and [MkDocs](https://www.mkdocs.org/).
 Documentation is written as Markdown files inside the `docs` folder.
 You have to register each file in the navigation inside `mkdocs.yml`.
 To preview the documentation locally, use `npx @techdocs/cli serve` (requires Nodejs and Docker).
-On every `master` build, the documentation is published to Backstage.
 
 For more details, see [our documentation about publishing TechDocs to Backstage](https://sda.dev/developer-guide/development/backstage/provide-documentation-in-backstage/).

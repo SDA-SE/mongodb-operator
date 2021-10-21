@@ -236,21 +236,16 @@ pipeline {
     }
 
 
-    // Publishes the documentation to Backstage
-    // Learn more about this step at https://catalog.sda.dev/docs/sda-se/Component/jenkins-pipeline/steps/publishTechDocs
-    stage('Publish TechDocs') {
+    // Verifies the TechDocs documentation
+    // Learn more about this step at https://catalog.sda.dev/docs/sda-se/Component/jenkins-pipeline/steps/verifyTechDocs/
+    stage('Verify TechDocs') {
       agent {
         docker {
           image 'quay.io/sdase/techdocs:1'
         }
       }
       steps {
-        publishTechDocs(
-            publishBranch: 'master',
-            entities: [
-                [name: "mongodb-operator"]
-            ]
-        )
+        verifyTechDocs()
       }
     }
 
