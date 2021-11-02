@@ -1,0 +1,17 @@
+version: 2
+
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: wednesday
+    time: "02:00"
+    timezone: Europe/Berlin
+  open-pull-requests-limit: 10
+  reviewers:
+  - SDA-SE/mr-kaplan
+  commit-message:
+    prefix: fix
+    prefix-development: chore
+    include: scope
