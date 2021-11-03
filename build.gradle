@@ -69,7 +69,7 @@ dependencies {
   testImplementation "org.assertj:assertj-core:3.20.1"
   testImplementation "de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.0.0"
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
-  testImplementation "org.mockito:mockito-junit-jupiter:2.23.4"
+  testImplementation "org.mockito:mockito-junit-jupiter:4.0.0"
   testImplementation "org.awaitility:awaitility:4.1.0"
   testImplementation "uk.org.webcompere:system-stubs-jupiter:1.1.0"
   testImplementation 'org.awaitility:awaitility:4.1.0'
