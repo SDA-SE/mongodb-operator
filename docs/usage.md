@@ -15,10 +15,12 @@ metadata:
 spec:
   database:
     pruneAfterDelete: true # optional, default false
+    connectionStringOptions: # optional, default ""
   secret:
     databaseKey: d # optional, default 'database'
     usernameKey: u # optional, default 'username'
     passwordKey: p # optional, default 'password'
+    connectionStringKey: c  # optional, default 'connectionString'
 ```
 
 This will create a database named `test-namespace_my-db` and the user `test-namespace_my-db` with
@@ -32,6 +34,7 @@ If `spec.database.pruneAfterDelete` is true, the whole database with all content
 With an appropriate Kustomize configuration (similar to the configuration required for Sealed
 Secrets), databases created this way can be used in PR deployments with name suffix.
 
+The `connectionStringOptions` will be added to the provided connection string.
 
 ## Caveats
 

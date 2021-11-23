@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.tuple;
 
 import com.sdase.k8s.operator.mongodb.controller.tasks.CreateDatabaseTask;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
+import com.sdase.k8s.operator.mongodb.controller.tasks.util.ConnectionStringUtil;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -82,6 +84,24 @@ class V1SecretBuilderTest {
   }
 
   @Test
+  void shouldCreateConnectionString() {
+    var given = taskWithMongoDbTestDbInMyNamespace();
+    given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
+
+    var actual = builder.createSecretForOwner(given);
+
+    assertThat(Base64.getDecoder().decode(actual.getData().get("c")))
+        .isEqualTo(
+            ConnectionStringUtil.createConnectionString(
+                    given.getDatabaseName(),
+                    given.getUsername(),
+                    given.getPassword(),
+                    "mongodb0.example.com:27017",
+                    "readPreference=secondaryPreferred&retryWrites=false")
+                .getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Test
   void shouldCreatePasswordAndPlaceItInConfiguredPasswordKey() {
     var given = taskWithMongoDbTestDbInMyNamespace();
     given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
@@ -120,15 +140,24 @@ class V1SecretBuilderTest {
     objectMeta.setUid(TEST_DB_UID);
     var mongoDbCustomResource = new MongoDbCustomResource();
     mongoDbCustomResource.setMetadata(objectMeta);
+    mongoDbCustomResource
+        .getSpec()
+        .setDatabase(
+            new DatabaseSpec()
+                .setConnectionStringOptions("readPreference=secondaryPreferred&retryWrites=false"));
 
     return TaskFactory.customFactory(
             NamingUtil::fromNamespaceAndName,
             mdbCr -> PLAIN_TEST_PASSWORD,
             NamingUtil::fromNamespaceAndName)
-        .newCreateTask(mongoDbCustomResource);
+        .newCreateTask(mongoDbCustomResource, "mongodb0.example.com:27017");
   }
 
   private SecretSpec secretSpecWithShortenedKeys() {
-    return new SecretSpec().setDatabaseKey("d").setUsernameKey("u").setPasswordKey("p");
+    return new SecretSpec()
+        .setDatabaseKey("d")
+        .setUsernameKey("u")
+        .setPasswordKey("p")
+        .setConnectionStringKey("c");
   }
 }

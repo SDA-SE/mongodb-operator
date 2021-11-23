@@ -14,6 +14,8 @@ echo "  Found secret:"
 echo "${secret}"
 usernameBase64="$(echo "${secret}" | yq r - -p v data.u)"
 echo "  Found base64 username in 'data.u': ${usernameBase64}"
+connectionStringBase64="$(echo "${secret}" | yq r - -p v data.c)"
+echo "  Found base64 connection string in 'data.c': ${connectionStringBase64}"
 echo "${secret}" | grep "bG9jYWwtdGVzdF9sb2NhbC10ZXN0LWRi" || exit 1
 
 echo "👀 then a database user should be created …"

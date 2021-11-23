@@ -30,21 +30,27 @@ public class MongoDbService {
 
   private final String myUsername;
 
+  private final List<String> myMongoHost;
+
   public MongoDbService(String mongoDbConnectionString) {
+    final var connectionString = new ConnectionString(mongoDbConnectionString);
+    myMongoHost = connectionString.getHosts();
     mongoClient = MongoClients.create(mongoDbConnectionString);
     connectedToDocumentDb = checkDocumentDb(mongoDbConnectionString);
     myUsername = findMyUsername(mongoDbConnectionString);
   }
 
   public MongoDbService(String mongoDbConnectionString, SSLContext sslContext) {
+    final var connectionString = new ConnectionString(mongoDbConnectionString);
     var mongoClientSettings =
         MongoClientSettings.builder()
-            .applyConnectionString(new ConnectionString(mongoDbConnectionString))
+            .applyConnectionString(connectionString)
             .applyToSslSettings(builder -> builder.context(sslContext))
             .build();
     mongoClient = MongoClients.create(mongoClientSettings);
     connectedToDocumentDb = checkDocumentDb(mongoDbConnectionString);
     myUsername = findMyUsername(mongoDbConnectionString);
+    myMongoHost = connectionString.getHosts();
   }
 
   /**
@@ -235,5 +241,9 @@ public class MongoDbService {
       LOG.info("Assuming to be connected to a MongoDB.");
       return false;
     }
+  }
+
+  public List<String> getHosts() {
+    return this.myMongoHost;
   }
 }

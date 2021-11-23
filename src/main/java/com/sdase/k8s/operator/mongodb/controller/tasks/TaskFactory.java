@@ -1,5 +1,6 @@
 package com.sdase.k8s.operator.mongodb.controller.tasks;
 
+import com.sdase.k8s.operator.mongodb.controller.tasks.util.ConnectionStringUtil;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.PasswordUtil;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
@@ -34,12 +35,22 @@ public class TaskFactory {
     this.databaseNameCreator = databaseNameCreator;
   }
 
-  public CreateDatabaseTask newCreateTask(MongoDbCustomResource mongoDbCustomResource) {
+  public CreateDatabaseTask newCreateTask(
+      MongoDbCustomResource mongoDbCustomResource, String hosts) {
+    final var dbName = databaseNameCreator.apply(mongoDbCustomResource);
+    final var username = usernameCreator.apply(mongoDbCustomResource);
+    final var password = passwordCreator.apply(mongoDbCustomResource);
     return new CreateDatabaseTask(
         mongoDbCustomResource,
-        databaseNameCreator.apply(mongoDbCustomResource),
-        usernameCreator.apply(mongoDbCustomResource),
-        passwordCreator.apply(mongoDbCustomResource));
+        dbName,
+        username,
+        password,
+        ConnectionStringUtil.createConnectionString(
+            dbName,
+            username,
+            password,
+            hosts,
+            mongoDbCustomResource.getSpec().getDatabase().getConnectionStringOptions()));
   }
 
   public DeleteDatabaseTask newDeleteTask(MongoDbCustomResource mongoDbCustomResource) {
