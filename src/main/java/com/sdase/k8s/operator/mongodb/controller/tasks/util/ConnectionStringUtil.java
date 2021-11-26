@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 
 public class ConnectionStringUtil {
 
@@ -49,7 +50,7 @@ public class ConnectionStringUtil {
       URI uri,
       String hosts) {
     return String.format(
-        "%s://%s:%s@%s/%s?%s",
+        "%s://%s:%s@%s/%s".concat(StringUtils.isNotBlank(customOptions) ? "?%s" : ""),
         uri.getScheme(),
         encodeValue(username),
         encodeValue(password),
