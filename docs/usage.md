@@ -15,7 +15,7 @@ metadata:
 spec:
   database:
     pruneAfterDelete: true # optional, default false
-    connectionStringOptions: # optional, default ""
+    connectionStringOptions: # optional, defaults used by MongoDB operator
   secret:
     databaseKey: d # optional, default 'database'
     usernameKey: u # optional, default 'username'
@@ -34,7 +34,8 @@ If `spec.database.pruneAfterDelete` is true, the whole database with all content
 With an appropriate Kustomize configuration (similar to the configuration required for Sealed
 Secrets), databases created this way can be used in PR deployments with name suffix.
 
-The `connectionStringOptions` will be added to the provided connection string.
+The `connectionStringOptions` will overwrite the defaults which are used by the MongoDB operator itself
+to connect to the MongoDB. 
 
 ## Caveats
 

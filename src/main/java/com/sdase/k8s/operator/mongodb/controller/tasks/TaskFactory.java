@@ -1,10 +1,14 @@
 package com.sdase.k8s.operator.mongodb.controller.tasks;
 
+import com.mongodb.ConnectionString;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.ConnectionStringUtil;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.PasswordUtil;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
+import java.util.Optional;
 import java.util.function.Function;
+import org.apache.commons.lang3.StringUtils;
 
 public class TaskFactory {
 
@@ -36,21 +40,21 @@ public class TaskFactory {
   }
 
   public CreateDatabaseTask newCreateTask(
-      MongoDbCustomResource mongoDbCustomResource, String hosts) {
-    final var dbName = databaseNameCreator.apply(mongoDbCustomResource);
-    final var username = usernameCreator.apply(mongoDbCustomResource);
-    final var password = passwordCreator.apply(mongoDbCustomResource);
-    return new CreateDatabaseTask(
-        mongoDbCustomResource,
-        dbName,
-        username,
-        password,
+      MongoDbCustomResource mongoDbCustomResource, ConnectionString connectionString) {
+    var dbName = databaseNameCreator.apply(mongoDbCustomResource);
+    var username = usernameCreator.apply(mongoDbCustomResource);
+    var password = passwordCreator.apply(mongoDbCustomResource);
+    var options =
+        Optional.ofNullable(mongoDbCustomResource.getSpec().getDatabase())
+            .map(DatabaseSpec::getConnectionStringOptions)
+            .filter(StringUtils::isNotBlank)
+            .orElse(null);
+    var newConnectionString =
         ConnectionStringUtil.createConnectionString(
-            dbName,
-            username,
-            password,
-            hosts,
-            mongoDbCustomResource.getSpec().getDatabase().getConnectionStringOptions()));
+            dbName, username, password, options, connectionString);
+
+    return new CreateDatabaseTask(
+        mongoDbCustomResource, dbName, username, password, newConnectionString);
   }
 
   public DeleteDatabaseTask newDeleteTask(MongoDbCustomResource mongoDbCustomResource) {

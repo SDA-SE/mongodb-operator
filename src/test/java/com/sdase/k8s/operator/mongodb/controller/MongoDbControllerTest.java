@@ -15,9 +15,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import com.mongodb.ConnectionString;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
@@ -42,6 +44,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith({MockitoExtension.class})
 class MongoDbControllerTest {
+
+  private static final ConnectionString MONGODB_OPERATOR_CONNECTION_STRING =
+      new ConnectionString(
+          "mongodb://"
+              + "mongodb-operator:suer-s3cr35"
+              + "@some-documentdb.c123456.eu-central-1.docdb.amazonaws.com:27017"
+              + ",some-documentdb.c789012.eu-central-1.docdb.amazonaws.com:27017"
+              + "/admin");
 
   @Mock KubernetesClientAdapter kubernetesClientAdapterMock;
 
@@ -168,12 +178,22 @@ class MongoDbControllerTest {
         .createSecretInNamespace(anyString(), secretArgumentCaptor.capture());
     when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
         .thenReturn(true);
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
 
     var givenMongoDbCr = new MongoDbCustomResource();
     givenMongoDbCr.setMetadata(
         new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
     givenMongoDbCr.setSpec(
-        new MongoDbSpec().setSecret(new SecretSpec().setUsernameKey("u").setPasswordKey("p")));
+        new MongoDbSpec()
+            .setSecret(
+                new SecretSpec()
+                    .setUsernameKey("u")
+                    .setPasswordKey("p")
+                    .setConnectionStringKey("c"))
+            .setDatabase(
+                new DatabaseSpec()
+                    .setConnectionStringOptions(
+                        "tls=true&readPreference=secondaryPreferred&retryWrites=false")));
 
     var actual =
         mongoDbController.createOrUpdateResource(
@@ -195,8 +215,70 @@ class MongoDbControllerTest {
           softly
               .assertThat(secretArgumentCaptor.getValue())
               .extracting(Secret::getData)
-              .extracting("u", "p")
-              .containsExactly("dGhlLW5hbWVzcGFjZV90aGUtbmFtZQ==", "c3RhdGljLXRlc3QtcGFzc3dvcmQ=");
+              .extracting("u", "p", "c")
+              .containsExactly(
+                  "dGhlLW5hbWVzcGFjZV90aGUtbmFtZQ==",
+                  "c3RhdGljLXRlc3QtcGFzc3dvcmQ=",
+                  "bW9uZ29kYjovL3RoZS1uYW1lc3BhY2VfdGhlLW5hbWU6c3RhdGljLXRlc3QtcGFzc3dvcmRAc29tZS1kb2N1bWVudGRiLmMxMjM0NTYuZXUtY2VudHJhbC0xLmRvY2RiLmFtYXpvbmF3cy5jb206MjcwMTcsc29tZS1kb2N1bWVudGRiLmM3ODkwMTIuZXUtY2VudHJhbC0xLmRvY2RiLmFtYXpvbmF3cy5jb206MjcwMTcvdGhlLW5hbWVzcGFjZV90aGUtbmFtZT90bHM9dHJ1ZSZyZWFkUHJlZmVyZW5jZT1zZWNvbmRhcnlQcmVmZXJyZWQmcmV0cnlXcml0ZXM9ZmFsc2U=");
+
+          // For the moment no updates to the original resource, this may change in the future if
+          // needed.
+          softly.assertThat(actual.isUpdateCustomResource()).isFalse();
+          softly.assertThat(actual.isUpdateStatusSubResource()).isFalse();
+          softly.assertThat(actual.isUpdateCustomResourceAndStatusSubResource()).isFalse();
+        });
+  }
+
+  @Test
+  void shouldCallAllNecessaryServicesForSuccessForDocumentDb() {
+    var secretArgumentCaptor = ArgumentCaptor.forClass(Secret.class);
+    doNothing()
+        .when(kubernetesClientAdapterMock)
+        .createSecretInNamespace(anyString(), secretArgumentCaptor.capture());
+    when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
+        .thenReturn(true);
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
+
+    var givenMongoDbCr = new MongoDbCustomResource();
+    givenMongoDbCr.setMetadata(
+        new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
+    givenMongoDbCr.setSpec(
+        new MongoDbSpec()
+            .setSecret(
+                new SecretSpec()
+                    .setUsernameKey("u")
+                    .setPasswordKey("p")
+                    .setConnectionStringKey("c"))
+            .setDatabase(
+                new DatabaseSpec()
+                    .setConnectionStringOptions(
+                        "tls=true&readPreference=secondaryPreferred&retryWrites=false")));
+
+    var actual =
+        mongoDbController.createOrUpdateResource(
+            givenMongoDbCr, new MongoDbCustomResourceContext());
+
+    verify(mongoDbServiceMock, times(1))
+        .createDatabaseWithUser(
+            "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
+    verify(kubernetesClientAdapterMock, times(1))
+        .createSecretInNamespace(eq("the-namespace"), any(Secret.class));
+
+    assertSoftly(
+        softly -> {
+          softly
+              .assertThat(secretArgumentCaptor.getValue())
+              .extracting(Secret::getMetadata)
+              .extracting("namespace", "name")
+              .containsExactly("the-namespace", "the-name");
+          softly
+              .assertThat(secretArgumentCaptor.getValue())
+              .extracting(Secret::getData)
+              .extracting("u", "p", "c")
+              .containsExactly(
+                  "dGhlLW5hbWVzcGFjZV90aGUtbmFtZQ==",
+                  "c3RhdGljLXRlc3QtcGFzc3dvcmQ=",
+                  "bW9uZ29kYjovL3RoZS1uYW1lc3BhY2VfdGhlLW5hbWU6c3RhdGljLXRlc3QtcGFzc3dvcmRAc29tZS1kb2N1bWVudGRiLmMxMjM0NTYuZXUtY2VudHJhbC0xLmRvY2RiLmFtYXpvbmF3cy5jb206MjcwMTcsc29tZS1kb2N1bWVudGRiLmM3ODkwMTIuZXUtY2VudHJhbC0xLmRvY2RiLmFtYXpvbmF3cy5jb206MjcwMTcvdGhlLW5hbWVzcGFjZV90aGUtbmFtZT90bHM9dHJ1ZSZyZWFkUHJlZmVyZW5jZT1zZWNvbmRhcnlQcmVmZXJyZWQmcmV0cnlXcml0ZXM9ZmFsc2U=");
 
           // For the moment no updates to the original resource, this may change in the future if
           // needed.
@@ -215,6 +297,7 @@ class MongoDbControllerTest {
         .createSecretInNamespace(anyString(), secretArgumentCaptor.capture());
     when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
         .thenReturn(true);
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
 
     var givenMongoDbCr = new MongoDbCustomResource();
     givenMongoDbCr.setMetadata(
@@ -252,6 +335,7 @@ class MongoDbControllerTest {
   void shouldNotCreateSecretButFailWhenNoDatabaseHasBeenCreated() {
     when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
         .thenReturn(false);
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
 
     var givenMongoDbCr = new MongoDbCustomResource();
     givenMongoDbCr.setMetadata(

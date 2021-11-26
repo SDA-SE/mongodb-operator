@@ -15,6 +15,9 @@ import org.slf4j.LoggerFactory;
 @Controller
 public class MongoDbController implements ResourceController<MongoDbCustomResource> {
 
+  private static final String DEFAULT_DOCUMENTDB_OPTIONS =
+      "readPreference=secondaryPreferred&retryWrites=false";
+
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbController.class);
 
   private final KubernetesClientAdapter kubernetesClientAdapter;
@@ -71,8 +74,7 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
         "MongoDb {}/{} created or updated",
         resource.getMetadata().getNamespace(),
         resource.getMetadata().getName());
-    final var hosts = String.join(",", mongoDbService.getHosts());
-    var task = taskFactory.newCreateTask(resource, hosts);
+    var task = taskFactory.newCreateTask(resource, mongoDbService.getConnectionString());
     var secret = v1SecretBuilder.createSecretForOwner(task);
     var databaseCreated =
         mongoDbService.createDatabaseWithUser(

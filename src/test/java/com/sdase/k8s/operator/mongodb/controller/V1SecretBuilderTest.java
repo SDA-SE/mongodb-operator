@@ -3,6 +3,7 @@ package com.sdase.k8s.operator.mongodb.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import com.mongodb.ConnectionString;
 import com.sdase.k8s.operator.mongodb.controller.tasks.CreateDatabaseTask;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.ConnectionStringUtil;
@@ -21,6 +22,13 @@ class V1SecretBuilderTest {
 
   private static final String TEST_DB_UID = UUID.randomUUID().toString();
   private static final String PLAIN_TEST_PASSWORD = "static-test-password";
+  private static final ConnectionString MONGODB_OPERATOR_CONNECTION_STRING =
+      new ConnectionString(
+          "mongodb://"
+              + "mongodb-operator:suer-s3cr35"
+              + "@some-documentdb.c123456.eu-central-1.docdb.amazonaws.com:27017"
+              + ",some-documentdb.c789012.eu-central-1.docdb.amazonaws.com:27017"
+              + "/admin");
 
   V1SecretBuilder builder = new V1SecretBuilder();
 
@@ -96,8 +104,8 @@ class V1SecretBuilderTest {
                     given.getDatabaseName(),
                     given.getUsername(),
                     given.getPassword(),
-                    "mongodb0.example.com:27017",
-                    "readPreference=secondaryPreferred&retryWrites=false")
+                    "readPreference=secondaryPreferred&retryWrites=false",
+                    MONGODB_OPERATOR_CONNECTION_STRING)
                 .getBytes(StandardCharsets.UTF_8));
   }
 
@@ -150,7 +158,7 @@ class V1SecretBuilderTest {
             NamingUtil::fromNamespaceAndName,
             mdbCr -> PLAIN_TEST_PASSWORD,
             NamingUtil::fromNamespaceAndName)
-        .newCreateTask(mongoDbCustomResource, "mongodb0.example.com:27017");
+        .newCreateTask(mongoDbCustomResource, MONGODB_OPERATOR_CONNECTION_STRING);
   }
 
   private SecretSpec secretSpecWithShortenedKeys() {

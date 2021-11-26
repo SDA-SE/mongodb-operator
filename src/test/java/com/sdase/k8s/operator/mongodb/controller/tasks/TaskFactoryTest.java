@@ -2,6 +2,7 @@ package com.sdase.k8s.operator.mongodb.controller.tasks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.mongodb.ConnectionString;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.ConnectionStringUtil;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
@@ -33,6 +34,13 @@ class TaskFactoryTest {
   void shouldBuildCreateTaskFromSource() {
     var givenNamespace = "my-namespace";
     var givenName = "my-name";
+    var givenConnectionString =
+        new ConnectionString(
+            "mongodb://"
+                + "mongodb-operator:suer-s3cr35"
+                + "@some-documentdb.c123456.eu-central-1.docdb.amazonaws.com:27017"
+                + ",some-documentdb.c789012.eu-central-1.docdb.amazonaws.com:27017"
+                + "/admin");
 
     var given = new MongoDbCustomResource();
     given.setMetadata(
@@ -44,7 +52,7 @@ class TaskFactoryTest {
                     .setConnectionStringOptions(
                         "readPreference=secondaryPreferred&retryWrites=false")));
 
-    var actual = defaultTaskFactory.newCreateTask(given, "mongodb0.example.com:27017");
+    var actual = defaultTaskFactory.newCreateTask(given, givenConnectionString);
 
     assertThat(actual.getSource()).isSameAs(given);
     assertThat(actual.getDatabaseName()).contains(givenNamespace).contains(givenName);
@@ -57,7 +65,7 @@ class TaskFactoryTest {
                 actual.getDatabaseName(),
                 actual.getUsername(),
                 actual.getPassword(),
-                "mongodb0.example.com:27017",
-                "readPreference=secondaryPreferred&retryWrites=false"));
+                "readPreference=secondaryPreferred&retryWrites=false",
+                givenConnectionString));
   }
 }
