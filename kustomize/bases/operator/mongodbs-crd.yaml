@@ -56,7 +56,6 @@ spec:
                         Connection options are pairs in the following form: name=value
                         Separate options with the ampersand (i.e. &) character name1=value1&name2=value2.
                       type: string
-                      default: "Defaults used by the MongoDB Operator itself."
                       example: readPreference=secondaryPreferred&retryWrites=false
                 secret:
                   description: Specifies how the secret should be created.
