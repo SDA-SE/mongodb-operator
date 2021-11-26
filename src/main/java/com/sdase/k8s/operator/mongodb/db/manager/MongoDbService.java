@@ -33,22 +33,22 @@ public class MongoDbService {
   private final ConnectionString connectionString;
 
   public MongoDbService(String mongoDbConnectionString) {
-    this.connectionString = new ConnectionString(mongoDbConnectionString);
+    connectionString = new ConnectionString(mongoDbConnectionString);
     mongoClient = MongoClients.create(mongoDbConnectionString);
-    connectedToDocumentDb = checkDocumentDb(mongoDbConnectionString);
-    myUsername = findMyUsername(mongoDbConnectionString);
+    connectedToDocumentDb = checkDocumentDb(new ConnectionString(mongoDbConnectionString));
+    myUsername = connectionString.getUsername();
   }
 
   public MongoDbService(String mongoDbConnectionString, SSLContext sslContext) {
-    this.connectionString = new ConnectionString(mongoDbConnectionString);
+    connectionString = new ConnectionString(mongoDbConnectionString);
     var mongoClientSettings =
         MongoClientSettings.builder()
             .applyConnectionString(connectionString)
             .applyToSslSettings(builder -> builder.context(sslContext))
             .build();
     mongoClient = MongoClients.create(mongoClientSettings);
-    connectedToDocumentDb = checkDocumentDb(mongoDbConnectionString);
-    myUsername = findMyUsername(mongoDbConnectionString);
+    connectedToDocumentDb = checkDocumentDb(connectionString);
+    myUsername = connectionString.getUsername();
   }
 
   /**
@@ -179,11 +179,6 @@ public class MongoDbService {
     return Optional.empty();
   }
 
-  private String findMyUsername(String mongoDbConnectionString) {
-    var connectionString = new ConnectionString(mongoDbConnectionString);
-    return connectionString.getUsername();
-  }
-
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean databaseExists(String databaseName) {
     MongoIterable<String> existingDatabases = mongoClient.listDatabaseNames();
@@ -224,8 +219,7 @@ public class MongoDbService {
     }
   }
 
-  private boolean checkDocumentDb(String mongoDbConnectionString) {
-    var connectionString = new ConnectionString(mongoDbConnectionString);
+  private boolean checkDocumentDb(ConnectionString connectionString) {
     var hosts = connectionString.getHosts();
     LOG.info("Configured hosts are: {}", hosts);
     var includesAnyDocumentDbHost =

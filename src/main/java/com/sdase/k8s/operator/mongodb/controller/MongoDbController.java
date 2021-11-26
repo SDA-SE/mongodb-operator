@@ -15,9 +15,6 @@ import org.slf4j.LoggerFactory;
 @Controller
 public class MongoDbController implements ResourceController<MongoDbCustomResource> {
 
-  private static final String DEFAULT_DOCUMENTDB_OPTIONS =
-      "readPreference=secondaryPreferred&retryWrites=false";
-
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbController.class);
 
   private final KubernetesClientAdapter kubernetesClientAdapter;
