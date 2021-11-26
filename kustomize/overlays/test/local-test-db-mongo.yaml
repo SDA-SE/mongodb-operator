@@ -3,6 +3,9 @@ kind: MongoDb
 metadata:
   name: local-test-db
 spec:
+  database:
+    connectionStringOptions: readPreference=secondaryPreferred&retryWrites=false
   secret:
     usernameKey: u
     passwordKey: p
+    connectionStringKey: c

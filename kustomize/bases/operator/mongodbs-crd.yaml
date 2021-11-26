@@ -47,9 +47,17 @@ spec:
                         In development cluster it is useful to clean up databases, especially of PR
                         deployments to keep the database instance small.
                         In a production environment you most likely want to avoid deleting the
-                        content accidentially.
+                        content accidentally.
                       type: boolean
                       default: false
+                    connectionStringOptions:
+                      description: |
+                        Overwrites the default connection string options used by the MongoDB operator.
+                        Connection options are pairs in the following form: name=value
+                        Separate options with the ampersand (i.e. &) character name1=value1&name2=value2.
+                      type: string
+                      default: "Defaults used by the MongoDB Operator itself."
+                      example: readPreference=secondaryPreferred&retryWrites=false
                 secret:
                   description: Specifies how the secret should be created.
                   type: object
@@ -73,6 +81,12 @@ spec:
                       type: string
                       default: password
                       example: MONGODB_PASSWORD
+                    connectionStringKey:
+                      description: |
+                        The name of the key in the `data` section where the connectionString is located.
+                      type: string
+                      default: connectionString
+                      example: MONGODB_CONNECTION_STRING
   # either Namespaced or Cluster
   scope: Namespaced
   names:

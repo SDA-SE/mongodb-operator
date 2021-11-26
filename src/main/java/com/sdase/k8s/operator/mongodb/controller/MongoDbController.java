@@ -71,7 +71,7 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
         "MongoDb {}/{} created or updated",
         resource.getMetadata().getNamespace(),
         resource.getMetadata().getName());
-    var task = taskFactory.newCreateTask(resource);
+    var task = taskFactory.newCreateTask(resource, mongoDbService.getConnectionString());
     var secret = v1SecretBuilder.createSecretForOwner(task);
     var databaseCreated =
         mongoDbService.createDatabaseWithUser(

@@ -8,13 +8,19 @@ public class CreateDatabaseTask {
   private final String databaseName;
   private final String username;
   private final String password;
+  private final String connectionString;
 
   public CreateDatabaseTask(
-      MongoDbCustomResource source, String databaseName, String username, String password) {
+      MongoDbCustomResource source,
+      String databaseName,
+      String username,
+      String password,
+      String connectionString) {
     this.source = source;
     this.databaseName = databaseName;
     this.username = username;
     this.password = password;
+    this.connectionString = connectionString;
   }
 
   public MongoDbCustomResource getSource() {
@@ -31,5 +37,9 @@ public class CreateDatabaseTask {
 
   public String getPassword() {
     return password;
+  }
+
+  public String getConnectionString() {
+    return connectionString;
   }
 }

@@ -18,6 +18,7 @@ public class V1SecretBuilder {
     var database = createDatabaseTask.getDatabaseName();
     var username = createDatabaseTask.getUsername();
     var password = createDatabaseTask.getPassword();
+    var connectionString = createDatabaseTask.getConnectionString();
     secret.setData(
         Map.of(
             owner.getSpec().getSecret().getDatabaseKey(),
@@ -25,7 +26,9 @@ public class V1SecretBuilder {
             owner.getSpec().getSecret().getUsernameKey(),
             base64(username),
             owner.getSpec().getSecret().getPasswordKey(),
-            base64(password)));
+            base64(password),
+            owner.getSpec().getSecret().getConnectionStringKey(),
+            base64(connectionString)));
     ObjectMeta secretMetadata = createMetaDataFromOwnerResource(owner);
     secret.setMetadata(secretMetadata);
     return secret;

@@ -3,9 +3,12 @@ package com.sdase.k8s.operator.mongodb.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import com.mongodb.ConnectionString;
 import com.sdase.k8s.operator.mongodb.controller.tasks.CreateDatabaseTask;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
+import com.sdase.k8s.operator.mongodb.controller.tasks.util.ConnectionStringUtil;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -19,6 +22,13 @@ class V1SecretBuilderTest {
 
   private static final String TEST_DB_UID = UUID.randomUUID().toString();
   private static final String PLAIN_TEST_PASSWORD = "static-test-password";
+  private static final ConnectionString MONGODB_OPERATOR_CONNECTION_STRING =
+      new ConnectionString(
+          "mongodb://"
+              + "mongodb-operator:suer-s3cr35"
+              + "@some-documentdb.c123456.eu-central-1.docdb.amazonaws.com:27017"
+              + ",some-documentdb.c789012.eu-central-1.docdb.amazonaws.com:27017"
+              + "/admin");
 
   V1SecretBuilder builder = new V1SecretBuilder();
 
@@ -82,6 +92,24 @@ class V1SecretBuilderTest {
   }
 
   @Test
+  void shouldCreateConnectionString() {
+    var given = taskWithMongoDbTestDbInMyNamespace();
+    given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
+
+    var actual = builder.createSecretForOwner(given);
+
+    assertThat(Base64.getDecoder().decode(actual.getData().get("c")))
+        .isEqualTo(
+            ConnectionStringUtil.createConnectionString(
+                    given.getDatabaseName(),
+                    given.getUsername(),
+                    given.getPassword(),
+                    "readPreference=secondaryPreferred&retryWrites=false",
+                    MONGODB_OPERATOR_CONNECTION_STRING)
+                .getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Test
   void shouldCreatePasswordAndPlaceItInConfiguredPasswordKey() {
     var given = taskWithMongoDbTestDbInMyNamespace();
     given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
@@ -120,15 +148,24 @@ class V1SecretBuilderTest {
     objectMeta.setUid(TEST_DB_UID);
     var mongoDbCustomResource = new MongoDbCustomResource();
     mongoDbCustomResource.setMetadata(objectMeta);
+    mongoDbCustomResource
+        .getSpec()
+        .setDatabase(
+            new DatabaseSpec()
+                .setConnectionStringOptions("readPreference=secondaryPreferred&retryWrites=false"));
 
     return TaskFactory.customFactory(
             NamingUtil::fromNamespaceAndName,
             mdbCr -> PLAIN_TEST_PASSWORD,
             NamingUtil::fromNamespaceAndName)
-        .newCreateTask(mongoDbCustomResource);
+        .newCreateTask(mongoDbCustomResource, MONGODB_OPERATOR_CONNECTION_STRING);
   }
 
   private SecretSpec secretSpecWithShortenedKeys() {
-    return new SecretSpec().setDatabaseKey("d").setUsernameKey("u").setPasswordKey("p");
+    return new SecretSpec()
+        .setDatabaseKey("d")
+        .setUsernameKey("u")
+        .setPasswordKey("p")
+        .setConnectionStringKey("c");
   }
 }
