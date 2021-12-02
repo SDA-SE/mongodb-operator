@@ -249,6 +249,31 @@ pipeline {
       }
     }
 
+    stage('Approve Dependabot PR') {
+      when {
+        beforeAgent true
+        changeRequest()
+      }
+      agent {
+        node {
+          label 'docker'
+        }
+      }
+      steps {
+        approveDependabotPr( allowedDependencies: [
+            // test dependencies
+            'assertj-core',
+            'awaitility',
+            'de.flapdoodle.embed.mongo',
+            'junit-bom',
+            'junit-pioneer',
+            'kubernetes-server-mock',
+            'mockito-junit-jupiter',
+            'system-stubs-jupiter'
+        ] )
+      }
+    }
+
     stage('Create Release') {
       when {
         beforeAgent true
