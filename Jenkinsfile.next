@@ -263,6 +263,7 @@ pipeline {
         approveDependabotPr( allowedDependencies: [
             // build dependencies
             'com.diffplug.spotless',
+            'com.google.cloud.tools.jib',
             // test dependencies
             'assertj-core',
             'awaitility',
