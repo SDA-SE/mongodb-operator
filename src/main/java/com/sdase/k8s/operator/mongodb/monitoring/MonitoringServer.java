@@ -2,23 +2,25 @@ package com.sdase.k8s.operator.mongodb.monitoring;
 
 import java.util.Collection;
 import java.util.function.Supplier;
-import spark.Spark;
+import spark.Service;
 
 public class MonitoringServer {
 
   private final int port;
   private final Supplier<Boolean> isReady;
+  private final Service service;
 
   public MonitoringServer(int port, Collection<ReadinessCheck> readinessChecks) {
     this.port = port;
     this.isReady = () -> readinessChecks.stream().allMatch(ReadinessCheck::isReady);
+    this.service = Service.ignite();
   }
 
-  public void start() {
+  public MonitoringServer start() {
 
-    Spark.port(port);
+    service.port(port);
 
-    Spark.get(
+    service.get(
         "/health/readiness",
         (req, res) -> {
           res.type("text/plain");
@@ -27,12 +29,19 @@ public class MonitoringServer {
           return ready ? "UP" : "OUT_OF_SERVICE";
         });
 
-    Spark.get(
+    service.get(
         "/health/liveness",
         (req, res) -> {
           res.type("text/plain");
           res.status(200);
           return "UP";
         });
+
+    return this;
+  }
+
+  public void stop() {
+    service.stop();
+    service.awaitStop();
   }
 }
