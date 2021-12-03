@@ -11,15 +11,12 @@ import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
-import io.fabric8.kubernetes.client.server.mock.KubernetesMockServerExtension;
 import java.io.IOException;
 import java.lang.Thread.State;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Map;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -36,8 +33,8 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
-@ExtendWith({SystemStubsExtension.class, KubernetesMockServerExtension.class})
-@EnableKubernetesMockClient
+@ExtendWith({SystemStubsExtension.class})
+@EnableKubernetesMockClient(crud = true)
 class MongoDbOperatorTest extends AbstractMongoDbTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbOperatorTest.class);
@@ -72,6 +69,8 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
   void log() throws InterruptedException {
     var lastRequest = server.getLastRequest();
     LOG.info("Last request path: {}", lastRequest.getPath());
+    var requestCount = server.getRequestCount();
+    LOG.info("Request count: {}", requestCount);
   }
 
   @Test
@@ -87,19 +86,13 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
         .expect()
         .get()
         .withPath("/apis/persistence.sda-se.com/v1beta1/mongodbs?watch=true")
-        .andReturn(200, new ArrayList<>())
-        .always();
-    server
-        .expect()
-        .get()
-        .withPath("/version")
-        .andReturn(200, Map.of("major", "1", "minor", "2"))
-        .always();
+        .andUpgradeToWebSocket()
+        .open();
 
     var testThread = new Thread(() -> new MongoDbOperator(client, port));
     try {
       testThread.start();
-      await().untilAsserted(() -> assertThat(server.getRequestCount()).isGreaterThan(2));
+      await().untilAsserted(() -> assertThat(server.getRequestCount()).isGreaterThan(1));
       await().untilAsserted(() -> assertThat(testThread.isAlive()).isTrue());
       await().untilAsserted(() -> assertThat(testThread.getState()).isEqualTo(State.WAITING));
       await().untilAsserted(this::assertLivenessEndpointAvailable);
