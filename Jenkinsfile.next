@@ -261,6 +261,8 @@ pipeline {
       }
       steps {
         approveDependabotPr( allowedDependencies: [
+            // build dependencies
+            'com.diffplug.spotless',
             // test dependencies
             'assertj-core',
             'awaitility',
