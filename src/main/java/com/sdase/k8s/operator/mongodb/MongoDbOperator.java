@@ -26,8 +26,8 @@ public class MongoDbOperator {
       var mongoDbPrivilegesCheck = verifyPrivileges(mongoDbService);
       operator.register(createMongoDbController(kubernetesClient, mongoDbService));
       operator.start(); // adds some checks and produces some logs, exits on error
-      startMonitoringServer(monitoringPort, mongoDbPrivilegesCheck);
-      keepRunning();
+      var monitoringServer = startMonitoringServer(monitoringPort, mongoDbPrivilegesCheck);
+      keepRunning(monitoringServer);
     }
   }
 
@@ -57,8 +57,9 @@ public class MongoDbOperator {
     return certificates.map(SslUtil::createTruststoreFromPemKey).map(SslUtil::createSslContext);
   }
 
-  private void startMonitoringServer(int port, ReadinessCheck... readinessChecks) {
-    new MonitoringServer(port, List.of(readinessChecks)).start();
+  @SuppressWarnings("java:S2095") // MonitoringServer is closed by caller
+  private MonitoringServer startMonitoringServer(int port, ReadinessCheck... readinessChecks) {
+    return new MonitoringServer(port, List.of(readinessChecks)).start();
   }
 
   /*
@@ -67,9 +68,11 @@ public class MongoDbOperator {
    * Kubernetes API watchers flooding the log and the Operator is not working as expected. There
    * seems to be a similar problem when using Quarkus which produces the same type of exceptions,
    * see https://github.com/quarkiverse/quarkus-operator-sdk/issues/9
+   *
+   * @param toBeClosedAfterFinish resources that should be closed when the service is shutting down
    */
-  private void keepRunning() {
-    new KeepAliveRunner().keepAlive();
+  private void keepRunning(AutoCloseable... toBeClosedAfterFinish) {
+    new KeepAliveRunner(toBeClosedAfterFinish).keepAlive();
   }
 
   public static void main(String[] args) {
