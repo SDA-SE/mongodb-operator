@@ -63,7 +63,7 @@ dependencies {
   }
 
 
-  testImplementation enforcedPlatform("org.junit:junit-bom:5.7.2")
+  testImplementation enforcedPlatform("org.junit:junit-bom:5.8.2")
   testImplementation "org.junit.jupiter:junit-jupiter"
   testImplementation "org.junit-pioneer:junit-pioneer:1.4.2"
   testImplementation "org.assertj:assertj-core:3.20.1"
