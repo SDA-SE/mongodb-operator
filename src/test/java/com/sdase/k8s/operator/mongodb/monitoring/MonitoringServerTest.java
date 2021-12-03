@@ -10,32 +10,32 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import spark.Spark;
 
 class MonitoringServerTest {
 
-  private static int port;
-  private static final AtomicBoolean READY = new AtomicBoolean(true);
+  private MonitoringServer monitoringServer;
+  private int port;
+  private final AtomicBoolean ready = new AtomicBoolean(true);
 
-  @BeforeAll
-  static void setUp() throws IOException {
+  @BeforeEach
+  void startServer() throws IOException {
     try (ServerSocket serverSocket = new ServerSocket(0)) {
       port = serverSocket.getLocalPort();
-      new MonitoringServer(port, List.of(READY::get)).start();
+      monitoringServer = new MonitoringServer(port, List.of(ready::get)).start();
     }
   }
 
-  @AfterAll
-  static void tearDown() {
-    Spark.stop();
+  @AfterEach
+  void stopServer() {
+    monitoringServer.stop();
   }
 
   @Test
   void shouldProvidePingEndpointForReadinessReady() {
-    READY.set(true);
+    ready.set(true);
     var httpClient = new OkHttpClient();
     var request = readinessEndpointRequest();
     await()
@@ -52,7 +52,7 @@ class MonitoringServerTest {
 
   @Test
   void shouldProvidePingEndpointForReadinessNotReady() {
-    READY.set(false);
+    ready.set(false);
     var httpClient = new OkHttpClient();
     var request = readinessEndpointRequest();
     await()
