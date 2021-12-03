@@ -11,8 +11,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.mongodb.ConnectionString;
@@ -166,8 +166,8 @@ class MongoDbControllerTest {
 
     assertThat(actual).isEqualTo(DeleteControl.DEFAULT_DELETE);
 
-    verifyZeroInteractions(mongoDbServiceMock);
-    verifyZeroInteractions(mongoDbServiceMock);
+    verifyNoInteractions(mongoDbServiceMock);
+    verifyNoInteractions(mongoDbServiceMock);
   }
 
   @Test
@@ -350,7 +350,7 @@ class MongoDbControllerTest {
     verify(mongoDbServiceMock, times(1))
         .createDatabaseWithUser(
             "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
-    verifyZeroInteractions(kubernetesClientAdapterMock);
+    verifyNoInteractions(kubernetesClientAdapterMock);
   }
 
   private static class MongoDbCustomResourceContext implements Context<MongoDbCustomResource> {
