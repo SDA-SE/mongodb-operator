@@ -138,8 +138,4 @@ public abstract class AbstractMongoDbTest {
     var dropUserCommand = new BasicDBObject("dropUser", "test-user");
     mongo.getDatabase("admin").runCommand(dropUserCommand);
   }
-
-  private static String asStringOrNull(char[] chars) {
-    return chars == null ? null : new String(chars);
-  }
 }

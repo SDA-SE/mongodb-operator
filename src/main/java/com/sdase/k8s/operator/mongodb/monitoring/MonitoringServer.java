@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.function.Supplier;
 import spark.Service;
 
-public class MonitoringServer {
+public class MonitoringServer implements AutoCloseable {
 
   private final int port;
   private final Supplier<Boolean> isReady;
@@ -43,5 +43,10 @@ public class MonitoringServer {
   public void stop() {
     service.stop();
     service.awaitStop();
+  }
+
+  @Override
+  public void close() {
+    stop();
   }
 }
