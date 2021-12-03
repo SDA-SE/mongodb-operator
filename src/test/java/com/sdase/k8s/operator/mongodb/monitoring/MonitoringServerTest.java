@@ -6,6 +6,7 @@ import static org.awaitility.Awaitility.await;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -39,6 +40,7 @@ class MonitoringServerTest {
     var httpClient = new OkHttpClient();
     var request = readinessEndpointRequest();
     await()
+        .atMost(30, TimeUnit.SECONDS)
         .untilAsserted(
             () -> {
               try (Response response = httpClient.newCall(request).execute()) {
@@ -56,6 +58,7 @@ class MonitoringServerTest {
     var httpClient = new OkHttpClient();
     var request = readinessEndpointRequest();
     await()
+        .atMost(30, TimeUnit.SECONDS)
         .untilAsserted(
             () -> {
               try (Response response = httpClient.newCall(request).execute()) {
@@ -72,6 +75,7 @@ class MonitoringServerTest {
     var httpClient = new OkHttpClient();
     var request = livenessEndpointRequest();
     await()
+        .atMost(30, TimeUnit.SECONDS)
         .untilAsserted(
             () -> {
               try (Response response = httpClient.newCall(request).execute()) {
