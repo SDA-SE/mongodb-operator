@@ -13,7 +13,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.RetryingTest;
 
 class MonitoringServerTest {
 
@@ -34,7 +34,7 @@ class MonitoringServerTest {
     monitoringServer.stop();
   }
 
-  @Test
+  @RetryingTest(5)
   void shouldProvidePingEndpointForReadinessReady() {
     ready.set(true);
     var httpClient = new OkHttpClient();
@@ -52,7 +52,7 @@ class MonitoringServerTest {
             });
   }
 
-  @Test
+  @RetryingTest(5)
   void shouldProvidePingEndpointForReadinessNotReady() {
     ready.set(false);
     var httpClient = new OkHttpClient();
@@ -70,7 +70,7 @@ class MonitoringServerTest {
             });
   }
 
-  @Test
+  @RetryingTest(5)
   void shouldProvidePingEndpointForLiveness() {
     var httpClient = new OkHttpClient();
     var request = livenessEndpointRequest();
