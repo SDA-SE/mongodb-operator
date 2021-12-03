@@ -4,14 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.tuple;
 
+import com.mongodb.MongoClient;
 import com.sdase.k8s.operator.mongodb.db.manager.model.User;
 import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
 import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
+import org.bson.Document;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,47 +40,92 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
     removeDatabases();
   }
 
+  @AfterEach
+  void verifyUsersAreCleanedUpInDocumentDb() {
+    if (!mongoDbService.checkDocumentDb(mongoDbService.getConnectionString())) {
+      return;
+    }
+    long count = -1; // not zero -> fail
+    var mongoClient = new MongoClient(getMongoDbConnectionString());
+    Document dbStats = new Document("usersInfo", 1);
+    Document command = mongoClient.getDatabase("admin").runCommand(dbStats);
+    var usersResult = command.get("users");
+    if (usersResult instanceof ArrayList) {
+      var users = (ArrayList<?>) usersResult;
+      count =
+          users.stream()
+              .filter(Document.class::isInstance)
+              .map(Document.class::cast)
+              .map(d -> d.get("user"))
+              .filter(Objects::nonNull)
+              .filter(String.class::isInstance)
+              .map(String.class::cast)
+              .filter(
+                  u ->
+                      u.startsWith("test-db-")
+                          || u.startsWith("existing-test-db-")
+                          || u.startsWith("test-db1-")
+                          || u.startsWith("test-db2-"))
+              .count();
+    }
+    assertThat(count)
+        .describedAs(
+            "Counted %d test users, should be zero but allowing up to 20 to cover parallel jobs.",
+            count)
+        .isNotNegative()
+        .isLessThanOrEqualTo(20);
+  }
+
   @Test
   void shouldCreateUser() {
-    // given … nothing
+    var databaseAndUserName = registerTestDb("test-db");
+    try {
+      // given … nothing
 
-    // when
-    var actual =
-        mongoDbService.createDatabaseWithUser(
-            registerTestDb("test-db"), UUID.randomUUID().toString());
+      // when
+      var actual =
+          mongoDbService.createDatabaseWithUser(databaseAndUserName, UUID.randomUUID().toString());
 
-    // then
-    assertThat(actual).isTrue();
+      // then
+      assertThat(actual).isTrue();
+    } finally {
+      mongoDbService.dropDatabaseUser(databaseAndUserName, databaseAndUserName);
+    }
   }
 
   @Test
   void shouldNotCreateUserThatAlreadyExists() {
-    // given
-    mongoDbService.createDatabaseWithUser(
-        registerTestDb("existing-test-db"), UUID.randomUUID().toString());
+    var databaseAndUserName = registerTestDb("existing-test-db");
+    try {
+      // given
+      mongoDbService.createDatabaseWithUser(databaseAndUserName, UUID.randomUUID().toString());
 
-    // when
-    var actual =
-        mongoDbService.createDatabaseWithUser(
-            registerTestDb("existing-test-db"), UUID.randomUUID().toString());
+      // when
+      var actual =
+          mongoDbService.createDatabaseWithUser(databaseAndUserName, UUID.randomUUID().toString());
 
-    // then
-    assertThat(actual).isFalse();
+      // then
+      assertThat(actual).isFalse();
+    } finally {
+      mongoDbService.dropDatabaseUser(databaseAndUserName, databaseAndUserName);
+    }
   }
 
   @Test
   void shouldDropUser() {
-    // given
-    mongoDbService.createDatabaseWithUser(
-        registerTestDb("test-db-to-be-dropped"), UUID.randomUUID().toString());
+    var databaseAndUserName = registerTestDb("test-db-to-be-dropped");
+    try {
+      // given
+      mongoDbService.createDatabaseWithUser(databaseAndUserName, UUID.randomUUID().toString());
 
-    // when
-    var actual =
-        mongoDbService.dropDatabaseUser(
-            registerTestDb("test-db-to-be-dropped"), registerTestDb("test-db-to-be-dropped"));
+      // when
+      var actual = mongoDbService.dropDatabaseUser(databaseAndUserName, databaseAndUserName);
 
-    // then
-    assertThat(actual).isTrue();
+      // then
+      assertThat(actual).isTrue();
+    } finally {
+      mongoDbService.dropDatabaseUser(databaseAndUserName, databaseAndUserName);
+    }
   }
 
   @Test
@@ -116,30 +166,40 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
 
   @Test
   void shouldIdentifyExistingUser() {
-    // given
-    mongoDbService.createDatabaseWithUser(
-        registerTestDb("test-db-existing-user"), UUID.randomUUID().toString());
+    var databaseAndUserName = registerTestDb("test-db-existing-user");
+    try {
+      // given
+      mongoDbService.createDatabaseWithUser(databaseAndUserName, UUID.randomUUID().toString());
 
-    // when
-    var actual =
-        mongoDbService.userExists(
-            registerTestDb("test-db-existing-user"), registerTestDb("test-db-existing-user"));
+      // when
+      var actual = mongoDbService.userExists(databaseAndUserName, databaseAndUserName);
 
-    // then
-    assertThat(actual).isTrue();
+      // then
+      assertThat(actual).isTrue();
+    } finally {
+      mongoDbService.dropDatabaseUser(databaseAndUserName, databaseAndUserName);
+    }
   }
 
   @Test
   void shouldNotIdentifyAbsentUser() {
-    // given
-    mongoDbService.createDatabaseWithUser(registerTestDb("test-db1"), UUID.randomUUID().toString());
-    mongoDbService.createDatabaseWithUser(registerTestDb("test-db2"), UUID.randomUUID().toString());
+    var databaseAndUserNameOne = registerTestDb("test-db1");
+    var databaseAndUserNameTwo = registerTestDb("test-db2");
+    try {
+      // given
+      mongoDbService.createDatabaseWithUser(databaseAndUserNameOne, UUID.randomUUID().toString());
+      mongoDbService.createDatabaseWithUser(databaseAndUserNameTwo, UUID.randomUUID().toString());
 
-    // when
-    var actual = mongoDbService.userExists(registerTestDb("test-db3"), registerTestDb("test-db3"));
+      // when
+      var actual =
+          mongoDbService.userExists(registerTestDb("test-db3"), registerTestDb("test-db3"));
 
-    // then
-    assertThat(actual).isFalse();
+      // then
+      assertThat(actual).isFalse();
+    } finally {
+      mongoDbService.dropDatabaseUser(databaseAndUserNameOne, databaseAndUserNameOne);
+      mongoDbService.dropDatabaseUser(databaseAndUserNameTwo, databaseAndUserNameTwo);
+    }
   }
 
   @Test

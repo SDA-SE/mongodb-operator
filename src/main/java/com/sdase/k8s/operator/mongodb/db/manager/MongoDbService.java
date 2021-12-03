@@ -219,7 +219,7 @@ public class MongoDbService {
     }
   }
 
-  private boolean checkDocumentDb(ConnectionString connectionString) {
+  boolean checkDocumentDb(ConnectionString connectionString) {
     var hosts = connectionString.getHosts();
     LOG.info("Configured hosts are: {}", hosts);
     var includesAnyDocumentDbHost =
