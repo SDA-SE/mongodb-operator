@@ -67,7 +67,7 @@ dependencies {
   testImplementation "org.junit.jupiter:junit-jupiter"
   testImplementation "org.junit-pioneer:junit-pioneer:1.4.2"
   testImplementation "org.assertj:assertj-core:3.21.0"
-  testImplementation "de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.0.0"
+  testImplementation "de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.2.0"
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
   testImplementation "org.mockito:mockito-junit-jupiter:2.23.4"
   testImplementation "uk.org.webcompere:system-stubs-jupiter:1.2.0"
