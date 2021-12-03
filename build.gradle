@@ -44,7 +44,7 @@ dependencies {
     // version conflict within operator framework
     exclude group: "com.google.guava", module: "guava"
   }
-  implementation "com.google.guava:guava:27.0.1-jre"
+  implementation "com.google.guava:guava:31.0.1-jre"
   annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
     // version conflict within operator framework
     exclude group: "com.google.guava", module: "guava"
