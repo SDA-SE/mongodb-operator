@@ -8,6 +8,7 @@ import io.javaoperatorsdk.operator.api.Context;
 import io.javaoperatorsdk.operator.api.Controller;
 import io.javaoperatorsdk.operator.api.DeleteControl;
 import io.javaoperatorsdk.operator.api.ResourceController;
+import io.javaoperatorsdk.operator.api.RetryInfo;
 import io.javaoperatorsdk.operator.api.UpdateControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,12 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
       if (deleteDatabaseTask.isPruneDb()) {
         boolean databaseDeleted = mongoDbService.dropDatabase(deleteDatabaseTask.getDatabaseName());
         if (!databaseDeleted) {
+          if (context.getRetryInfo().map(RetryInfo::isLastAttempt).orElse(false)) {
+            LOG.warn(
+                "Last attempt to delete database for resource {} failed. Skipping.",
+                resource.getFullResourceName());
+            return DeleteControl.DEFAULT_DELETE;
+          }
           throw new IllegalStateException("Failed to drop database");
         }
       }

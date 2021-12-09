@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -88,6 +89,32 @@ class MongoDbControllerTest {
   }
 
   @Test
+  void shouldSkipDeleteDatabaseAfterLastAttempt() {
+    when(mongoDbServiceMock.dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name"))
+        .thenReturn(true);
+    when(mongoDbServiceMock.dropDatabase("the-namespace_the-name")).thenReturn(false);
+
+    var givenMetadata = new ObjectMeta();
+    givenMetadata.setNamespace("the-namespace");
+    givenMetadata.setName("the-name");
+    var given = new MongoDbCustomResource();
+    given.setMetadata(givenMetadata);
+    given.getSpec().getDatabase().setPruneAfterDelete(true);
+
+    var retryInfoMock = mock(RetryInfo.class);
+    when(retryInfoMock.isLastAttempt()).thenReturn(true);
+    var contextMock = mock(MongoDbCustomResourceContext.class);
+    when(contextMock.getRetryInfo()).thenReturn(Optional.of(retryInfoMock));
+
+    var actual = mongoDbController.deleteResource(given, contextMock);
+
+    // By default owned resources (like the created secret) will be deleted as well.
+    assertThat(actual).isEqualTo(DeleteControl.DEFAULT_DELETE);
+    verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
+    verifyNoMoreInteractions(mongoDbServiceMock);
+  }
+
+  @Test
   void shouldFailWhenUserCantBeDeleted() {
     when(mongoDbServiceMock.dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name"))
         .thenReturn(false);
@@ -141,10 +168,13 @@ class MongoDbControllerTest {
     given.setMetadata(givenMetadata);
     given.getSpec().getDatabase().setPruneAfterDelete(true);
 
-    var givenContext = new MongoDbCustomResourceContext();
+    var retryInfoMock = mock(RetryInfo.class);
+    when(retryInfoMock.isLastAttempt()).thenReturn(false);
+    var contextMock = mock(MongoDbCustomResourceContext.class);
+    when(contextMock.getRetryInfo()).thenReturn(Optional.of(retryInfoMock));
 
     assertThatExceptionOfType(IllegalStateException.class)
-        .isThrownBy(() -> mongoDbController.deleteResource(given, givenContext));
+        .isThrownBy(() -> mongoDbController.deleteResource(given, contextMock));
 
     // By default owned resources (like the created secret) will be deleted as well.
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
