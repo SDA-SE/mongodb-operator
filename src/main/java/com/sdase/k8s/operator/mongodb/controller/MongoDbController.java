@@ -54,8 +54,8 @@ public class MongoDbController implements ResourceController<MongoDbCustomResour
         if (!databaseDeleted) {
           if (context.getRetryInfo().map(RetryInfo::isLastAttempt).orElse(false)) {
             LOG.warn(
-                "Last attempt to delete database for resource {} failed. Skipping.",
-                resource.getFullResourceName());
+                "Last attempt to delete database {} failed. Skipping.",
+                deleteDatabaseTask.getDatabaseName());
             return DeleteControl.DEFAULT_DELETE;
           }
           throw new IllegalStateException("Failed to drop database");
