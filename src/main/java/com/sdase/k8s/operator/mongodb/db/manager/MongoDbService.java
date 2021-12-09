@@ -144,6 +144,7 @@ public class MongoDbService {
       mongoClient.getDatabase(databaseName).drop();
       return !databaseExists(databaseName);
     } catch (MongoCommandException e) {
+      LOG.warn("Failed to delete database {}", databaseName, e);
       return !databaseExists(databaseName);
     }
   }
