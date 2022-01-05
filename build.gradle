@@ -2,7 +2,7 @@ plugins {
   id "jacoco"
   id "idea"
   id "java"
-  id "com.diffplug.spotless" version "6.0.1"
+  id "com.diffplug.spotless" version "6.1.0"
   id "com.google.cloud.tools.jib" version "3.1.4"
 }
 
