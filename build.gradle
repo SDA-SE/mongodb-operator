@@ -37,8 +37,8 @@ project.ext {
 
 dependencies {
 
-  implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.13.0")
-  annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.12.3")
+  implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.13.1")
+  annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.13.1")
 
   implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}"
   annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}"
