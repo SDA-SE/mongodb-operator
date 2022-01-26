@@ -32,7 +32,7 @@ jib {
 project.ext {
   mongoDbDriverVersion = "4.4.0"
   slf4jVersion = "1.7.32"
-  operatorFrameworkVersion = "1.10.0"
+  operatorFrameworkVersion = "2.0.2"
 }
 
 dependencies {
