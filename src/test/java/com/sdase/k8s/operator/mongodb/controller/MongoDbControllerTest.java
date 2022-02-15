@@ -28,11 +28,9 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.javaoperatorsdk.operator.api.Context;
-import io.javaoperatorsdk.operator.api.DeleteControl;
-import io.javaoperatorsdk.operator.api.RetryInfo;
-import io.javaoperatorsdk.operator.processing.event.EventList;
-import java.util.List;
+import io.javaoperatorsdk.operator.api.reconciler.Context;
+import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
+import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -80,10 +78,10 @@ class MongoDbControllerTest {
     var given = new MongoDbCustomResource();
     given.setMetadata(givenMetadata);
 
-    var actual = mongoDbController.deleteResource(given, new MongoDbCustomResourceContext());
+    var actual = mongoDbController.cleanup(given, new MongoDbCustomResourceContext());
 
     // By default owned resources (like the created secret) will be deleted as well.
-    assertThat(actual).isEqualTo(DeleteControl.DEFAULT_DELETE);
+    assertThat(actual).usingRecursiveComparison().isEqualTo(DeleteControl.defaultDelete());
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
     verifyNoMoreInteractions(mongoDbServiceMock);
   }
@@ -106,10 +104,10 @@ class MongoDbControllerTest {
     var contextMock = mock(MongoDbCustomResourceContext.class);
     when(contextMock.getRetryInfo()).thenReturn(Optional.of(retryInfoMock));
 
-    var actual = mongoDbController.deleteResource(given, contextMock);
+    var actual = mongoDbController.cleanup(given, contextMock);
 
     // By default owned resources (like the created secret) will be deleted as well.
-    assertThat(actual).isEqualTo(DeleteControl.DEFAULT_DELETE);
+    assertThat(actual).usingRecursiveComparison().isEqualTo(DeleteControl.defaultDelete());
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
     verifyNoMoreInteractions(mongoDbServiceMock);
   }
@@ -128,7 +126,7 @@ class MongoDbControllerTest {
     var givenContext = new MongoDbCustomResourceContext();
 
     assertThatExceptionOfType(IllegalStateException.class)
-        .isThrownBy(() -> mongoDbController.deleteResource(given, givenContext));
+        .isThrownBy(() -> mongoDbController.cleanup(given, givenContext));
 
     // By default owned resources (like the created secret) will be deleted as well.
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
@@ -147,10 +145,10 @@ class MongoDbControllerTest {
     given.setMetadata(givenMetadata);
     given.getSpec().getDatabase().setPruneAfterDelete(true);
 
-    var actual = mongoDbController.deleteResource(given, new MongoDbCustomResourceContext());
+    var actual = mongoDbController.cleanup(given, new MongoDbCustomResourceContext());
 
     // By default owned resources (like the created secret) will be deleted as well.
-    assertThat(actual).isEqualTo(DeleteControl.DEFAULT_DELETE);
+    assertThat(actual).usingRecursiveComparison().isEqualTo(DeleteControl.defaultDelete());
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
     verify(mongoDbServiceMock).dropDatabase("the-namespace_the-name");
   }
@@ -174,7 +172,7 @@ class MongoDbControllerTest {
     when(contextMock.getRetryInfo()).thenReturn(Optional.of(retryInfoMock));
 
     assertThatExceptionOfType(IllegalStateException.class)
-        .isThrownBy(() -> mongoDbController.deleteResource(given, contextMock));
+        .isThrownBy(() -> mongoDbController.cleanup(given, contextMock));
 
     // By default owned resources (like the created secret) will be deleted as well.
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
@@ -192,9 +190,9 @@ class MongoDbControllerTest {
 
     var givenContext = new MongoDbCustomResourceContext();
 
-    var actual = mongoDbController.deleteResource(given, givenContext);
+    var actual = mongoDbController.cleanup(given, givenContext);
 
-    assertThat(actual).isEqualTo(DeleteControl.DEFAULT_DELETE);
+    assertThat(actual).usingRecursiveComparison().isEqualTo(DeleteControl.defaultDelete());
 
     verifyNoInteractions(mongoDbServiceMock);
     verifyNoInteractions(mongoDbServiceMock);
@@ -225,9 +223,7 @@ class MongoDbControllerTest {
                     .setConnectionStringOptions(
                         "tls=true&readPreference=secondaryPreferred&retryWrites=false")));
 
-    var actual =
-        mongoDbController.createOrUpdateResource(
-            givenMongoDbCr, new MongoDbCustomResourceContext());
+    var actual = mongoDbController.reconcile(givenMongoDbCr, new MongoDbCustomResourceContext());
 
     verify(mongoDbServiceMock, times(1))
         .createDatabaseWithUser(
@@ -253,9 +249,10 @@ class MongoDbControllerTest {
 
           // For the moment no updates to the original resource, this may change in the future if
           // needed.
-          softly.assertThat(actual.isUpdateCustomResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatusSubResource()).isFalse();
-          softly.assertThat(actual.isUpdateCustomResourceAndStatusSubResource()).isFalse();
+          softly.assertThat(actual.isUpdateResource()).isFalse();
+          softly.assertThat(actual.isUpdateStatus()).isFalse();
+          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isNoUpdate()).isTrue();
         });
   }
 
@@ -284,9 +281,7 @@ class MongoDbControllerTest {
                     .setConnectionStringOptions(
                         "tls=true&readPreference=secondaryPreferred&retryWrites=false")));
 
-    var actual =
-        mongoDbController.createOrUpdateResource(
-            givenMongoDbCr, new MongoDbCustomResourceContext());
+    var actual = mongoDbController.reconcile(givenMongoDbCr, new MongoDbCustomResourceContext());
 
     verify(mongoDbServiceMock, times(1))
         .createDatabaseWithUser(
@@ -312,9 +307,10 @@ class MongoDbControllerTest {
 
           // For the moment no updates to the original resource, this may change in the future if
           // needed.
-          softly.assertThat(actual.isUpdateCustomResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatusSubResource()).isFalse();
-          softly.assertThat(actual.isUpdateCustomResourceAndStatusSubResource()).isFalse();
+          softly.assertThat(actual.isUpdateResource()).isFalse();
+          softly.assertThat(actual.isUpdateStatus()).isFalse();
+          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isNoUpdate()).isTrue();
         });
   }
 
@@ -337,7 +333,7 @@ class MongoDbControllerTest {
     var givenContext = new MongoDbCustomResourceContext();
 
     assertThatExceptionOfType(KubernetesClientException.class)
-        .isThrownBy(() -> mongoDbController.createOrUpdateResource(givenMongoDbCr, givenContext))
+        .isThrownBy(() -> mongoDbController.reconcile(givenMongoDbCr, givenContext))
         .isSameAs(givenException);
 
     verify(mongoDbServiceMock, times(1))
@@ -375,7 +371,7 @@ class MongoDbControllerTest {
     var givenContext = new MongoDbCustomResourceContext();
 
     assertThatIllegalStateException()
-        .isThrownBy(() -> mongoDbController.createOrUpdateResource(givenMongoDbCr, givenContext));
+        .isThrownBy(() -> mongoDbController.reconcile(givenMongoDbCr, givenContext));
 
     verify(mongoDbServiceMock, times(1))
         .createDatabaseWithUser(
@@ -383,15 +379,20 @@ class MongoDbControllerTest {
     verifyNoInteractions(kubernetesClientAdapterMock);
   }
 
-  private static class MongoDbCustomResourceContext implements Context<MongoDbCustomResource> {
-
-    @Override
-    public EventList getEvents() {
-      return new EventList(List.of());
-    }
+  private static class MongoDbCustomResourceContext implements Context {
 
     @Override
     public Optional<RetryInfo> getRetryInfo() {
+      return Optional.empty();
+    }
+
+    @Override
+    public <T> Optional<T> getSecondaryResource(Class<T> expectedType) {
+      return Context.super.getSecondaryResource(expectedType);
+    }
+
+    @Override
+    public <T> Optional<T> getSecondaryResource(Class<T> expectedType, String eventSourceName) {
       return Optional.empty();
     }
   }
