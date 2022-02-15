@@ -21,14 +21,14 @@ import javax.net.ssl.SSLContext;
 public class MongoDbOperator {
 
   public MongoDbOperator(KubernetesClient kubernetesClient, int monitoringPort) {
-    try (var operator = new Operator(kubernetesClient, DefaultConfigurationService.instance())) {
-      var mongoDbService = createMongoDbService();
-      var mongoDbPrivilegesCheck = verifyPrivileges(mongoDbService);
-      operator.register(createMongoDbController(kubernetesClient, mongoDbService));
-      operator.start(); // adds some checks and produces some logs, exits on error
-      var monitoringServer = startMonitoringServer(monitoringPort, mongoDbPrivilegesCheck);
-      keepRunning(monitoringServer);
-    }
+    var operator = new Operator(kubernetesClient, DefaultConfigurationService.instance());
+    operator.installShutdownHook();
+    var mongoDbService = createMongoDbService();
+    var mongoDbPrivilegesCheck = verifyPrivileges(mongoDbService);
+    operator.register(createMongoDbController(kubernetesClient, mongoDbService));
+    operator.start(); // adds some checks and produces some logs, exits on error
+    var monitoringServer = startMonitoringServer(monitoringPort, mongoDbPrivilegesCheck);
+    keepRunning(monitoringServer);
   }
 
   private MongoDbPrivilegesCheck verifyPrivileges(MongoDbService mongoDbService) {
