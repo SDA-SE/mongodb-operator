@@ -1,5 +1,6 @@
 package com.sdase.k8s.operator.mongodb;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
@@ -97,11 +98,15 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
             });
     try {
       testThread.start();
-      await().untilAsserted(() -> assertThat(server.getRequestCount()).isGreaterThan(1));
-      await().untilAsserted(() -> assertThat(testThread.isAlive()).isTrue());
-      await().untilAsserted(() -> assertThat(testThread.getState()).isEqualTo(State.WAITING));
-      await().untilAsserted(this::assertLivenessEndpointAvailable);
-      await().untilAsserted(this::assertReadinessEndpointAvailable);
+      await()
+          .atMost(20, SECONDS)
+          .untilAsserted(() -> assertThat(server.getRequestCount()).isGreaterThan(1));
+      await().atMost(20, SECONDS).untilAsserted(() -> assertThat(testThread.isAlive()).isTrue());
+      await()
+          .atMost(20, SECONDS)
+          .untilAsserted(() -> assertThat(testThread.getState()).isEqualTo(State.WAITING));
+      await().atMost(20, SECONDS).untilAsserted(this::assertLivenessEndpointAvailable);
+      await().atMost(20, SECONDS).untilAsserted(this::assertReadinessEndpointAvailable);
     } finally {
       testThread.interrupt();
       Spark.stop();
