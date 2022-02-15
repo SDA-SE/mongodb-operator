@@ -25,24 +25,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Spark;
+import uk.org.webcompere.systemstubs.SystemStubs;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
-import uk.org.webcompere.systemstubs.jupiter.SystemStub;
-import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
-@ExtendWith({SystemStubsExtension.class})
 @EnableKubernetesMockClient(crud = true)
 class MongoDbOperatorTest extends AbstractMongoDbTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbOperatorTest.class);
   private static int port;
 
-  @SystemStub
   EnvironmentVariables environmentVariables =
-      new EnvironmentVariables().set("MONGODB_CONNECTION_STRING", getMongoDbConnectionString());
+      SystemStubs.withEnvironmentVariables(
+          "MONGODB_CONNECTION_STRING", getMongoDbConnectionString());
 
   KubernetesMockServer server;
   KubernetesClient client;
@@ -89,7 +86,15 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
         .andUpgradeToWebSocket()
         .open();
 
-    var testThread = new Thread(() -> new MongoDbOperator(client, port));
+    var testThread =
+        new Thread(
+            () -> {
+              try {
+                environmentVariables.execute(() -> new MongoDbOperator(client, port));
+              } catch (Exception e) {
+                throw new RuntimeException(e);
+              }
+            });
     try {
       testThread.start();
       await().untilAsserted(() -> assertThat(server.getRequestCount()).isGreaterThan(1));
