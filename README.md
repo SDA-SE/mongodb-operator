@@ -1,5 +1,8 @@
 # MongoDB Operator
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SDA-SE_mongodb-operator&metric=alert_status&token=efbe8726a565fc89dc219aee7da6df82910a9fe4)](https://sonarcloud.io/summary/new_code?id=SDA-SE_mongodb-operator)
+[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B8463%2Fmongodb-operator.svg?type=shield)](https://app.fossa.com/projects/custom%2B8463%2Fmongodb-operator?ref=badge_shield)
+
 A Kubernetes Operator that creates users and databases in existing MongoDB clusters based on a
 custom resource.
 

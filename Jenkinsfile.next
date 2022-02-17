@@ -107,7 +107,7 @@ pipeline {
           }
 
           stages {
-            stage('Test') {
+            stage('Test') { // done
               steps {
                 javaGradlew gradleCommand: 'check jacocoTestReport', secretId: githubSecretId
                 // stash for SonarCloud
@@ -115,13 +115,13 @@ pipeline {
               }
 
               post {
-                always {
+                always { // done
                   junit testResults: 'build/test-results/test/*.xml', allowEmptyResults: true
                 }
               }
             }
 
-            stage("Build Docker Image") {
+            stage("Build Docker Image") {  // done
               when {
                 beforeAgent true
                 not { environment name: 'IMAGE_TAG', value: '' }
@@ -190,7 +190,7 @@ pipeline {
 
       parallel {
 
-        stage("Verify Distroless Image") {
+        stage("Verify Distroless Image") { // done
           when {
             beforeAgent true
             not { changeRequest() }
