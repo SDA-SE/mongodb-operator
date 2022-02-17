@@ -1,5 +1,9 @@
 name: Integration Test
 
+# This test bootstraps a Kubernetes environment with Kubernetes in Docker [KinD],
+# installs the MongoDB Operator and a MongoDB and then verifies that a database
+# with user and password and a corresponding secret is created.
+
 on:
   push:
     branches:
