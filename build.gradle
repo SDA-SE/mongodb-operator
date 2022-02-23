@@ -68,7 +68,7 @@ dependencies {
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit-pioneer:junit-pioneer:1.6.1'
   testImplementation 'org.assertj:assertj-core:3.22.0'
-  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.3.0', {
+  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.2', {
     // conflict with operator-framework
     exclude group: 'org.slf4j'
   }
