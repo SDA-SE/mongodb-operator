@@ -19,7 +19,7 @@ jobs:
           java-version: 11
 
       - name: Setup environment
-        uses: nick-invision/retry@v2
+        uses: nick-fields/retry@v2
         with:
           timeout_minutes: 10
           max_attempts: 10
@@ -28,7 +28,7 @@ jobs:
           command: ./start.sh
 
       - name: Run tests
-        uses: nick-invision/retry@v2
+        uses: nick-fields/retry@v2
         with:
           timeout_minutes: 10
           max_attempts: 10
@@ -37,7 +37,7 @@ jobs:
           command: ./test.sh
 
       - name: Tear down environment
-        uses: nick-invision/retry@v2
+        uses: nick-fields/retry@v2
         if: "always()"
         with:
           timeout_minutes: 5
