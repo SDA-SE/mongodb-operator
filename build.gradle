@@ -34,12 +34,13 @@ project.ext {
   slf4jVersion = "1.7.36"
   operatorFrameworkVersion = "2.1.1"
   mockitoVersion = "4.4.0"
+  jacksonVersion = "2.13.2"
 }
 
 dependencies {
 
-  implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.13.2")
-  annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.13.1")
+  implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
+  annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
 
   implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
     // self managed to avoid conflicts
