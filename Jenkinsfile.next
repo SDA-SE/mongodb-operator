@@ -289,7 +289,7 @@ pipeline {
         }
       }
       steps {
-        semanticRelease secretId: githubSecretId
+        semanticRelease dryRun: 'true', secretId: githubSecretId
       }
     }
   }
