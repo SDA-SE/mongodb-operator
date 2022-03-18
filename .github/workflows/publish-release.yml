@@ -1,0 +1,52 @@
+# This workflow pushes the releases to quay.io
+# TODO this is only a dry run
+name: Publish Release
+
+on:
+  release:
+    types:
+      - released
+      - prereleased
+
+env:
+  SEMANTIC_VERSION: ${{ github.event.release.tag_name }}
+
+jobs:
+  jib-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 11
+          cache: 'gradle'
+
+      - name: Build and Push
+#         env:
+#           USERNAME: ${{ secrets.QUAY_IO_USERNAME }}
+#           PASSWORD: ${{ secrets.QUAY_IO_PASSWORD }}
+        run: >
+          ./gradlew jibDockerBuild
+#           ./gradlew jib
+#           -Djib.to.auth.username=${USERNAME}
+#           -Djib.to.auth.password=${PASSWORD}
+#           -Djib.useOnlyProjectCache=true
+#           -Djib.console=plain
+#           -Djib.disableUpdateChecks=true
+#           -Djib.httpTimeout=0
+#           -Djib.container.creationTime=USE_CURRENT_TIMESTAMP
+#           -Djib.to.image=quay.io/sdase/mongodb-operator:${SEMANTIC_VERSION}
+
+#       - name: Update docs
+#         env:
+#           BEARER: ${{ secrets.QUAY_IO_BEARER }}
+#         run: >
+#           DESCRIPTION_CONTENT=$(jq -Rs '. | {description: .}' < docs/usage.md) &&
+#           curl -s -o /dev/null -w "%{http_code}" \
+#             -X PUT "https://quay.io/api/v1/repository/sdase/mongodb-operator" \
+#             --header "content-type: application/json" \
+#             --header "Authorization: Bearer ${BEARER}" \
+#             --data "${DESCRIPTION_CONTENT}"

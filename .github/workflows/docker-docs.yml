@@ -1,0 +1,20 @@
+# This workflow checks the documentation
+name: Docker Docs
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Verify usage.md exists (required for release)
+        run: >
+          ls docs/usage.md

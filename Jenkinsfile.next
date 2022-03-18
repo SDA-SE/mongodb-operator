@@ -136,7 +136,7 @@ pipeline {
               }
             }
 
-            stage("Push Docker Image") {
+            stage("Push Docker Image") { // dry run prepared, secrets missing
               when {
                 beforeAgent true
                 not { changeRequest() }
