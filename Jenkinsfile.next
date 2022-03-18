@@ -19,7 +19,7 @@ pipeline {
   }
 
   stages {
-    stage('Generate Semantic Release') {
+    stage('Generate Semantic Release') { // done
       agent {
         docker {
           image 'quay.io/sdase/semantic-release:15.13.3'
@@ -238,7 +238,7 @@ pipeline {
 
     // Verifies the TechDocs documentation
     // Learn more about this step at https://catalog.sda.dev/docs/sda-se/Component/jenkins-pipeline/steps/verifyTechDocs/
-    stage('Verify TechDocs') {
+    stage('Verify TechDocs') { // done
       agent {
         docker {
           image 'quay.io/sdase/techdocs:1'
@@ -277,7 +277,7 @@ pipeline {
       }
     }
 
-    stage('Create Release') {
+    stage('Create Release') { // done
       when {
         beforeAgent true
         branch 'master'
