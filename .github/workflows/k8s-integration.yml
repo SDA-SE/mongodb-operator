@@ -1,4 +1,4 @@
-name: Integration Test
+name: K8S Integration
 
 # This test bootstraps a Kubernetes environment with Kubernetes in Docker [KinD],
 # installs the MongoDB Operator and a MongoDB and then verifies that a database

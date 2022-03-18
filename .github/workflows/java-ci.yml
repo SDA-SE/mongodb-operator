@@ -47,7 +47,6 @@ jobs:
           retention-days: 7
 
   publish-test-results:
-    name: "Publish Unit Tests Results"
     timeout-minutes: 60
     needs: build
     runs-on: ubuntu-latest
