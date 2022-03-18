@@ -9,7 +9,7 @@ on:
 
 jobs:
   # check code style
-  spotless:
+  check:
     runs-on: ubuntu-latest
 
     timeout-minutes: 60
