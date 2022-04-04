@@ -34,7 +34,7 @@ project.ext {
   slf4jVersion = "1.7.36"
   operatorFrameworkVersion = "2.1.2"
   mockitoVersion = "4.4.0"
-  jacksonVersion = "2.13.2"
+  jacksonVersion = "2.13.2.20220328"
 }
 
 dependencies {
