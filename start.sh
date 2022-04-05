@@ -10,9 +10,7 @@ echo "🏗 Connecting local Kubernetes cluster to local Docker registry …"
 docker network inspect kind | grep "\"kind-registry\"" || docker network connect "kind" "kind-registry" || exit 1
 
 echo "🏗 Installing infrastructure components in local Kubernetes cluster …"
-# Need to apply without kustomize for GitHub Action that uses an older version of kustomize in kubectl
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.40.2/deploy/static/provider/kind/deploy.yaml || exit 1
-kubectl apply -f kustomize/overlays/infra/local-registry-hosting-cm.yaml || exit 1
+kubectl apply -k kustomize/overlays/infra || exit 1
 
 # maybe just temporarily needed:
 kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission
