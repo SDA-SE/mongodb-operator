@@ -10,6 +10,10 @@ pipeline {
 
   stages {
     stage('Test DocumentDB') {
+      when {
+        beforeAgent true
+        changeRequest()
+      }
       agent {
         docker {
           image 'quay.io/sdase/openjdk-development:11-hotspot'
