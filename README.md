@@ -1,14 +1,24 @@
 # MongoDB Operator
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SDA-SE_mongodb-operator&metric=alert_status&token=efbe8726a565fc89dc219aee7da6df82910a9fe4)](https://sonarcloud.io/summary/new_code?id=SDA-SE_mongodb-operator)
-[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B8463%2Fmongodb-operator.svg?type=shield)](https://app.fossa.com/projects/custom%2B8463%2Fmongodb-operator?ref=badge_shield)
+[![Latest Release](https://img.shields.io/github/v/release/sda-se/mongodb-operator?label=latest)](https://github.com/SDA-SE/mongodb-operator/releases/latest)
+[![Java CI](https://github.com/SDA-SE/mongodb-operator/actions/workflows/java-ci.yml/badge.svg)](https://github.com/SDA-SE/mongodb-operator/actions/workflows/java-ci.yml)
+[![K8S Integration](https://github.com/SDA-SE/mongodb-operator/actions/workflows/k8s-integration.yml/badge.svg)](https://github.com/SDA-SE/mongodb-operator/actions/workflows/k8s-integration.yml)
+[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B8463%2Fmongodb-operator.svg?type=shield)](https://app.fossa.com/reports/f2d847ad-031f-4018-9846-80394af34e83)
+[![Spotless](https://github.com/SDA-SE/mongodb-operator/actions/workflows/spotless.yml/badge.svg)](https://github.com/SDA-SE/mongodb-operator/actions/workflows/spotless.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SDA-SE_mongodb-operator&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=SDA-SE_mongodb-operator)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=SDA-SE_mongodb-operator&metric=coverage)](https://sonarcloud.io/summary/new_code?id=SDA-SE_mongodb-operator)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=SDA-SE_mongodb-operator&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=SDA-SE_mongodb-operator)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=SDA-SE_mongodb-operator&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=SDA-SE_mongodb-operator)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=SDA-SE_mongodb-operator&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=SDA-SE_mongodb-operator)
 
 A Kubernetes Operator that creates users and databases in existing MongoDB clusters based on a
 custom resource.
 
 Pleaser refer to the [deployment documentation](docs/deployment.md) for installing MongoDB Operator
-in a Kubernetes Cluster or to the [usage documentation](docs/usage) to see how to request database
+in a Kubernetes Cluster or to the [usage documentation](docs/usage) to see how to request a database
 for a workload.
+
+The image is hosted at [quay.io/sdase/mongodb-operator](https://quay.io/repository/sdase/mongodb-operator).
 
 ## Local Deployment
 
