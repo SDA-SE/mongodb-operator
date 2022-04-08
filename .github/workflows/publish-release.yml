@@ -20,7 +20,7 @@ jobs:
       - name: check tag ${{ github.ref }}
         id: check_tag
         run: |
-          if [[${{ github.ref }} =~ refs\/tags\/[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+          if [[ "${{ github.ref }}" =~ refs\/tags\/[0-9]+\.[0-9]+\.[0-9]+ ]]; then
             echo "::set-output name=do_release::true"
           else
             echo "::set-output name=do_release::false"
