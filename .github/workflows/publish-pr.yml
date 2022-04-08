@@ -1,18 +1,17 @@
-# This workflow pushes the releases to quay.io
+# This workflow pushes the PR build to quay.io
 # TODO this is only a dry run
-name: Publish Release
+name: Publish PR
 
 on:
-  release:
-    types:
-      - released
-      - prereleased
+  pull_request:
 
 env:
-  TAG: ${{ github.event.release.tag_name }}
+  TAG: PR-${{ github.event.number }}
 
 jobs:
   jib-push:
+    # Don't run for forks and dependabot because of missing secrets
+    if: "!(github.event.pull_request && github.event.pull_request.head.repo.fork) && github.actor != 'dependabot[bot]'"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -39,14 +38,3 @@ jobs:
 #           -Djib.httpTimeout=0
 #           -Djib.container.creationTime=USE_CURRENT_TIMESTAMP
 #           -Djib.to.image=quay.io/sdase/mongodb-operator:${TAG}
-
-#       - name: Update docs
-#         env:
-#           BEARER: ${{ secrets.QUAY_IO_BEARER }}
-#         run: >
-#           DESCRIPTION_CONTENT=$(jq -Rs '. | {description: .}' < docs/usage.md) &&
-#           curl -s -o /dev/null -w "%{http_code}" \
-#             -X PUT "https://quay.io/api/v1/repository/sdase/mongodb-operator" \
-#             --header "content-type: application/json" \
-#             --header "Authorization: Bearer ${BEARER}" \
-#             --data "${DESCRIPTION_CONTENT}"
