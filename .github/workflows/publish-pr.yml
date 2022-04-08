@@ -24,17 +24,16 @@ jobs:
           cache: 'gradle'
 
       - name: Build and Push
-#         env:
-#           USERNAME: ${{ secrets.QUAY_IO_USERNAME }}
-#           PASSWORD: ${{ secrets.QUAY_IO_PASSWORD }}
+        env:
+          USERNAME: ${{ secrets.QUAY_IO_USERNAME }}
+          PASSWORD: ${{ secrets.QUAY_IO_PASSWORD }}
         run: >
-          ./gradlew jibDockerBuild
-#           ./gradlew jib
-#           -Djib.to.auth.username=${USERNAME}
-#           -Djib.to.auth.password=${PASSWORD}
-#           -Djib.useOnlyProjectCache=true
-#           -Djib.console=plain
-#           -Djib.disableUpdateChecks=true
-#           -Djib.httpTimeout=0
-#           -Djib.container.creationTime=USE_CURRENT_TIMESTAMP
-#           -Djib.to.image=quay.io/sdase/mongodb-operator:${TAG}
+          ./gradlew jib
+          -Djib.to.auth.username=${USERNAME}
+          -Djib.to.auth.password=${PASSWORD}
+          -Djib.useOnlyProjectCache=true
+          -Djib.console=plain
+          -Djib.disableUpdateChecks=true
+          -Djib.httpTimeout=0
+          -Djib.container.creationTime=USE_CURRENT_TIMESTAMP
+          -Djib.to.image=quay.io/sdase/mongodb-operator:${TAG}
