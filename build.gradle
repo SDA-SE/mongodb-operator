@@ -127,6 +127,10 @@ sonarqube {
       property 'sonar.pullrequest.key', System.getenv('GITHUB_PR')
     }
 
+    if (System.getenv('GITHUB_BRANCH') != null) {
+      property 'sonar.pullrequest.branch', System.getenv('GITHUB_BRANCH')
+    }
+
     if (System.getenv('SONAR_SCM_REVISION') != null) {
       property 'sonar.scm.revision', System.getenv('SONAR_SCM_REVISION')
     }
