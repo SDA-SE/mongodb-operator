@@ -28,6 +28,14 @@ jib {
   from.image = 'quay.io/sdase/openjdk-runtime:11-hotspot-distroless'
   container.user = 10001
   to.image = "$rootProject.name:latest"
+  container.labels = [
+      'org.opencontainers.image.title': rootProject.name,
+      'org.opencontainers.image.version': version,
+      'org.opencontainers.image.url': "https://github.com/SDA-SE/${rootProject.name}",
+      'org.opencontainers.image.source': "https://github.com/SDA-SE/${rootProject.name}",
+      'org.opencontainers.image.licenses': "MIT",
+      'org.opencontainers.image.description': "A Kubernetes Operator that creates users and databases in existing MongoDB clusters based on a custom resource.",
+  ]
 }
 
 project.ext {
