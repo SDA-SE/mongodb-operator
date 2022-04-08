@@ -260,3 +260,8 @@ For more details, see [our documentation about publishing TechDocs to Backstage]
 
 We are looking forward to contributions.
 Take a look at our [Contribution Guidelines](CONTRIBUTING.md) before submitting Pull Requests.
+
+## Responsible Disclosure and Security
+
+The [SECURITY.md](SECURITY.md) includes information on responsible disclosure and security related
+topics like security patches.
