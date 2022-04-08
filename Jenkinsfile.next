@@ -166,7 +166,7 @@ pipeline {
           }
         }
 
-        stage('Fossa') {
+        stage('Fossa') { // prepared
           agent {
             docker {
               image 'quay.io/sdase/openjdk-development:11-hotspot'
@@ -220,7 +220,7 @@ pipeline {
         }
 
 
-        stage('SonarCloud Analysis') {
+        stage('SonarCloud Analysis') { // prepared
           agent {
             docker {
               image 'quay.io/sdase/sonar-scanner:4'
@@ -277,7 +277,7 @@ pipeline {
       }
     }
 
-    stage('Create Release') { // done
+    stage('Create Release') { // prepared
       when {
         beforeAgent true
         branch 'master'
