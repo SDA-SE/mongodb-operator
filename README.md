@@ -255,3 +255,8 @@ You have to register each file in the navigation inside `mkdocs.yml`.
 To preview the documentation locally, use `npx @techdocs/cli serve` (requires Nodejs and Docker).
 
 For more details, see [our documentation about publishing TechDocs to Backstage](https://sda.dev/developer-guide/development/backstage/provide-documentation-in-backstage/).
+
+## Contributing
+
+We are looking forward to contributions.
+Take a look at our [Contribution Guidelines](CONTRIBUTING.md) before submitting Pull Requests.
