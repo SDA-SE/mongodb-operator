@@ -41,28 +41,16 @@ jobs:
           cache: 'gradle'
 
       - name: Build and Push
-#         env:
-#           USERNAME: ${{ secrets.QUAY_IO_USERNAME }}
-#           PASSWORD: ${{ secrets.QUAY_IO_PASSWORD }}
+        env:
+          USERNAME: ${{ secrets.QUAY_IO_USERNAME }}
+          PASSWORD: ${{ secrets.QUAY_IO_PASSWORD }}
         run: >
-          ./gradlew jibDockerBuild
-#           ./gradlew jib
-#           -Djib.to.auth.username=${USERNAME}
-#           -Djib.to.auth.password=${PASSWORD}
-#           -Djib.useOnlyProjectCache=true
-#           -Djib.console=plain
-#           -Djib.disableUpdateChecks=true
-#           -Djib.httpTimeout=0
-#           -Djib.container.creationTime=USE_CURRENT_TIMESTAMP
-#           -Djib.to.image=quay.io/sdase/mongodb-operator:${TAG}
-
-#       - name: Update docs
-#         env:
-#           BEARER: ${{ secrets.QUAY_IO_BEARER }}
-#         run: >
-#           DESCRIPTION_CONTENT=$(jq -Rs '. | {description: .}' < docs/usage.md) &&
-#           curl -s -o /dev/null -w "%{http_code}" \
-#             -X PUT "https://quay.io/api/v1/repository/sdase/mongodb-operator" \
-#             --header "content-type: application/json" \
-#             --header "Authorization: Bearer ${BEARER}" \
-#             --data "${DESCRIPTION_CONTENT}"
+          ./gradlew jib
+          -Djib.to.auth.username=${USERNAME}
+          -Djib.to.auth.password=${PASSWORD}
+          -Djib.useOnlyProjectCache=true
+          -Djib.console=plain
+          -Djib.disableUpdateChecks=true
+          -Djib.httpTimeout=0
+          -Djib.container.creationTime=USE_CURRENT_TIMESTAMP
+          -Djib.to.image=quay.io/sdase/mongodb-operator:${TAG}
