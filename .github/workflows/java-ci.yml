@@ -94,4 +94,4 @@ jobs:
       - name: Release and Publish
         run: semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_RELEASE_TOKEN }} # can't use standard GITHUB_TOKEN
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }} # can't use standard GITHUB_TOKEN
