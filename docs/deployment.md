@@ -61,6 +61,8 @@ temporary test deployments could create a big amount of temporary used databases
 
 ## MongoDB Operator Image
 
+The image is hosted at [quay.io/sdase/mongodb-operator](https://quay.io/repository/sdase/mongodb-operator).
+
 ### Base Image
 
 This container is based on the distroless [SDA OpenJDK base image](https://quay.io/repository/sdase/openjdk-runtime).
