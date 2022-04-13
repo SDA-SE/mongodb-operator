@@ -16,7 +16,7 @@ pipeline {
       }
       agent {
         docker {
-          image 'quay.io/sdase/openjdk-development:11-hotspot'
+          image 'quay.io/sdase/openjdk-development:11.0.13-hotspot'
         }
       }
       steps {
