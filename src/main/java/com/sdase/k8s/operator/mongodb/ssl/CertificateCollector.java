@@ -74,7 +74,7 @@ public class CertificateCollector {
 
   private Optional<Path> toPathIfExists(String location) {
     var optionalPath =
-        Optional.ofNullable(Path.of(location)).filter(Files::exists).filter(Files::isDirectory);
+        Optional.of(Path.of(location)).filter(Files::exists).filter(Files::isDirectory);
     if (optionalPath.isEmpty()) {
       return optionalPath;
     } else if (!Files.isReadable(optionalPath.get())) {
