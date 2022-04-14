@@ -1,5 +1,4 @@
 # This workflow pushes the PR build to quay.io
-# TODO this is only a dry run
 name: Publish PR
 
 on:
