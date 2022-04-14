@@ -1,5 +1,4 @@
 # This workflow pushes the releases to quay.io
-# TODO this is only a dry run
 name: Publish Release
 
 on:
