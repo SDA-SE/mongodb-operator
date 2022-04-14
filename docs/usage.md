@@ -15,7 +15,7 @@ metadata:
 spec:
   database:
     pruneAfterDelete: true # optional, default false
-    connectionStringOptions: # optional, defaults used by MongoDB operator
+    connectionStringOptions: "" # optional, defaults to the ones used by MongoDB operator
   secret:
     databaseKey: d # optional, default 'database'
     usernameKey: u # optional, default 'username'
@@ -43,10 +43,11 @@ to connect to the MongoDB.
   allowed to drop databases.
 * Other settings than available in the secret for the database instance are not covered by the
   MongoDB Operator yet.
-  `host`, `options`, etc. must be requested from the DevOps team of each Kubernetes cluster.
+  `host`, `options`, etc. must be configured separately for each Kubernetes cluster unless the
+  workload is configured with the `connectionString`.
 * The `authSource` is the allowed database itself for MongoDB instances and the admin database for
-  DocumentDB instances. As DocumentDB uses the admin database for all users, there is no need to
-  configure `authSource`.
+  DocumentDB instances.
+  As DocumentDB uses the admin database for all users, there is no need to configure `authSource`.
 * There is a hard limit of 64 characters for the database name.
   The database name is built from `<metadata.namespace>_<metadata.name>`.
   The namespace is used to avoid collisions and therefore data security issues.
@@ -54,6 +55,16 @@ to connect to the MongoDB.
   exceed 63 characters.
   This error can be recognized in the log of the Operator and by the fact that no Secret is created
   for the MongoDb resource.
+* In some rare cases the created secret does not match the created MongoDB user due to concurrency
+  issues.
+  We are still investigating on this bug.
+  In such cases, the MongoDB resource can be deleted and created again to trigger a new setup of the
+  user.
+  This workaround **will delete the database and all collections** if
+  `spec.database.pruneAfterDelete: true` is set and the MongoDB Operator has the
+  [required privileges](deployment.md#database).
+  It is important to disable `spec.database.pruneAfterDelete` and do not grant more than
+  `userAdminAnyDatabase` to the MongoDB Operator user in production environments.
 
 
 ## Kustomize

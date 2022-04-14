@@ -6,6 +6,10 @@
 A Kubernetes Operator that creates users and databases in existing MongoDB clusters based on a
 custom resource.
 
+Pleaser refer to the [deployment documentation](docs/deployment.md) for installing MongoDB Operator
+in a Kubernetes Cluster or to the [usage documentation](docs/usage) to see how to request database
+for a workload.
+
 ## Local Deployment
 
 ### Prerequisites: 
@@ -253,8 +257,6 @@ and [MkDocs](https://www.mkdocs.org/).
 Documentation is written as Markdown files inside the `docs` folder.
 You have to register each file in the navigation inside `mkdocs.yml`.
 To preview the documentation locally, use `npx @techdocs/cli serve` (requires Nodejs and Docker).
-
-For more details, see [our documentation about publishing TechDocs to Backstage](https://sda.dev/developer-guide/development/backstage/provide-documentation-in-backstage/).
 
 ## Contributing
 

@@ -33,7 +33,8 @@ The MongoDB Operator requires a `ServiceAccount` with some privileges for the Ku
 
 #### Custom Resource Definition
 
-The [CRD `mongodbs`](/catalog/default/api/mongodbs-crd) must be applied.
+The [CRD `mongodbs`](https://github.com/SDA-SE/mongodb-operator/tree/master/kustomize/bases/operator/mongodbs-crd.yaml)
+must be applied.
 
 
 ### Database    
@@ -49,15 +50,15 @@ to function properly.
 
 [`dbAdminAnyDatabase`](https://docs.mongodb.com/v4.4/reference/built-in-roles/#mongodb-authrole-dbAdminAnyDatabase)
 is needed to support `spec.database.pruneAfterDelete: true` of the MongoDB custom resource.
-`pruneAfterDelete` is suggested for develop and test environments only where PR deployments could
-create a big amount of temporary used databases.
+`pruneAfterDelete` is suggested for develop and test environments only where pull request or
+temporary test deployments could create a big amount of temporary used databases.
 
 
 ## MongoDB Operator Image
 
 ### Base Image
 
-This container is based on the distroless [SDA OpenJDK base image](https://github.com/SDA-SE/openjdk-runtime).
+This container is based on the distroless [SDA OpenJDK base image](https://quay.io/repository/sdase/openjdk-runtime).
 The base image provides both manual and automatic ways to configure memory limits of the JVM.
 
 ### Environment Variables
