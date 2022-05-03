@@ -23,6 +23,11 @@ The MongoDB Operator requires a `ServiceAccount` with some privileges for the Ku
     * `list`
     * `get`
     * `update`
+* For the resource `mongodbs/status` the following verbs are required:
+    * `watch`
+    * `list`
+    * `get`
+    * `update`
 * For the resource `secrets` the following verbs are required:
     * `create`
     * `update`
