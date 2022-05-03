@@ -86,6 +86,38 @@ spec:
                       type: string
                       default: connectionString
                       example: MONGODB_CONNECTION_STRING
+            status:
+              type: object
+              properties:
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      lastTransitionTime:
+                        description: Last time the condition transitioned from one status to another.
+                        type: string
+                        format: datetime
+                      message:
+                        description: Human-readable message indicating details about last transition.
+                        type: string
+                      observedGeneration:
+                        type: number
+                      reason:
+                        description: Unique, one-word, CamelCase reason for the condition's last transition.
+                        type: string
+                      status:
+                        description: Status is the status of the condition. Can be True, False, Unknown.
+                        type: string
+                      type:
+                        description: Type is the type of the condition.
+                        type: string
+                      additionalProperties:
+                        type: object
+      # subresources for the custom resource
+      subresources:
+        # enables the status subresource
+        status: {}
   # either Namespaced or Cluster
   scope: Namespaced
   names:
