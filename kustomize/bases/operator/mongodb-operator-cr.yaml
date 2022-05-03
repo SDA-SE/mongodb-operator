@@ -9,6 +9,9 @@ rules:
   - apiGroups: ["persistence.sda-se.com"]
     resources: ["mongodbs"]
     verbs: ["watch", "list", "get", "update"]
+  - apiGroups: ["persistence.sda-se.com"]
+    resources: ["mongodbs/status"]
+    verbs: ["watch", "list", "get", "update"]
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
     resourceNames:
