@@ -1,7 +1,7 @@
 apiVersion: persistence.sda-se.com/v1beta1
 kind: MongoDb
 metadata:
-  name: local-test-db
+  name: local-test-db-with-way-too-long-name-that-exceeds-all-limits
 spec:
   database:
     connectionStringOptions: readPreference=secondaryPreferred&retryWrites=false

@@ -12,9 +12,9 @@ echo "👀 then a secret should be created …"
 secret="$(kubectl get secrets -n local-test local-test-db -o yaml)"
 echo "  Found secret:"
 echo "${secret}"
-usernameBase64="$(echo "${secret}" | yq r - -p v data.u)"
+usernameBase64="$(echo "${secret}" | yq .data.u)"
 echo "  Found base64 username in 'data.u': ${usernameBase64}"
-connectionStringBase64="$(echo "${secret}" | yq r - -p v data.c)"
+connectionStringBase64="$(echo "${secret}" | yq .data.c)"
 echo "  Found base64 connection string in 'data.c': ${connectionStringBase64}"
 echo "${secret}" | grep "bG9jYWwtdGVzdF9sb2NhbC10ZXN0LWRi" || exit 1
 
@@ -26,6 +26,21 @@ echo "${users}"
 echo "${users}" | jq '.results[] | select(._id=="local-test_local-test-db.local-test_local-test-db") | .roles[0].role' | grep "readWrite" || exit 1
 echo "${users}" | jq '.results[] | select(._id=="local-test_local-test-db.local-test_local-test-db") | .roles[0].db' | grep "local-test_local-test-db" || exit 1
 
+echo "👀 then status should be updated on success …"
+
+mongodb="$(kubectl get mongodb -n local-test local-test-db -o json)"
+
+echo "Found MongoDB resource:"
+echo "${mongodb}"
+echo "${mongodb}" | jq '.status.conditions[].status' | grep -v "True" && exit 1
+
+echo "👀 then status should be updated on error …"
+
+mongodbWithError="$(kubectl get mongodb -n local-test local-test-db-with-way-too-long-name-that-exceeds-all-limits -o json)"
+
+echo "Found MongoDB resource:"
+echo "${mongodbWithError}"
+echo "${mongodbWithError}" | jq '.status.conditions[].status' | grep "True" && exit 1
 
 echo "🏗 when deleting MongoDB …"
 kubectl delete -k kustomize/overlays/test/

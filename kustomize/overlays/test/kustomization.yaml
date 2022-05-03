@@ -6,3 +6,4 @@ namespace: local-test
 resources:
   - local-test-ns.yaml
   - local-test-db-mongo.yaml
+  - local-test-db-with-way-too-long-name-that-exceeds-all-limits-mongo.yaml
