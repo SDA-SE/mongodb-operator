@@ -5,12 +5,16 @@ import com.sdase.k8s.operator.mongodb.controller.tasks.util.IllegalNameException
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbStatus;
+import io.fabric8.kubernetes.api.model.Condition;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import java.time.Instant;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,16 +84,69 @@ public class MongoDbController
         "MongoDb {}/{} created or updated",
         resource.getMetadata().getNamespace(),
         resource.getMetadata().getName());
-    var task = taskFactory.newCreateTask(resource, mongoDbService.getConnectionString());
-    var secret = v1SecretBuilder.createSecretForOwner(task);
-    var databaseCreated =
-        mongoDbService.createDatabaseWithUser(
-            task.getDatabaseName(), task.getUsername(), task.getPassword());
-    if (!databaseCreated) {
-      // maybe update status in the future but probably requires write access to the MongoDB CR
-      throw new IllegalStateException("Failed to create database");
+    var reason = findReason(context);
+    var resourceGeneration = resource.getMetadata().getGeneration();
+    try {
+      var task = taskFactory.newCreateTask(resource, mongoDbService.getConnectionString());
+      var secret = v1SecretBuilder.createSecretForOwner(task);
+      var databaseCreated =
+          mongoDbService.createDatabaseWithUser(
+              task.getDatabaseName(), task.getUsername(), task.getPassword());
+      if (!databaseCreated) {
+        // maybe update status in the future but probably requires write access to the MongoDB CR
+        throw new IllegalStateException("Failed to create database");
+      }
+      kubernetesClientAdapter.createSecretInNamespace(
+          resource.getMetadata().getNamespace(), secret);
+      return UpdateControl.updateStatus(
+          addConditions(
+              resource,
+              createCondition(
+                  resourceGeneration,
+                  true,
+                  "CreateUsername",
+                  "User " + task.getUsername() + " created.",
+                  reason),
+              createCondition(resourceGeneration, true, "CreateUser", "User created.", reason)));
+    } catch (IllegalNameException e) {
+      return UpdateControl.updateStatus(
+          addConditions(
+              resource,
+              createCondition(resourceGeneration, false, "CreateUsername", e.getMessage(), reason),
+              createCondition(
+                  resourceGeneration, false, "CreateUser", "No creatable user", reason)));
     }
-    kubernetesClientAdapter.createSecretInNamespace(resource.getMetadata().getNamespace(), secret);
-    return UpdateControl.noUpdate();
+  }
+
+  private String findReason(Context context) {
+    return context
+        .getRetryInfo()
+        .filter(retryInfo -> retryInfo.getAttemptCount() > 1)
+        .map(info -> info.isLastAttempt() ? "LastAttempt" : "Attempt" + info.getAttemptCount())
+        .orElse("Create");
+  }
+
+  private MongoDbCustomResource addConditions(
+      MongoDbCustomResource resource, Condition... conditions) {
+    var status = new MongoDbStatus();
+    status.setConditions(List.of(conditions));
+    resource.setStatus(status);
+    return resource;
+  }
+
+  private Condition createCondition(
+      Long generation,
+      boolean success,
+      String conditionType,
+      String conditionMessage,
+      String reason) {
+    var condition = new Condition();
+    condition.setLastTransitionTime(Instant.now().toString());
+    condition.setStatus(success ? "True" : "False");
+    condition.setType(conditionType);
+    condition.setMessage(conditionMessage);
+    condition.setReason(reason);
+    condition.setObservedGeneration(generation);
+    return condition;
   }
 }

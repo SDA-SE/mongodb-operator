@@ -24,6 +24,7 @@ import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
+import io.fabric8.kubernetes.api.model.Condition;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -253,9 +254,14 @@ class MongoDbControllerTest {
           // For the moment no updates to the original resource, this may change in the future if
           // needed.
           softly.assertThat(actual.isUpdateResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatus()).isFalse();
+          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly
+              .assertThat(actual.getResource().getStatus().getConditions())
+              .isNotEmpty()
+              .extracting(Condition::getStatus)
+              .containsOnly("True");
           softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
-          softly.assertThat(actual.isNoUpdate()).isTrue();
+          softly.assertThat(actual.isNoUpdate()).isFalse();
         });
   }
 
@@ -311,9 +317,54 @@ class MongoDbControllerTest {
           // For the moment no updates to the original resource, this may change in the future if
           // needed.
           softly.assertThat(actual.isUpdateResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatus()).isFalse();
+          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly
+              .assertThat(actual.getResource().getStatus().getConditions())
+              .isNotEmpty()
+              .extracting(Condition::getStatus)
+              .containsOnly("True");
           softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
-          softly.assertThat(actual.isNoUpdate()).isTrue();
+          softly.assertThat(actual.isNoUpdate()).isFalse();
+        });
+  }
+
+  @Test
+  void shouldFailWithBadConditionsForTooLongName() {
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
+
+    var givenMongoDbCr = new MongoDbCustomResource();
+    givenMongoDbCr.setMetadata(
+        new ObjectMetaBuilder()
+            .withNamespace("the-namespace")
+            .withName("the-database-with-way-too-long-name-that-exceeds-all-limits")
+            .build());
+    givenMongoDbCr.setSpec(
+        new MongoDbSpec()
+            .setSecret(
+                new SecretSpec()
+                    .setUsernameKey("u")
+                    .setPasswordKey("p")
+                    .setConnectionStringKey("c"))
+            .setDatabase(
+                new DatabaseSpec()
+                    .setConnectionStringOptions(
+                        "tls=true&readPreference=secondaryPreferred&retryWrites=false")));
+
+    var actual = mongoDbController.reconcile(givenMongoDbCr, new MongoDbCustomResourceContext());
+
+    assertSoftly(
+        softly -> {
+          // For the moment no updates to the original resource, this may change in the future if
+          // needed.
+          softly.assertThat(actual.isUpdateResource()).isFalse();
+          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly
+              .assertThat(actual.getResource().getStatus().getConditions())
+              .isNotEmpty()
+              .extracting(Condition::getStatus)
+              .containsOnly("False");
+          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isNoUpdate()).isFalse();
         });
   }
 
