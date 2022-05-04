@@ -3,7 +3,7 @@ plugins {
   id "idea"
   id "java"
   id 'org.sonarqube' version '3.3'
-  id "com.diffplug.spotless" version "6.5.0"
+  id "com.diffplug.spotless" version "6.5.2"
   id "com.google.cloud.tools.jib" version "3.2.1"
 }
 
