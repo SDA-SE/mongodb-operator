@@ -78,7 +78,7 @@ dependencies {
   testImplementation enforcedPlatform("org.junit:junit-bom:5.8.2")
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit-pioneer:junit-pioneer:1.7.1'
-  testImplementation 'org.assertj:assertj-core:3.22.0'
+  testImplementation 'org.assertj:assertj-core:3.23.1'
   testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.3', {
     // conflict with operator-framework
     exclude group: 'org.slf4j'
