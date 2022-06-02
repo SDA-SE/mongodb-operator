@@ -2,7 +2,7 @@ package com.sdase.k8s.operator.mongodb.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,6 +20,7 @@ import com.mongodb.ConnectionString;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
+import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService.CreateDatabaseResult;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
@@ -209,7 +210,7 @@ class MongoDbControllerTest {
         .when(kubernetesClientAdapterMock)
         .createSecretInNamespace(anyString(), secretArgumentCaptor.capture());
     when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
-        .thenReturn(true);
+        .thenReturn(CreateDatabaseResult.CREATED);
     when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
 
     var givenMongoDbCr = new MongoDbCustomResource();
@@ -272,7 +273,7 @@ class MongoDbControllerTest {
         .when(kubernetesClientAdapterMock)
         .createSecretInNamespace(anyString(), secretArgumentCaptor.capture());
     when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
-        .thenReturn(true);
+        .thenReturn(CreateDatabaseResult.CREATED);
     when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
 
     var givenMongoDbCr = new MongoDbCustomResource();
@@ -360,9 +361,11 @@ class MongoDbControllerTest {
           softly.assertThat(actual.isUpdateStatus()).isTrue();
           softly
               .assertThat(actual.getResource().getStatus().getConditions())
-              .isNotEmpty()
-              .extracting(Condition::getStatus)
-              .containsOnly("False");
+              .extracting(Condition::getType, Condition::getStatus)
+              .containsExactlyInAnyOrder(
+                  tuple("CreateUsername", "False"),
+                  tuple("CreateDatabase", "Unknown"),
+                  tuple("CreateSecret", "Unknown"));
           softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
           softly.assertThat(actual.isNoUpdate()).isFalse();
         });
@@ -376,7 +379,7 @@ class MongoDbControllerTest {
         .when(kubernetesClientAdapterMock)
         .createSecretInNamespace(anyString(), secretArgumentCaptor.capture());
     when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
-        .thenReturn(true);
+        .thenReturn(CreateDatabaseResult.CREATED);
     when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
 
     var givenMongoDbCr = new MongoDbCustomResource();
@@ -386,9 +389,7 @@ class MongoDbControllerTest {
         new MongoDbSpec().setSecret(new SecretSpec().setUsernameKey("u").setPasswordKey("p")));
     var givenContext = new MongoDbCustomResourceContext();
 
-    assertThatExceptionOfType(KubernetesClientException.class)
-        .isThrownBy(() -> mongoDbController.reconcile(givenMongoDbCr, givenContext))
-        .isSameAs(givenException);
+    var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
 
     verify(mongoDbServiceMock, times(1))
         .createDatabaseWithUser(
@@ -408,13 +409,24 @@ class MongoDbControllerTest {
               .extracting(Secret::getData)
               .extracting("u", "p")
               .containsExactly("dGhlLW5hbWVzcGFjZV90aGUtbmFtZQ==", "c3RhdGljLXRlc3QtcGFzc3dvcmQ=");
+          softly.assertThat(actual.isUpdateResource()).isFalse();
+          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly
+              .assertThat(actual.getResource().getStatus().getConditions())
+              .extracting(Condition::getType, Condition::getStatus)
+              .containsExactlyInAnyOrder(
+                  tuple("CreateUsername", "True"),
+                  tuple("CreateDatabase", "True"),
+                  tuple("CreateSecret", "False"));
+          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isNoUpdate()).isFalse();
         });
   }
 
   @Test
   void shouldNotCreateSecretButFailWhenNoDatabaseHasBeenCreated() {
     when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
-        .thenReturn(false);
+        .thenReturn(CreateDatabaseResult.FAILED);
     when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
 
     var givenMongoDbCr = new MongoDbCustomResource();
@@ -424,13 +436,89 @@ class MongoDbControllerTest {
         new MongoDbSpec().setSecret(new SecretSpec().setUsernameKey("u").setPasswordKey("p")));
     var givenContext = new MongoDbCustomResourceContext();
 
-    assertThatIllegalStateException()
-        .isThrownBy(() -> mongoDbController.reconcile(givenMongoDbCr, givenContext));
+    var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
 
     verify(mongoDbServiceMock, times(1))
         .createDatabaseWithUser(
             "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
     verifyNoInteractions(kubernetesClientAdapterMock);
+    assertSoftly(
+        softly -> {
+          softly.assertThat(actual.isUpdateResource()).isFalse();
+          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly
+              .assertThat(actual.getResource().getStatus().getConditions())
+              .extracting(Condition::getType, Condition::getStatus)
+              .containsExactlyInAnyOrder(
+                  tuple("CreateUsername", "True"),
+                  tuple("CreateDatabase", "False"),
+                  tuple("CreateSecret", "Unknown"));
+          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isNoUpdate()).isFalse();
+        });
+  }
+
+  @Test
+  void shouldUpdateStatusOfExistingResourcesWithoutStatus() {
+    when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
+        .thenReturn(CreateDatabaseResult.SKIPPED);
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
+
+    var givenMongoDbCr = new MongoDbCustomResource();
+    givenMongoDbCr.setMetadata(
+        new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
+    givenMongoDbCr.setSpec(
+        new MongoDbSpec().setSecret(new SecretSpec().setUsernameKey("u").setPasswordKey("p")));
+    var givenContext = new MongoDbCustomResourceContext();
+
+    var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
+
+    verify(mongoDbServiceMock, times(1))
+        .createDatabaseWithUser(
+            "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
+    verifyNoInteractions(kubernetesClientAdapterMock);
+    assertSoftly(
+        softly -> {
+          softly.assertThat(actual.isUpdateResource()).isFalse();
+          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly
+              .assertThat(actual.getResource().getStatus().getConditions())
+              .extracting(Condition::getType, Condition::getStatus)
+              .containsExactlyInAnyOrder(
+                  tuple("CreateUsername", "True"),
+                  tuple("CreateDatabase", "True"),
+                  tuple("CreateSecret", "True"));
+          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isNoUpdate()).isFalse();
+        });
+  }
+
+  @Test
+  void shouldDoNothingWhenStatusIsComplete() {
+    var givenMongoDbCr = new MongoDbCustomResource();
+    givenMongoDbCr.setMetadata(
+        new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
+    givenMongoDbCr.setSpec(
+        new MongoDbSpec().setSecret(new SecretSpec().setUsernameKey("u").setPasswordKey("p")));
+    givenMongoDbCr =
+        new MongoDbResourceConditions()
+            .applyUsernameCreated("the-namespace_the-name")
+            .applyDatabaseCreated()
+            .applySecretCreated()
+            .createStatusUpdate(givenMongoDbCr)
+            .getResource();
+    var givenContext = new MongoDbCustomResourceContext();
+
+    var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
+
+    assertSoftly(
+        softly -> {
+          softly.assertThat(actual.isUpdateResource()).isFalse();
+          softly.assertThat(actual.isUpdateStatus()).isFalse();
+          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isNoUpdate()).isTrue();
+        });
+    verifyNoInteractions(taskFactorySpy, mongoDbServiceMock, kubernetesClientAdapterMock);
   }
 
   private static class MongoDbCustomResourceContext implements Context<MongoDbCustomResource> {
