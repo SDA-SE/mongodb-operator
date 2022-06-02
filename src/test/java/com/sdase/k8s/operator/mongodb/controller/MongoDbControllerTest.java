@@ -28,10 +28,13 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.javaoperatorsdk.operator.api.config.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
 import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
+import io.javaoperatorsdk.operator.api.reconciler.dependent.managed.ManagedDependentResourceContext;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -379,7 +382,7 @@ class MongoDbControllerTest {
     verifyNoInteractions(kubernetesClientAdapterMock);
   }
 
-  private static class MongoDbCustomResourceContext implements Context {
+  private static class MongoDbCustomResourceContext implements Context<MongoDbCustomResource> {
 
     @Override
     public Optional<RetryInfo> getRetryInfo() {
@@ -387,13 +390,23 @@ class MongoDbControllerTest {
     }
 
     @Override
-    public <T> Optional<T> getSecondaryResource(Class<T> expectedType) {
-      return Context.super.getSecondaryResource(expectedType);
+    public <T> Set<T> getSecondaryResources(Class<T> expectedType) {
+      return null;
     }
 
     @Override
     public <T> Optional<T> getSecondaryResource(Class<T> expectedType, String eventSourceName) {
       return Optional.empty();
+    }
+
+    @Override
+    public ControllerConfiguration<MongoDbCustomResource> getControllerConfiguration() {
+      return null;
+    }
+
+    @Override
+    public ManagedDependentResourceContext managedDependentResourceContext() {
+      return null;
     }
   }
 }

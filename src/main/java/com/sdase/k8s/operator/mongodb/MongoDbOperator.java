@@ -13,7 +13,7 @@ import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.javaoperatorsdk.operator.Operator;
-import io.javaoperatorsdk.operator.config.runtime.DefaultConfigurationService;
+import io.javaoperatorsdk.operator.api.config.ConfigurationServiceProvider;
 import java.util.List;
 import java.util.Optional;
 import javax.net.ssl.SSLContext;
@@ -21,7 +21,7 @@ import javax.net.ssl.SSLContext;
 public class MongoDbOperator {
 
   public MongoDbOperator(KubernetesClient kubernetesClient, int monitoringPort) {
-    var operator = new Operator(kubernetesClient, DefaultConfigurationService.instance());
+    var operator = new Operator(kubernetesClient, ConfigurationServiceProvider.instance());
     operator.installShutdownHook();
     var mongoDbService = createMongoDbService();
     var mongoDbPrivilegesCheck = verifyPrivileges(mongoDbService);

@@ -4,6 +4,7 @@ import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.IllegalNameException;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
+import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
@@ -14,7 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ControllerConfiguration
-public class MongoDbController implements Reconciler<MongoDbCustomResource> {
+public class MongoDbController
+    implements Reconciler<MongoDbCustomResource>, Cleaner<MongoDbCustomResource> {
 
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbController.class);
 
@@ -35,7 +37,8 @@ public class MongoDbController implements Reconciler<MongoDbCustomResource> {
   }
 
   @Override
-  public DeleteControl cleanup(MongoDbCustomResource resource, Context context) {
+  public DeleteControl cleanup(
+      MongoDbCustomResource resource, Context<MongoDbCustomResource> context) {
     LOG.info(
         "MongoDb {}/{} deleted",
         resource.getMetadata().getNamespace(),
@@ -72,7 +75,7 @@ public class MongoDbController implements Reconciler<MongoDbCustomResource> {
 
   @Override
   public UpdateControl<MongoDbCustomResource> reconcile(
-      MongoDbCustomResource resource, Context context) {
+      MongoDbCustomResource resource, Context<MongoDbCustomResource> context) {
     LOG.info(
         "MongoDb {}/{} created or updated",
         resource.getMetadata().getNamespace(),
