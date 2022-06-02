@@ -69,10 +69,10 @@ public class MongoDbController
       }
     } catch (IllegalNameException e) {
       LOG.warn(
-          "Ignoring delete request for MongoDb {}/{}, name is invalid. The database may not exist.",
+          "Ignoring delete request for MongoDb {}/{}, name is invalid. The database may not exist. Reason: {}",
           resource.getMetadata().getNamespace(),
           resource.getMetadata().getName(),
-          e);
+          e.getMessage());
     }
     return DeleteControl.defaultDelete();
   }
