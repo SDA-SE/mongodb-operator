@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.tuple;
 
 import com.mongodb.MongoClient;
+import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService.CreateDatabaseResult;
 import com.sdase.k8s.operator.mongodb.db.manager.model.User;
 import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
 import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
@@ -87,7 +88,7 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
           mongoDbService.createDatabaseWithUser(databaseAndUserName, UUID.randomUUID().toString());
 
       // then
-      assertThat(actual).isTrue();
+      assertThat(actual).isEqualTo(CreateDatabaseResult.CREATED);
     } finally {
       mongoDbService.dropDatabaseUser(databaseAndUserName, databaseAndUserName);
     }
@@ -105,7 +106,7 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
           mongoDbService.createDatabaseWithUser(databaseAndUserName, UUID.randomUUID().toString());
 
       // then
-      assertThat(actual).isFalse();
+      assertThat(actual).isEqualTo(CreateDatabaseResult.SKIPPED);
     } finally {
       mongoDbService.dropDatabaseUser(databaseAndUserName, databaseAndUserName);
     }
@@ -212,7 +213,7 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
             "invalid-/\\. \"$*<>:|?-db", UUID.randomUUID().toString());
 
     // then
-    assertThat(actual).isFalse();
+    assertThat(actual).isEqualTo(CreateDatabaseResult.FAILED);
   }
 
   @Test

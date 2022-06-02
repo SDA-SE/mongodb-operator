@@ -99,7 +99,7 @@ public class MongoDbService {
    *       <li>the {@code createUser} command fails
    *     </ul>
    */
-  public boolean createDatabaseWithUser(String databaseAndUserName, String password) {
+  public CreateDatabaseResult createDatabaseWithUser(String databaseAndUserName, String password) {
     return createDatabaseWithUser(databaseAndUserName, databaseAndUserName, password);
   }
 
@@ -118,18 +118,19 @@ public class MongoDbService {
    *       <li>the {@code createUser} command fails
    *     </ul>
    */
-  public boolean createDatabaseWithUser(String databaseName, String username, String password) {
+  public CreateDatabaseResult createDatabaseWithUser(
+      String databaseName, String username, String password) {
     try {
       LOG.info("createDatabaseWithUser: {}@{}: check if database exists", username, databaseName);
       if (userExists(databaseName, username)) {
         LOG.info(
             "createDatabaseWithUser: {}@{}: skipping, database exists", username, databaseName);
-        return false;
+        return CreateDatabaseResult.SKIPPED;
       }
       return createUser(databaseName, username, password);
     } catch (Exception e) {
       LOG.error("createDatabaseWithUser: {}@{}: failed", username, databaseName, e);
-      return false;
+      return CreateDatabaseResult.FAILED;
     }
   }
 
@@ -187,7 +188,7 @@ public class MongoDbService {
         .anyMatch(databaseName::equals);
   }
 
-  private boolean createUser(String databaseName, String username, String password) {
+  private CreateDatabaseResult createUser(String databaseName, String username, String password) {
     LOG.info("createUser: {}@{}: creating user with readWrite access", username, databaseName);
     var createUserCommand =
         new BasicDBObject("createUser", username)
@@ -199,7 +200,7 @@ public class MongoDbService {
         mongoClient.getDatabase(userDatabase(databaseName)).runCommand(createUserCommand);
     var created = isOk(response);
     LOG.info("createUser: {}@{}: created: {}", username, databaseName, created);
-    return created;
+    return created ? CreateDatabaseResult.CREATED : CreateDatabaseResult.FAILED;
   }
 
   private String userDatabase(String accessibleDatabase) {
@@ -238,5 +239,11 @@ public class MongoDbService {
 
   public ConnectionString getConnectionString() {
     return this.connectionString;
+  }
+
+  public enum CreateDatabaseResult {
+    SKIPPED,
+    CREATED,
+    FAILED
   }
 }

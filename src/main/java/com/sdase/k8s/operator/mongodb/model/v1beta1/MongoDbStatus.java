@@ -6,7 +6,18 @@ import java.util.List;
 
 public class MongoDbStatus {
 
+  private long attempts;
+
   private List<Condition> conditions = new ArrayList<>();
+
+  public long getAttempts() {
+    return attempts;
+  }
+
+  public MongoDbStatus setAttempts(long attempts) {
+    this.attempts = attempts;
+    return this;
+  }
 
   public List<Condition> getConditions() {
     return conditions;
