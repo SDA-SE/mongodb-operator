@@ -82,10 +82,25 @@ dependencies {
   testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.6', {
     // conflict with operator-framework
     exclude group: 'org.slf4j'
+    // conflict inside flapdoodle
+    exclude group: 'de.flapdoodle.embed', module: 'de.flapdoodle.embed.process'
+    // conflict inside flapdoodle
+    exclude group: 'de.flapdoodle', module: 'de.flapdoodle.os'
+  }
+  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.process:3.1.11', {
+    // conflict with operator-framework
+    exclude group: 'org.slf4j'
+    // conflict inside flapdoodle
+    exclude group: 'de.flapdoodle', module: 'de.flapdoodle.os'
+  }
+  testImplementation 'de.flapdoodle:de.flapdoodle.os:1.1.9', {
+    // conflict with operator-framework
+    exclude group: 'org.slf4j'
   }
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
   testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
   testImplementation "uk.org.webcompere:system-stubs-jupiter:2.0.1", {
+    // conflicts with mockitoVersion
     exclude group: 'org.mockito', 'module': 'mockito-inline'
   }
   testImplementation "org.mockito:mockito-inline:${mockitoVersion}"
