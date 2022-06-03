@@ -5,10 +5,8 @@ import com.sdase.k8s.operator.mongodb.controller.tasks.util.IllegalNameException
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService.CreateDatabaseResult;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
-import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
-import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbStatus;
-import io.fabric8.kubernetes.api.model.Condition;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
