@@ -42,7 +42,7 @@ project.ext {
   mongoDbDriverVersion = "4.6.0"
   slf4jVersion = "1.7.36"
   operatorFrameworkVersion = "3.0.2"
-  mockitoVersion = "4.6.0"
+  mockitoVersion = "4.6.1"
   jacksonVersion = "2.13.3"
 }
 
