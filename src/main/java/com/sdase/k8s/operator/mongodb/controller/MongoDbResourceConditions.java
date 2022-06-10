@@ -71,38 +71,35 @@ public class MongoDbResourceConditions {
   }
 
   /**
-   * @param original the resource that is handled
+   * @param resource The resource that is handled. The {@linkplain
+   *     io.fabric8.kubernetes.client.CustomResource#setStatus(Object) status} of the given instance
+   *     will be modified.
    * @return an {@code UpdateControl} with the <strong>modified</strong> original resource.
    */
-  UpdateControl<MongoDbCustomResource> createStatusUpdate(MongoDbCustomResource original) {
-    var resourceGeneration = findResourceGeneration(original);
-    var resourceWithConditions =
-        createResourceWithConditions(
-            original,
-            createCondition(
-                resourceGeneration, createUsernameSuccessful, "CreateUsername", usernameMessage),
-            createCondition(
-                resourceGeneration,
-                createDatabaseSuccessful,
-                "CreateDatabase",
-                createDatabaseMessage),
-            createCondition(
-                resourceGeneration, createSecretSuccessful, "CreateSecret", createSecretMessage));
+  UpdateControl<MongoDbCustomResource> createStatusUpdate(MongoDbCustomResource resource) {
+    var resourceGeneration = findResourceGeneration(resource);
+    updateStatus(
+        resource,
+        createCondition(
+            resourceGeneration, createUsernameSuccessful, "CreateUsername", usernameMessage),
+        createCondition(
+            resourceGeneration, createDatabaseSuccessful, "CreateDatabase", createDatabaseMessage),
+        createCondition(
+            resourceGeneration, createSecretSuccessful, "CreateSecret", createSecretMessage));
     LOG.info(
         "Setting status of MongoDB {}/{}: username={}, database={}, secret={}, attempt={}",
-        original.getMetadata().getNamespace(),
-        original.getMetadata().getName(),
+        resource.getMetadata().getNamespace(),
+        resource.getMetadata().getName(),
         createUsernameSuccessful,
         createDatabaseSuccessful,
         createSecretSuccessful,
-        resourceWithConditions.getStatus().getAttempts());
-    if (allConditionsTrue(resourceWithConditions)) {
-      return UpdateControl.updateStatus(resourceWithConditions);
+        resource.getStatus().getAttempts());
+    if (allConditionsTrue(resource)) {
+      return UpdateControl.updateStatus(resource);
     } else {
-      return UpdateControl.updateStatus(resourceWithConditions)
+      return UpdateControl.updateStatus(resource)
           .rescheduleAfter(
-              RECONCILE_REQUEST_MIN_DURATION_ON_ERROR_SECONDS
-                  * resourceWithConditions.getStatus().getAttempts(),
+              RECONCILE_REQUEST_MIN_DURATION_ON_ERROR_SECONDS * resource.getStatus().getAttempts(),
               TimeUnit.SECONDS);
     }
   }
@@ -117,15 +114,13 @@ public class MongoDbResourceConditions {
     return mongoDbCustomResource.getMetadata().getGeneration();
   }
 
-  private MongoDbCustomResource createResourceWithConditions(
-      MongoDbCustomResource resource, Condition... conditions) {
+  private void updateStatus(MongoDbCustomResource resourceToUpdate, Condition... conditionsToAdd) {
     var attempts = 1L;
-    if (resource.getStatus() != null) {
-      attempts = resource.getStatus().getAttempts() + 1;
+    if (resourceToUpdate.getStatus() != null) {
+      attempts = resourceToUpdate.getStatus().getAttempts() + 1;
     }
-    var status = new MongoDbStatus().setConditions(List.of(conditions)).setAttempts(attempts);
-    resource.setStatus(status);
-    return resource;
+    var status = new MongoDbStatus().setConditions(List.of(conditionsToAdd)).setAttempts(attempts);
+    resourceToUpdate.setStatus(status);
   }
 
   private Condition createCondition(
