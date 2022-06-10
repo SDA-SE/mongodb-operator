@@ -1,5 +1,6 @@
 package com.sdase.k8s.operator.mongodb.controller;
 
+import com.sdase.k8s.operator.mongodb.controller.tasks.CreateDatabaseTask;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.IllegalNameException;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
@@ -13,6 +14,7 @@ import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,35 +92,61 @@ public class MongoDbController
           resource.getMetadata().getName());
       return UpdateControl.noUpdate();
     }
+
+    createDatabaseTask(resource, conditions)
+        .filter(task -> CreateDatabaseResult.CREATED == createDatabase(task, resource, conditions))
+        .ifPresent(task -> createSecret(task, resource, conditions));
+
+    return conditions.createStatusUpdate(resource);
+  }
+
+  private Optional<CreateDatabaseTask> createDatabaseTask(
+      MongoDbCustomResource resource, MongoDbResourceConditions trackedConditions) {
     try {
       var task = taskFactory.newCreateTask(resource, mongoDbService.getConnectionString());
-      conditions.applyUsernameCreated(task.getUsername());
+      trackedConditions.applyUsernameCreated(task.getUsername());
+      return Optional.of(task);
+    } catch (IllegalNameException e) {
+      trackedConditions.applyUsernameCreationFailed(e.getMessage());
+      return Optional.empty();
+    }
+  }
 
-      var databaseCreated =
-          mongoDbService.createDatabaseWithUser(
-              task.getDatabaseName(), task.getUsername(), task.getPassword());
-      if (databaseCreated == CreateDatabaseResult.FAILED) {
-        return conditions.applyDatabaseCreationFailed().createStatusUpdate(resource);
-      }
-      if (databaseCreated == CreateDatabaseResult.SKIPPED && conditions.hasEmptyStatus(resource)) {
-        // If database/user already exists and there is no status in the resource, we assume that
-        // the resource has been handled by an older version, where no status was tracked.
-        // We have to assume, that the secret has been successfully created, because the MongoDB
-        // Operator has no read access to secrets by default.
-        return conditions.applyDatabaseCreated().applySecretCreated().createStatusUpdate(resource);
-      }
-      conditions.applyDatabaseCreated();
+  private CreateDatabaseResult createDatabase(
+      CreateDatabaseTask task,
+      MongoDbCustomResource resource,
+      MongoDbResourceConditions trackedConditions) {
+    var databaseCreated =
+        mongoDbService.createDatabaseWithUser(
+            task.getDatabaseName(), task.getUsername(), task.getPassword());
+    if (databaseCreated == CreateDatabaseResult.FAILED) {
+      trackedConditions.applyDatabaseCreationFailed();
+      return databaseCreated;
+    }
+    if (databaseCreated == CreateDatabaseResult.SKIPPED
+        && trackedConditions.hasEmptyStatus(resource)) {
+      // If database/user already exists and there is no status in the resource, we assume that
+      // the resource has been handled by an older version, where no status was tracked.
+      // We have to assume, that the secret has been successfully created, because the MongoDB
+      // Operator has no read access to secrets by default.
+      trackedConditions.applyDatabaseCreated().applySecretCreated();
+      return databaseCreated;
+    }
+    trackedConditions.applyDatabaseCreated();
+    return databaseCreated;
+  }
 
+  private void createSecret(
+      CreateDatabaseTask task,
+      MongoDbCustomResource resource,
+      MongoDbResourceConditions trackedConditions) {
+    try {
       var secret = v1SecretBuilder.createSecretForOwner(task);
       kubernetesClientAdapter.createSecretInNamespace(
           resource.getMetadata().getNamespace(), secret);
-      conditions.applySecretCreated();
-
-      return conditions.createStatusUpdate(resource);
-    } catch (IllegalNameException e) {
-      return conditions.applyUsernameCreationFailed(e.getMessage()).createStatusUpdate(resource);
+      trackedConditions.applySecretCreated();
     } catch (KubernetesClientException e) {
-      return conditions.applySecretCreationFailed(e.getMessage()).createStatusUpdate(resource);
+      trackedConditions.applySecretCreationFailed(e.getMessage()).createStatusUpdate(resource);
     }
   }
 }
