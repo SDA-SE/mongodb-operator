@@ -93,7 +93,7 @@ dependencies {
     // conflict inside flapdoodle
     exclude group: 'de.flapdoodle', module: 'de.flapdoodle.os'
   }
-  testImplementation 'de.flapdoodle:de.flapdoodle.os:1.1.9', {
+  testImplementation 'de.flapdoodle:de.flapdoodle.os:1.1.10', {
     // conflict with operator-framework
     exclude group: 'org.slf4j'
   }
