@@ -22,8 +22,8 @@ pipeline {
       steps {
         javaGradlewWithDocumentDb(
             gradleCommand: 'check jacocoTestReport --info',
-            documentDbSecretId: 'documentdb_testing_account',
-            documentDbHostsId: 'documentdb_testing_url'
+            documentDbSecretId: 'documentdb-testing-account',
+            documentDbHostsId: 'documentdb-testing-url'
         )
       }
 
