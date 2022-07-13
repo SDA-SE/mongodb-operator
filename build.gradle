@@ -69,7 +69,7 @@ dependencies {
   implementation 'org.hibernate.validator:hibernate-validator:7.0.4.Final'
   implementation 'jakarta.el:jakarta.el-api:5.0.1'
   implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
-  implementation "com.sparkjava:spark-core:2.9.3", {
+  implementation "com.sparkjava:spark-core:2.9.4", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
   }
