@@ -1,0 +1,9 @@
+site_name: 'MongoDB Operator Documentation'
+
+nav:
+  - MongoDB Operator: index.md
+  - Deployment: deployment.md
+  - Usage: usage.md
+
+theme:
+  name: material
