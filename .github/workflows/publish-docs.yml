@@ -5,15 +5,16 @@ on:
       - master
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b #v3.0.2
         with:
           fetch-depth: 1
+      - run: git config user.name 'github-actions[bot]' && git config user.email 'github-actions[bot]@users.noreply.github.com'
       - uses: actions/setup-python@c4e89fac7e8767b327bbad6cb4d859eda999cf08 #v.4.1.0
         with:
           python-version: 3.x
-      - run: pip install –-upgrade pip && pip install mkdocs-material
-      - name: Publish generated mkdocs to
-        #  commit to the gh-pages branch and push the gh-pages branch to GitHub
-        run: mkdocs gh-deploy --config-file mkdocs-material.yml
+      - run: pip install mkdocs-techdocs-core # Includes material theme
+      - run: git fetch origin gh-pages # Get latest history
+      - name: Publish generated mkdocs
+        run: mkdocs gh-deploy --config-file mkdocs.yml
