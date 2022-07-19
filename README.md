@@ -17,6 +17,7 @@ custom resource.
 Pleaser refer to the [deployment documentation](docs/deployment.md) for installing MongoDB Operator
 in a Kubernetes Cluster or to the [usage documentation](docs/usage) to see how to request a database
 for a workload.
+The full documentation is available on [GitHub Pages](https://sda-se.github.io/mongodb-operator/).
 
 The image is hosted at [quay.io/sdase/mongodb-operator](https://quay.io/repository/sdase/mongodb-operator).
 
