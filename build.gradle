@@ -87,7 +87,7 @@ dependencies {
     // conflict inside flapdoodle
     exclude group: 'de.flapdoodle', module: 'de.flapdoodle.os'
   }
-  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.process:3.1.11', {
+  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.process:3.1.13', {
     // conflict with operator-framework
     exclude group: 'org.slf4j'
     // conflict inside flapdoodle
