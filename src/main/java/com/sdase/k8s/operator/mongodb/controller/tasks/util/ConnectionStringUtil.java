@@ -5,7 +5,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 public class ConnectionStringUtil {
@@ -29,7 +28,7 @@ public class ConnectionStringUtil {
       String dbName,
       String username,
       String password,
-      @Nullable String customOptions,
+      String customOptions,
       ConnectionString connectionString) {
     var uri = URI.create(connectionString.getConnectionString());
     var hosts = String.join(",", connectionString.getHosts());
