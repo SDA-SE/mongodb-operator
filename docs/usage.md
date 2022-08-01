@@ -35,7 +35,14 @@ With an appropriate Kustomize configuration (similar to the configuration requir
 Secrets), databases created this way can be used in PR deployments with name suffix.
 
 The `connectionStringOptions` will overwrite the defaults which are used by the MongoDB operator itself
-to connect to the MongoDB. 
+to connect to the MongoDB.
+
+MongoDB Operator will set the `authSource` as the allowed database itself for MongoDB instances and
+as the admin database for DocumentDB instances.
+These settings are the defaults for the respective implementations when connecting to a specific
+database.
+Therefore `authSource` should not be configured in the connection options on client side when
+connecting to a database provided by the MongoDB Operator.
 
 ## Caveats
 
@@ -45,9 +52,6 @@ to connect to the MongoDB.
   MongoDB Operator yet.
   `host`, `options`, etc. must be configured separately for each Kubernetes cluster unless the
   workload is configured with the `connectionString`.
-* The `authSource` is the allowed database itself for MongoDB instances and the admin database for
-  DocumentDB instances.
-  As DocumentDB uses the admin database for all users, there is no need to configure `authSource`.
 * There is a hard limit of 64 characters for the database name.
   The database name is built from `<metadata.namespace>_<metadata.name>`.
   The namespace is used to avoid collisions and therefore data security issues.
