@@ -358,7 +358,13 @@ If <code>spec.database.pruneAfterDelete</code> is true, the whole database with 
 <p>With an appropriate Kustomize configuration (similar to the configuration required for Sealed
 Secrets), databases created this way can be used in PR deployments with name suffix.</p>
 <p>The <code>connectionStringOptions</code> will overwrite the defaults which are used by the MongoDB operator itself
-to connect to the MongoDB. </p>
+to connect to the MongoDB.</p>
+<p>MongoDB Operator will set the <code>authSource</code> as the allowed database itself for MongoDB instances and
+as the admin database for DocumentDB instances.
+These settings are the defaults for the respective implementations when connecting to a specific
+database.
+Therefore <code>authSource</code> should not be configured in the connection options on client side when
+connecting to a database provided by the MongoDB Operator.</p>
 <h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>spec.database.pruneAfterDelete: true</code> is only supported if the user of the MongoDB Operator is
@@ -367,9 +373,6 @@ to connect to the MongoDB. </p>
   MongoDB Operator yet.
   <code>host</code>, <code>options</code>, etc. must be configured separately for each Kubernetes cluster unless the
   workload is configured with the <code>connectionString</code>.</li>
-<li>The <code>authSource</code> is the allowed database itself for MongoDB instances and the admin database for
-  DocumentDB instances.
-  As DocumentDB uses the admin database for all users, there is no need to configure <code>authSource</code>.</li>
 <li>There is a hard limit of 64 characters for the database name.
   The database name is built from <code>&lt;metadata.namespace&gt;_&lt;metadata.name&gt;</code>.
   The namespace is used to avoid collisions and therefore data security issues.
