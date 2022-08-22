@@ -78,7 +78,11 @@ dependencies {
   testImplementation enforcedPlatform("org.junit:junit-bom:5.9.0")
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit-pioneer:junit-pioneer:1.7.1'
-  testImplementation 'org.assertj:assertj-core:3.23.1'
+  testImplementation 'org.assertj:assertj-core:3.23.1', {
+    // conflict of 1.12.10 in assertj vs 1.12.13 in mockito-core
+    exclude group: "net.bytebuddy", module: "byte-buddy"
+    exclude group: "net.bytebuddy", module: "byte-buddy-agent"
+  }
   testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.8'
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
   testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
