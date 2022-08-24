@@ -83,7 +83,9 @@ dependencies {
     exclude group: "net.bytebuddy", module: "byte-buddy"
     exclude group: "net.bytebuddy", module: "byte-buddy-agent"
   }
-  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.8'
+  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.4.8', {
+    exclude group: "org.slf4j", module: "slf4j-api"
+  }
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
   testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
   testImplementation "uk.org.webcompere:system-stubs-jupiter:2.0.1", {
