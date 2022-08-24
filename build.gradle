@@ -122,7 +122,7 @@ configurations.all {
 // begin config for SonarCloud
 jacocoTestReport {
   reports {
-    xml.enabled true
+    xml.required = true
   }
 }
 
