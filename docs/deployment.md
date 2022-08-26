@@ -19,21 +19,21 @@ The MongoDB Operator requires a `ServiceAccount` with some privileges for the Ku
 `ClusterRole`:
 
 * For the resource `mongodbs` the following verbs are required:
-    * `watch`
-    * `list`
-    * `get`
-    * `update`
+  * `watch`
+  * `list`
+  * `get`
+  * `update`
 * For the resource `mongodbs/status` the following verbs are required:
-    * `watch`
-    * `list`
-    * `get`
-    * `update`
+  * `watch`
+  * `list`
+  * `get`
+  * `update`
 * For the resource `secrets` the following verbs are required:
-    * `create`
-    * `update`
+  * `create`
+  * `update`
 * For the resource `customresourcedefinitions` with the resource name
   `mongodbs.persistence.sda-se.com` the following verbs are required:
-    * `get`
+  * `get`
 
 
 #### Custom Resource Definition
@@ -75,10 +75,10 @@ The following environment variables can be used to configure the Docker containe
 #### Java
 
 * `JAVA_TOOL_OPTIONS` _string_
-    * Set options for the JVM.
-      If Java options are set, you will find _Picked up JAVA_TOOL_OPTIONS: "-Xmx340m"_ or similar in
-      the log.
-    * Example: `-Xmx340m` to set the max heap size
+  * Set options for the JVM.
+    If Java options are set, you will find _Picked up JAVA_TOOL_OPTIONS: "-Xmx340m"_ or similar in
+    the log.
+  * Example: `-Xmx340m` to set the max heap size
 
 #### MongoDB
 
@@ -89,14 +89,14 @@ While users for requested databases are created in the database when using Mongo
 be created in the `admin` database when AWS DocumentDB is used.
 
 * `MONGODB_CONNECTION_STRING` _string_
-    * The connection String that covers all configuration to access the MongoDB database.
-    * Example: `mongodb://username:password@mongodb.mongodb:27017`
+  * The connection String that covers all configuration to access the MongoDB database.
+  * Example: `mongodb://username:password@mongodb.mongodb:27017`
 * `TRUSTED_CERTIFICATES_DIR`
-    * Directory in the container where CA certificates or certificate bundles in PEM format can be
-      mounted. These certificates are used to verify SSL connections to the database.
-      The configuration is ignored if no files are mounted.
-      Startup will fail if the directory is not readable.
-    * Default: `/var/trust/certificates`
+  * Directory in the container where CA certificates or certificate bundles in PEM format can be
+    mounted. These certificates are used to verify SSL connections to the database.
+    The configuration is ignored if no files are mounted.
+    Startup will fail if the directory is not readable.
+  * Default: `/var/trust/certificates`
 
 ### Endpoints
 
