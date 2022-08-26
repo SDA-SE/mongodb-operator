@@ -501,22 +501,30 @@ Operator.</p>
 <p>The MongoDB Operator requires a <code>ServiceAccount</code> with some privileges for the Kubernetes API from a
 <code>ClusterRole</code>:</p>
 <ul>
-<li>For the resource <code>mongodbs</code> the following verbs are required:
-    * <code>watch</code>
-    * <code>list</code>
-    * <code>get</code>
-    * <code>update</code></li>
-<li>For the resource <code>mongodbs/status</code> the following verbs are required:
-    * <code>watch</code>
-    * <code>list</code>
-    * <code>get</code>
-    * <code>update</code></li>
-<li>For the resource <code>secrets</code> the following verbs are required:
-    * <code>create</code>
-    * <code>update</code></li>
+<li>For the resource <code>mongodbs</code> the following verbs are required:<ul>
+<li><code>watch</code></li>
+<li><code>list</code></li>
+<li><code>get</code></li>
+<li><code>update</code></li>
+</ul>
+</li>
+<li>For the resource <code>mongodbs/status</code> the following verbs are required:<ul>
+<li><code>watch</code></li>
+<li><code>list</code></li>
+<li><code>get</code></li>
+<li><code>update</code></li>
+</ul>
+</li>
+<li>For the resource <code>secrets</code> the following verbs are required:<ul>
+<li><code>create</code></li>
+<li><code>update</code></li>
+</ul>
+</li>
 <li>For the resource <code>customresourcedefinitions</code> with the resource name
-  <code>mongodbs.persistence.sda-se.com</code> the following verbs are required:
-    * <code>get</code></li>
+  <code>mongodbs.persistence.sda-se.com</code> the following verbs are required:<ul>
+<li><code>get</code></li>
+</ul>
+</li>
 </ul>
 <h4 id="custom-resource-definition">Custom Resource Definition<a class="headerlink" href="#custom-resource-definition" title="Permanent link">&para;</a></h4>
 <p>The <a href="https://github.com/SDA-SE/mongodb-operator/tree/master/kustomize/bases/operator/mongodbs-crd.yaml">CRD <code>mongodbs</code></a>
@@ -541,11 +549,13 @@ The base image provides both manual and automatic ways to configure memory limit
 <p>The following environment variables can be used to configure the Docker container:</p>
 <h4 id="java">Java<a class="headerlink" href="#java" title="Permanent link">&para;</a></h4>
 <ul>
-<li><code>JAVA_TOOL_OPTIONS</code> <em>string</em>
-    * Set options for the JVM.
-      If Java options are set, you will find <em>Picked up JAVA_TOOL_OPTIONS: "-Xmx340m"</em> or similar in
-      the log.
-    * Example: <code>-Xmx340m</code> to set the max heap size</li>
+<li><code>JAVA_TOOL_OPTIONS</code> <em>string</em><ul>
+<li>Set options for the JVM.
+  If Java options are set, you will find <em>Picked up JAVA_TOOL_OPTIONS: "-Xmx340m"</em> or similar in
+  the log.</li>
+<li>Example: <code>-Xmx340m</code> to set the max heap size</li>
+</ul>
+</li>
 </ul>
 <h4 id="mongodb">MongoDB<a class="headerlink" href="#mongodb" title="Permanent link">&para;</a></h4>
 <p>When connecting to the MongoDB, the configured hosts are checked.
@@ -554,15 +564,19 @@ slightly changes.
 While users for requested databases are created in the database when using MongoDB, all users will
 be created in the <code>admin</code> database when AWS DocumentDB is used.</p>
 <ul>
-<li><code>MONGODB_CONNECTION_STRING</code> <em>string</em>
-    * The connection String that covers all configuration to access the MongoDB database.
-    * Example: <code>mongodb://username:password@mongodb.mongodb:27017</code></li>
-<li><code>TRUSTED_CERTIFICATES_DIR</code>
-    * Directory in the container where CA certificates or certificate bundles in PEM format can be
-      mounted. These certificates are used to verify SSL connections to the database.
-      The configuration is ignored if no files are mounted.
-      Startup will fail if the directory is not readable.
-    * Default: <code>/var/trust/certificates</code></li>
+<li><code>MONGODB_CONNECTION_STRING</code> <em>string</em><ul>
+<li>The connection String that covers all configuration to access the MongoDB database.</li>
+<li>Example: <code>mongodb://username:password@mongodb.mongodb:27017</code></li>
+</ul>
+</li>
+<li><code>TRUSTED_CERTIFICATES_DIR</code><ul>
+<li>Directory in the container where CA certificates or certificate bundles in PEM format can be
+  mounted. These certificates are used to verify SSL connections to the database.
+  The configuration is ignored if no files are mounted.
+  Startup will fail if the directory is not readable.</li>
+<li>Default: <code>/var/trust/certificates</code></li>
+</ul>
+</li>
 </ul>
 <h3 id="endpoints">Endpoints<a class="headerlink" href="#endpoints" title="Permanent link">&para;</a></h3>
 <p>The image exposes port <code>8081</code> for monitoring purposes.</p>
