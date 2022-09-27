@@ -89,4 +89,23 @@ class ConnectionStringUtilTest {
                 + ",some-documentdb.c789012.eu-central-1.docdb.amazonaws.com:27017"
                 + "/my-service-db");
   }
+
+  @Test
+  void shouldSupportMongoDbSrvSchema() {
+    var given = "mongodb+srv://server.example.com/admin?connectTimeoutMS=2000";
+    var username = "my-service-user";
+    var password = "dummy";
+    var database = "my-service-db";
+    var connectionString = new ConnectionString(given);
+    var actual =
+        ConnectionStringUtil.createConnectionString(
+            database, username, password, null, connectionString);
+    // verify connection string is valid
+    assertThat(actual)
+        .isEqualTo(
+            "mongodb+srv://"
+                + "my-service-user:dummy"
+                + "@server.example.com"
+                + "/my-service-db?connectTimeoutMS=2000");
+  }
 }
