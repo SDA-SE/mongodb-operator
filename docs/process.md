@@ -11,8 +11,6 @@ Kubernetes will care about deleting the secret when deletion of the `MongoDb` re
 The process is described in the following sequence diagram:
 
 ```plantuml
-!theme cerulean
-
 box
   participant "K8S" as k8s
   entity MongoDb as MDB
