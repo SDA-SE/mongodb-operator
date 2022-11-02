@@ -33,8 +33,10 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.javaoperatorsdk.operator.api.config.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
+import io.javaoperatorsdk.operator.api.reconciler.ResourceDiscriminator;
 import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.managed.ManagedDependentResourceContext;
+import io.javaoperatorsdk.operator.processing.event.EventSourceRetriever;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -539,12 +541,23 @@ class MongoDbControllerTest {
     }
 
     @Override
+    public <R> Optional<R> getSecondaryResource(
+        Class<R> expectedType, ResourceDiscriminator<R, MongoDbCustomResource> discriminator) {
+      return Optional.empty();
+    }
+
+    @Override
     public ControllerConfiguration<MongoDbCustomResource> getControllerConfiguration() {
       return null;
     }
 
     @Override
     public ManagedDependentResourceContext managedDependentResourceContext() {
+      return null;
+    }
+
+    @Override
+    public EventSourceRetriever<MongoDbCustomResource> eventSourceRetriever() {
       return null;
     }
   }
