@@ -10,8 +10,8 @@ import com.sdase.k8s.operator.mongodb.monitoring.MonitoringServer;
 import com.sdase.k8s.operator.mongodb.monitoring.ReadinessCheck;
 import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
 import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.javaoperatorsdk.operator.Operator;
 import io.javaoperatorsdk.operator.api.config.ConfigurationServiceProvider;
 import java.util.List;
@@ -76,7 +76,7 @@ public class MongoDbOperator {
   }
 
   public static void main(String[] args) {
-    try (var client = new DefaultKubernetesClient()) {
+    try (var client = new KubernetesClientBuilder().build()) {
       new MongoDbOperator(client, 8081);
     }
   }
