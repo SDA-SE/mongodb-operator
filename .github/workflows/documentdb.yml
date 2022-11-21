@@ -50,7 +50,7 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 10
           warning_on_retry: true
-          command: ./gradlew --continue test --stacktrace
+          command: ./gradlew --continue test --stacktrace --info
 
       - name: Disconnect
         if: always()
