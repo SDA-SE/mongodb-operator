@@ -20,7 +20,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MongoDbService {
+public class MongoDbService implements AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbService.class);
 
@@ -239,6 +239,11 @@ public class MongoDbService {
 
   public ConnectionString getConnectionString() {
     return this.connectionString;
+  }
+
+  @Override
+  public void close() {
+    mongoClient.close();
   }
 
   public enum CreateDatabaseResult {

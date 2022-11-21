@@ -28,7 +28,7 @@ public class MongoDbOperator {
     operator.register(createMongoDbController(kubernetesClient, mongoDbService));
     operator.start(); // adds some checks and produces some logs, exits on error
     var monitoringServer = startMonitoringServer(monitoringPort, mongoDbPrivilegesCheck);
-    keepRunning(monitoringServer);
+    keepRunning(monitoringServer, mongoDbService);
   }
 
   private MongoDbPrivilegesCheck verifyPrivileges(MongoDbService mongoDbService) {
