@@ -42,6 +42,7 @@ public abstract class AbstractMongoDbTest {
   private static MongodProcess mongod;
 
   private static MongoClient mongo;
+  private static String testClientConnectionString;
 
   private static String connectionString;
   private static boolean useExternalDb;
@@ -58,7 +59,7 @@ public abstract class AbstractMongoDbTest {
     if (useExternalDb) {
       LOG.info("Test configured to execute with external database.");
       connectionString = mongoDbUrlOverride;
-      mongo = new MongoClient(connectionString);
+      testClientConnectionString = connectionString;
     } else {
       LOG.info("Test will start local MongoDB database.");
       String host = Network.getLocalHost().getHostName();
@@ -71,13 +72,14 @@ public abstract class AbstractMongoDbTest {
       var password = UUID.randomUUID().toString();
 
       connectionString = String.format("mongodb://%s:%s@%s:%d", username, password, host, port);
-      mongo = new MongoClient(String.format("%s:%d", host, port)); // "no user" is admin in local db
+      testClientConnectionString =
+          String.format("%s:%d", host, port); // "no user" is admin in local db
       createDatabaseUser(username, password);
     }
   }
 
   protected static void removeDatabase(String databaseName) {
-    mongo.getDatabase(databaseName).drop();
+    getMongoClient().getDatabase(databaseName).drop();
   }
 
   protected static void removeDatabases() {
@@ -106,7 +108,7 @@ public abstract class AbstractMongoDbTest {
   protected void createDb(String database) {
     var dummyDocument = Document.parse("{\"test\":\"bar\"}");
     var collectionName = "test-provisioning-collection";
-    mongo.getDatabase(database).getCollection(collectionName).insertOne(dummyDocument);
+    getMongoClient().getDatabase(database).getCollection(collectionName).insertOne(dummyDocument);
   }
 
   protected String getMongoDbConnectionString() {
@@ -131,11 +133,18 @@ public abstract class AbstractMongoDbTest {
             .append(
                 "roles",
                 List.of(new BasicDBObject("role", "userAdminAnyDatabase").append("db", "admin")));
-    mongo.getDatabase("admin").runCommand(createUserCommand);
+    getMongoClient().getDatabase("admin").runCommand(createUserCommand);
   }
 
   private static void dropTestUser() {
     var dropUserCommand = new BasicDBObject("dropUser", "test-user");
-    mongo.getDatabase("admin").runCommand(dropUserCommand);
+    getMongoClient().getDatabase("admin").runCommand(dropUserCommand);
+  }
+
+  private static synchronized MongoClient getMongoClient() {
+    if (mongo == null) {
+      mongo = new MongoClient(testClientConnectionString);
+    }
+    return mongo;
   }
 }
