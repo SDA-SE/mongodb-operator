@@ -30,17 +30,21 @@ class KeepAliveRunner {
         }
       } catch (InterruptedException e) {
         LOG.info("Got interrupted.", e);
+        closeAll();
         Thread.currentThread().interrupt();
       }
-      toBeClosedAfterFinish.forEach(
-          c -> {
-            try {
-              c.close();
-            } catch (Exception e) {
-              LOG.warn("Closing after finish threw exception", e);
-            }
-          });
       LOG.info("Exiting");
     }
+  }
+
+  private void closeAll() {
+    toBeClosedAfterFinish.forEach(
+        c -> {
+          try {
+            c.close();
+          } catch (Exception e) {
+            LOG.warn("Closing after finish threw exception", e);
+          }
+        });
   }
 }
