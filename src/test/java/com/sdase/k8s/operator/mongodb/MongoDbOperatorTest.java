@@ -108,7 +108,7 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
       await().atMost(20, SECONDS).untilAsserted(this::assertLivenessEndpointAvailable);
       await().atMost(20, SECONDS).untilAsserted(this::assertReadinessEndpointAvailable);
     } finally {
-      testThread.interrupt();
+      // testThread.interrupt();
       Spark.stop();
     }
   }
