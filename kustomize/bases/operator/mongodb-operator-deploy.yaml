@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: mongodb-operator
   annotations:
-    kube-score/ignore: pod-networkpolicy,container-resources
+    kube-score/ignore: pod-networkpolicy
 spec:
   replicas: 1
   revisionHistoryLimit: 0
@@ -29,8 +29,10 @@ spec:
                   key: mongodbConnectionString
           resources:
             limits:
+              cpu: 300m
               memory: 256Mi
             requests:
+              cpu: 250m
               memory: 225Mi
           readinessProbe:
             httpGet:
