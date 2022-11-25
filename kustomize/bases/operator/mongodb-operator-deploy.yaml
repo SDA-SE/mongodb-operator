@@ -29,9 +29,9 @@ spec:
                   key: mongodbConnectionString
           resources:
             limits:
-              memory: 128Mi
+              memory: 256Mi
             requests:
-              memory: 96Mi
+              memory: 225Mi
           readinessProbe:
             httpGet:
               port: 8081
