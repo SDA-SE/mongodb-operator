@@ -1,0 +1,237 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mongodb-operator
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: mongodbs.persistence.sda-se.com
+spec:
+  group: persistence.sda-se.com
+  names:
+    kind: MongoDb
+    plural: mongodbs
+    shortNames:
+    - mongo
+    singular: mongodb
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        properties:
+          spec:
+            description: |
+              A MongoDB custom resource initiates a request for a database for the namespace where it
+              is located.
+              A database user with access to a database named `[metadata.namespace]_[metadata.name]`
+              will be created by the MongoDB Controller in an already existing MongoDB instance.
+              A secret containing username and a random password with the same `metadata.name` as this
+              custom resource will be provided in the same namespace.
+              Currently the database host, port, options and other parameters than username and
+              password must be set according the MongoDB instance configured for the cluster in the
+              MongoDB Controller.
+              The secret and the user will be removed, when this custom resource is deleted.
+              The database will be deleted if `spec.database.pruneAfterDelete` is `true`.
+            properties:
+              database:
+                description: Specifies handling of the database
+                properties:
+                  connectionStringOptions:
+                    description: |
+                      Overwrites the default connection string options used by the MongoDB operator.
+                      Connection options are pairs in the following form: name=value
+                      Separate options with the ampersand (i.e. &) character name1=value1&name2=value2.
+                    example: readPreference=secondaryPreferred&retryWrites=false
+                    type: string
+                  pruneAfterDelete:
+                    default: false
+                    description: |
+                      If the database **including it's content** should be deleted after the
+                      custom resource is removed.
+                      This does not affect deletion of the provided secret and the created
+                      database user.
+                      The secret and the user will be always removed.
+
+                      In development cluster it is useful to clean up databases, especially of PR
+                      deployments to keep the database instance small.
+                      In a production environment you most likely want to avoid deleting the
+                      content accidentally.
+                    type: boolean
+                type: object
+              secret:
+                description: Specifies how the secret should be created.
+                properties:
+                  connectionStringKey:
+                    default: connectionString
+                    description: |
+                      The name of the key in the `data` section where the connectionString is located.
+                    example: MONGODB_CONNECTION_STRING
+                    type: string
+                  databaseKey:
+                    default: database
+                    description: |
+                      The name of the key in the `data` section where the name of the provided
+                      database is located.
+                    example: MONGODB_USERNAME
+                    type: string
+                  passwordKey:
+                    default: password
+                    description: |
+                      The name of the key in the `data` section where the password is located.
+                    example: MONGODB_PASSWORD
+                    type: string
+                  usernameKey:
+                    default: username
+                    description: |
+                      The name of the key in the `data` section where the username is located.
+                    example: MONGODB_USERNAME
+                    type: string
+                type: object
+            type: object
+          status:
+            properties:
+              attempts:
+                description: How often it has been tried to create database user and
+                  secret.
+                type: number
+              conditions:
+                items:
+                  properties:
+                    additionalProperties:
+                      type: object
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: datetime
+                      type: string
+                    message:
+                      description: Human-readable message indicating details about
+                        last transition.
+                      type: string
+                    observedGeneration:
+                      type: number
+                    reason:
+                      description: Unique, one-word, CamelCase reason for the condition's
+                        last transition.
+                      type: string
+                    status:
+                      description: Status is the status of the condition. Can be True,
+                        False, Unknown.
+                      type: string
+                    type:
+                      description: Type is the type of the condition.
+                      type: string
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mongodb-operator
+  namespace: mongodb-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mongodb-operator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - update
+- apiGroups:
+  - persistence.sda-se.com
+  resources:
+  - mongodbs
+  verbs:
+  - watch
+  - list
+  - get
+  - update
+- apiGroups:
+  - persistence.sda-se.com
+  resources:
+  - mongodbs/status
+  verbs:
+  - watch
+  - list
+  - get
+  - update
+- apiGroups:
+  - apiextensions.k8s.io
+  resourceNames:
+  - mongodbs.persistence.sda-se.com
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mongodb-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mongodb-operator
+subjects:
+- kind: ServiceAccount
+  name: mongodb-operator
+  namespace: mongodb-operator
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kube-score/ignore: pod-networkpolicy,container-resources
+  name: mongodb-operator
+  namespace: mongodb-operator
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      serverpod: mongodb-operator
+  template:
+    metadata:
+      labels:
+        serverpod: mongodb-operator
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - env:
+        - name: MONGODB_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              key: mongodbConnectionString
+              name: mongodb-operator
+        image: quay.io/sdase/mongodb-operator:0.11.22
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8081
+          initialDelaySeconds: 10
+        name: operator
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8081
+          initialDelaySeconds: 10
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            memory: 96Mi
+      serviceAccountName: mongodb-operator

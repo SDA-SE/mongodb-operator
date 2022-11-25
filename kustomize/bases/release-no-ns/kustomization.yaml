@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../operator
+images:
+  - name: localhost:5000/mongodb-operator
+    newName: quay.io/sdase/mongodb-operator
+    newTag: 0.11.22
