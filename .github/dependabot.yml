@@ -10,7 +10,7 @@ updates:
     timezone: Europe/Berlin
   open-pull-requests-limit: 10
   reviewers:
-  - SDA-SE/mr-kaplan
+  - SDA-SE/bedrock
   commit-message:
     prefix: fix
     prefix-development: chore
