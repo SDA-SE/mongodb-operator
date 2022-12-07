@@ -39,7 +39,7 @@ jib {
 }
 
 project.ext {
-  mongoDbDriverVersion = "4.7.2"
+  mongoDbDriverVersion = "4.8.1"
   slf4jVersion = "2.0.3"
   operatorFrameworkVersion = "4.1.1"
   mockitoVersion = "4.9.0"
