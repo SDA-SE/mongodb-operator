@@ -86,7 +86,7 @@ dependencies {
   }
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
   testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
-  testImplementation "uk.org.webcompere:system-stubs-jupiter:2.0.1", {
+  testImplementation "uk.org.webcompere:system-stubs-jupiter:2.0.2", {
     // conflicts with mockitoVersion
     exclude group: 'org.mockito', 'module': 'mockito-inline'
   }
