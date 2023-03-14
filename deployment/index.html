@@ -507,7 +507,17 @@
 <h1 id="deployment-of-the-mongodb-operator">Deployment of the MongoDB Operator<a class="headerlink" href="#deployment-of-the-mongodb-operator" title="Permanent link">&para;</a></h1>
 <h2 id="mongodb-operator-requirements">MongoDB Operator Requirements<a class="headerlink" href="#mongodb-operator-requirements" title="Permanent link">&para;</a></h2>
 <p>To function properly, some requirements in the Kubernetes deployment must be met, and a MongoDB
-database instance must be set up.</p>
+database instance dedicated to the Kubernetes cluster must be set up.</p>
+<p>The MongoDB Operator expects a strict 1 to 1 relation of Kubernetes Cluster and MongoDB database
+instance.
+Exactly one MongoDB Operator replica must be deployed in one Kubernetes Cluster watching all
+namespaces.
+This MongoDB Operator is the only one managing users of the MongoDB database instance dedicated to
+the Kubernetes cluster.
+Database names and usernames are created based on namespace name and MongoDB resource name to avoid
+naming conflicts.
+A database instance managed by multiple MongoDB Operators for multiple clusters would cause name
+conflicts and access to the same database from multiple clusters.</p>
 <h3 id="kubernetes">Kubernetes<a class="headerlink" href="#kubernetes" title="Permanent link">&para;</a></h3>
 <p>An <a href="https://github.com/SDA-SE/mongodb-operator/tree/master/kustomize/bases/operator">example deployment of the MongoDB Operator</a>
 that covers the following requirements is available in the GitHub Repository of the MongoDB
