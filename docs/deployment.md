@@ -3,7 +3,18 @@
 ## MongoDB Operator Requirements
 
 To function properly, some requirements in the Kubernetes deployment must be met, and a MongoDB
-database instance must be set up.
+database instance dedicated to the Kubernetes cluster must be set up.
+
+The MongoDB Operator expects a strict 1 to 1 relation of Kubernetes Cluster and MongoDB database
+instance.
+Exactly one MongoDB Operator replica must be deployed in one Kubernetes Cluster watching all
+namespaces.
+This MongoDB Operator is the only one managing users of the MongoDB database instance dedicated to
+the Kubernetes cluster.
+Database names and usernames are created based on namespace name and MongoDB resource name to avoid
+naming conflicts.
+A database instance managed by multiple MongoDB Operators for multiple clusters would cause name
+conflicts and access to the same database from multiple clusters.
 
 
 ### Kubernetes
