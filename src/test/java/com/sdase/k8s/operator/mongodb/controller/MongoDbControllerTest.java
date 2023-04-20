@@ -29,6 +29,7 @@ import io.fabric8.kubernetes.api.model.Condition;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.javaoperatorsdk.operator.api.config.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -523,7 +524,7 @@ class MongoDbControllerTest {
     verifyNoInteractions(taskFactorySpy, mongoDbServiceMock, kubernetesClientAdapterMock);
   }
 
-  private static class MongoDbCustomResourceContext implements Context<MongoDbCustomResource> {
+  private class MongoDbCustomResourceContext implements Context<MongoDbCustomResource> {
 
     @Override
     public Optional<RetryInfo> getRetryInfo() {
@@ -559,6 +560,11 @@ class MongoDbControllerTest {
     @Override
     public EventSourceRetriever<MongoDbCustomResource> eventSourceRetriever() {
       return null;
+    }
+
+    @Override
+    public KubernetesClient getClient() {
+      return kubernetesClientAdapterMock.getKubernetesClient();
     }
   }
 }

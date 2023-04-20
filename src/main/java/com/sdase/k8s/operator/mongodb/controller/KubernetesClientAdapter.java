@@ -14,4 +14,8 @@ public class KubernetesClientAdapter {
   void createSecretInNamespace(String namespace, Secret secret) {
     kubernetesClient.secrets().inNamespace(namespace).create(secret);
   }
+
+  KubernetesClient getKubernetesClient() {
+    return kubernetesClient;
+  }
 }
