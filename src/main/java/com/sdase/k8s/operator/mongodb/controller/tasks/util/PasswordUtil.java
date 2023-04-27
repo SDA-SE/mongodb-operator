@@ -22,7 +22,7 @@ public final class PasswordUtil {
     String password;
     do {
       password = createPasswordInternal();
-    } while (!containsAllTypeOfCharacters(password));
+    } while (!isValidPassword(password));
     return password;
   }
 
@@ -31,10 +31,13 @@ public final class PasswordUtil {
         PASSWORD_LENGTH, 0, CHARS.length - 1, false, false, CHARS, SECURE_RANDOM);
   }
 
-  private static boolean containsAllTypeOfCharacters(String password) {
+  // only for testing
+  static boolean isValidPassword(String password) {
     return password.chars().anyMatch(c1 -> UPPER_CASE.chars().anyMatch(c2 -> c2 == c1))
         && password.chars().anyMatch(c1 -> LOWER_CASE.chars().anyMatch(c2 -> c2 == c1))
         && password.chars().anyMatch(c1 -> DIGITS.chars().anyMatch(c2 -> c2 == c1))
-        && password.chars().skip(1).anyMatch(c1 -> SPECIAL_CHARS.chars().anyMatch(c2 -> c2 == c1));
+        && password.chars().anyMatch(c1 -> SPECIAL_CHARS.chars().anyMatch(c2 -> c2 == c1))
+        // first character should not be a special character to avoid invalid configuration files
+        && SPECIAL_CHARS.chars().noneMatch(c -> c == password.charAt(0));
   }
 }
