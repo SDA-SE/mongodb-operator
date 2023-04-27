@@ -3,7 +3,7 @@ package com.sdase.k8s.operator.mongodb.controller.tasks.util;
 import java.security.SecureRandom;
 import org.apache.commons.lang3.RandomStringUtils;
 
-public class PasswordUtil {
+public final class PasswordUtil {
 
   private static final int PASSWORD_LENGTH = 60;
   private static final SecureRandom SECURE_RANDOM = new SecureRandom();
@@ -35,6 +35,6 @@ public class PasswordUtil {
     return password.chars().anyMatch(c1 -> UPPER_CASE.chars().anyMatch(c2 -> c2 == c1))
         && password.chars().anyMatch(c1 -> LOWER_CASE.chars().anyMatch(c2 -> c2 == c1))
         && password.chars().anyMatch(c1 -> DIGITS.chars().anyMatch(c2 -> c2 == c1))
-        && password.chars().anyMatch(c1 -> SPECIAL_CHARS.chars().anyMatch(c2 -> c2 == c1));
+        && password.chars().skip(1).anyMatch(c1 -> SPECIAL_CHARS.chars().anyMatch(c2 -> c2 == c1));
   }
 }

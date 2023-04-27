@@ -8,6 +8,8 @@ import org.junit.jupiter.api.RepeatedTest;
 
 class PasswordUtilTest {
 
+  private static final String SPECIAL_CHARS = "-_,.";
+
   @RepeatedTest(1000)
   void shouldAlwaysHaveUpperCaseLetters() {
     var actual = PasswordUtil.createPassword();
@@ -29,7 +31,13 @@ class PasswordUtilTest {
   @RepeatedTest(1000)
   void shouldAlwaysHaveSpecialCharacters() {
     var actual = PasswordUtil.createPassword();
-    assertThat(actual.toCharArray()).containsAnyOf("-_,.".toCharArray());
+    assertThat(actual.toCharArray()).containsAnyOf(SPECIAL_CHARS.toCharArray());
+  }
+
+  @RepeatedTest(1000)
+  void shouldNeverContainSpecialCharacterAtTheBeginning() {
+    var actual = PasswordUtil.createPassword();
+    assertThat(Character.toString(actual.charAt(0))).doesNotContain(SPECIAL_CHARS);
   }
 
   @RepeatedTest(1000)
