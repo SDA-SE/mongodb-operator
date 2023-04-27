@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 
 import com.mongodb.ConnectionString;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class PasswordUtilTest {
 
@@ -61,5 +63,16 @@ class PasswordUtilTest {
         .as("Password %s should not throw exception", actual)
         .isThrownBy(
             () -> new ConnectionString("mongodb://username:foo_" + actual + "_bar@mongodb/my-db"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(chars = {'-', '_', ',', '.'})
+  void shouldNotAcceptPasswordWithSpecialCharacterAtTheBeginning(char specialChar) {
+    String given = PasswordUtil.createPassword();
+    given = "" + specialChar + given.substring(1);
+
+    var actual = PasswordUtil.isValidPassword(given);
+
+    assertThat(actual).isFalse();
   }
 }
