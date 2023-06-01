@@ -59,7 +59,7 @@ public class MongoDbOperator {
     return certificates.map(SslUtil::createTruststoreFromPemKey).map(SslUtil::createSslContext);
   }
 
-  @SuppressWarnings("java:S2095") // MonitoringServer is closed by caller
+  @SuppressWarnings({"java:S2095", "resource"}) // MonitoringServer is closed by caller
   private MonitoringServer startMonitoringServer(int port, ReadinessCheck... readinessChecks) {
     return new MonitoringServer(port, List.of(readinessChecks)).start();
   }
