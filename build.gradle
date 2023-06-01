@@ -25,7 +25,7 @@ tasks.withType(JavaCompile) {
 jib {
   container.ports = ['8081']
   container.args = []
-  from.image = 'quay.io/sdase/openjdk-runtime:11-hotspot-distroless'
+  from.image = 'gcr.io/distroless/java11-debian11:nonroot'
   container.user = 10001
   to.image = "$rootProject.name:latest"
   container.labels = [
