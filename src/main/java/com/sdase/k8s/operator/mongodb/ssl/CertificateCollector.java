@@ -22,7 +22,7 @@ public class CertificateCollector {
   /**
    * @param pathToDirectoryWithCertificates the directory where *.pem with CA certificates are
    *     located. The path is scanned recursively. All files but *.pem files are ignored. The method
-   *     will fail, if the path is not readable but will ignore if it is not a dorectory or does not
+   *     will fail, if the path is not readable but will ignore if it is not a directory or does not
    *     exist.
    */
   public CertificateCollector(String pathToDirectoryWithCertificates) {
