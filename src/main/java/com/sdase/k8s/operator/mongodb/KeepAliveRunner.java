@@ -21,11 +21,14 @@ class KeepAliveRunner {
     this.toBeClosedAfterFinish.addAll(List.of(toBeClosedAfterFinish));
   }
 
+  @SuppressWarnings({
+    "InfiniteLoopStatement",
+    "java:S2189"
+  }) // intentional infinite loop waiting to be interrupted
   void keepAlive() {
     synchronized (WAITER) {
       try {
-        //noinspection InfiniteLoopStatement
-        while (true) { // NOSONAR
+        while (true) {
           WAITER.wait();
         }
       } catch (InterruptedException e) {

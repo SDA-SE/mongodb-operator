@@ -41,11 +41,12 @@ public class CertificateCollector {
     return findAllPemContent(optionalPath.get());
   }
 
+  @SuppressWarnings("java:S3864") // peek is fine for debug logs
   private Optional<String> findAllPemContent(Path path) {
     try (Stream<Path> pathStream = Files.walk(path, MAX_RECURSIVE_DEPTH)) {
       return Optional.of(
               pathStream
-                  .peek(p -> LOG.debug("Checking {}", p)) // NOSONAR java:S3864
+                  .peek(p -> LOG.debug("Checking {}", p))
                   .filter(Files::isRegularFile)
                   .filter(this::isPemFile)
                   .map(this::readContent)
