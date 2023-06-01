@@ -39,19 +39,19 @@ public class EnvironmentConfig {
   }
 
   private void validateConfig() {
-    var constraintViolations =
+    try (var validatorFactory =
         Validation.byDefaultProvider()
             .configure()
             .messageInterpolator(new ParameterMessageInterpolator())
-            .buildValidatorFactory()
-            .getValidator()
-            .validate(this);
-    if (constraintViolations.isEmpty()) {
-      LOG.info("Config is valid.");
-      return;
+            .buildValidatorFactory()) {
+      var constraintViolations = validatorFactory.getValidator().validate(this);
+      if (constraintViolations.isEmpty()) {
+        LOG.info("Config is valid.");
+        return;
+      }
+      constraintViolations.forEach(
+          cv -> LOG.info("{} is invalid: {}", cv.getPropertyPath(), cv.getMessage()));
+      throw new ValidationException("Invalid configuration. Check log for further information.");
     }
-    constraintViolations.forEach(
-        cv -> LOG.info("{} is invalid: {}", cv.getPropertyPath(), cv.getMessage()));
-    throw new ValidationException("Invalid configuration. Check log for further information.");
   }
 }
