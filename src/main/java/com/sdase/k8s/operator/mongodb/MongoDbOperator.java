@@ -10,10 +10,11 @@ import com.sdase.k8s.operator.mongodb.monitoring.MonitoringServer;
 import com.sdase.k8s.operator.mongodb.monitoring.ReadinessCheck;
 import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
 import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.javaoperatorsdk.operator.Operator;
 import io.javaoperatorsdk.operator.api.config.ConfigurationServiceProvider;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import javax.net.ssl.SSLContext;
@@ -22,7 +23,8 @@ public class MongoDbOperator {
 
   public MongoDbOperator(KubernetesClient kubernetesClient, int monitoringPort) {
     var operator = new Operator(kubernetesClient, ConfigurationServiceProvider.instance());
-    operator.installShutdownHook();
+    // timeout as in ConfigurationService.DEFAULT_TERMINATION_TIMEOUT_SECONDS
+    operator.installShutdownHook(Duration.ofSeconds(10L));
     var mongoDbService = createMongoDbService();
     var mongoDbPrivilegesCheck = verifyPrivileges(mongoDbService);
     operator.register(createMongoDbController(kubernetesClient, mongoDbService));
@@ -76,7 +78,7 @@ public class MongoDbOperator {
   }
 
   public static void main(String[] args) {
-    try (var client = new DefaultKubernetesClient()) {
+    try (var client = new KubernetesClientBuilder().build()) {
       new MongoDbOperator(client, 8081);
     }
   }
