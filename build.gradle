@@ -92,7 +92,7 @@ dependencies {
   }
   testImplementation "org.mockito:mockito-inline:${mockitoVersion}"
   testImplementation 'org.awaitility:awaitility:4.2.0'
-  testImplementation 'io.fabric8:kubernetes-server-mock:6.5.1', {
+  testImplementation 'io.fabric8:kubernetes-server-mock:6.6.2', {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
   }
