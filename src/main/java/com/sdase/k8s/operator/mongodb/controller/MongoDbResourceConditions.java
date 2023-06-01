@@ -38,6 +38,7 @@ public class MongoDbResourceConditions {
     return this;
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   MongoDbResourceConditions applyUsernameCreationFailed(String usernameFailedErrorMessage) {
     this.createUsernameSuccessful = false;
     this.usernameMessage = usernameFailedErrorMessage;
@@ -51,6 +52,7 @@ public class MongoDbResourceConditions {
     return this;
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   MongoDbResourceConditions applyDatabaseCreationFailed() {
     this.createDatabaseSuccessful = false;
     this.createDatabaseMessage = "Database creation failed";

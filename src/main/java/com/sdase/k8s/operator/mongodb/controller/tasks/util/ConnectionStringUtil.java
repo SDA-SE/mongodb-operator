@@ -1,7 +1,6 @@
 package com.sdase.k8s.operator.mongodb.controller.tasks.util;
 
 import com.mongodb.ConnectionString;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -59,10 +58,6 @@ public class ConnectionStringUtil {
   }
 
   private static String encodeValue(String value) {
-    try {
-      return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
-    } catch (UnsupportedEncodingException ex) {
-      throw new IllegalStateException(ex.getCause());
-    }
+    return URLEncoder.encode(value, StandardCharsets.UTF_8);
   }
 }

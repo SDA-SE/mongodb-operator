@@ -30,8 +30,8 @@ public class User {
   }
 
   public static class UserRole {
-    private String role;
-    private String db;
+    private final String role;
+    private final String db;
 
     public UserRole(String role, String db) {
       this.role = role;
