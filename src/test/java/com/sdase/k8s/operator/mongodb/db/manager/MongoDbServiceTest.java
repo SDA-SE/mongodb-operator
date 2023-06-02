@@ -47,34 +47,34 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
       return;
     }
     long count = -1; // not zero -> fail
-    var mongoClient = new MongoClient(getMongoDbConnectionString());
-    Document dbStats = new Document("usersInfo", 1);
-    Document command = mongoClient.getDatabase("admin").runCommand(dbStats);
-    var usersResult = command.get("users");
-    if (usersResult instanceof ArrayList) {
-      var users = (ArrayList<?>) usersResult;
-      count =
-          users.stream()
-              .filter(Document.class::isInstance)
-              .map(Document.class::cast)
-              .map(d -> d.get("user"))
-              .filter(Objects::nonNull)
-              .filter(String.class::isInstance)
-              .map(String.class::cast)
-              .filter(
-                  u ->
-                      u.startsWith("test-db-")
-                          || u.startsWith("existing-test-db-")
-                          || u.startsWith("test-db1-")
-                          || u.startsWith("test-db2-"))
-              .count();
+    try (var mongoClient = new MongoClient(getMongoDbConnectionString())) {
+      Document dbStats = new Document("usersInfo", 1);
+      Document command = mongoClient.getDatabase("admin").runCommand(dbStats);
+      var usersResult = command.get("users");
+      if (usersResult instanceof ArrayList<?> users) {
+        count =
+            users.stream()
+                .filter(Document.class::isInstance)
+                .map(Document.class::cast)
+                .map(d -> d.get("user"))
+                .filter(Objects::nonNull)
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .filter(
+                    u ->
+                        u.startsWith("test-db-")
+                            || u.startsWith("existing-test-db-")
+                            || u.startsWith("test-db1-")
+                            || u.startsWith("test-db2-"))
+                .count();
+      }
+      assertThat(count)
+          .describedAs(
+              "Counted %d test users, should be zero but allowing up to 20 to cover parallel jobs.",
+              count)
+          .isNotNegative()
+          .isLessThanOrEqualTo(20);
     }
-    assertThat(count)
-        .describedAs(
-            "Counted %d test users, should be zero but allowing up to 20 to cover parallel jobs.",
-            count)
-        .isNotNegative()
-        .isLessThanOrEqualTo(20);
   }
 
   @Test
