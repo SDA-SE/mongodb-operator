@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -62,7 +63,7 @@ public abstract class AbstractMongoDbTest {
     } else {
       LOG.info("Test will start local MongoDB database.");
       String host = Network.getLocalHost().getHostName();
-      int port = Network.getFreeServerPort();
+      int port = getFreeServerPort();
       var mongodConfig = createMongodConfig(host, port);
       mongodExe = starter.prepare(mongodConfig);
       mongod = mongodExe.start();
@@ -74,6 +75,10 @@ public abstract class AbstractMongoDbTest {
       mongo = new MongoClient(String.format("%s:%d", host, port)); // "no user" is admin in local db
       createDatabaseUser(username, password);
     }
+  }
+
+  private static int getFreeServerPort() throws IOException {
+    return Network.freeServerPorts(Network.getLocalHost(), 10)[new Random().nextInt(10)];
   }
 
   protected static void removeDatabase(String databaseName) {
