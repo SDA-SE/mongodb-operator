@@ -17,7 +17,15 @@ public class EnvironmentConfig {
 
   private String trustedCertificatesDir;
 
+  private final ConfigKeyResolver configKeyResolver;
+
   public EnvironmentConfig() {
+    this(System::getenv);
+  }
+
+  // internally used for testing without mocking System.getenv()
+  EnvironmentConfig(ConfigKeyResolver configKeyResolver) {
+    this.configKeyResolver = configKeyResolver;
     createConfig();
     validateConfig();
   }
@@ -31,8 +39,8 @@ public class EnvironmentConfig {
   }
 
   private void createConfig() {
-    mongodbConnectionString = System.getenv("MONGODB_CONNECTION_STRING");
-    trustedCertificatesDir = System.getenv("TRUSTED_CERTIFICATES_DIR");
+    mongodbConnectionString = configKeyResolver.getValue("MONGODB_CONNECTION_STRING");
+    trustedCertificatesDir = configKeyResolver.getValue("TRUSTED_CERTIFICATES_DIR");
     if (StringUtils.isBlank(trustedCertificatesDir)) {
       trustedCertificatesDir = DEFAULT_TRUSTED_CERTIFICATES_DIR;
     }
@@ -53,5 +61,17 @@ public class EnvironmentConfig {
           cv -> LOG.info("{} is invalid: {}", cv.getPropertyPath(), cv.getMessage()));
       throw new ValidationException("Invalid configuration. Check log for further information.");
     }
+  }
+
+  interface ConfigKeyResolver {
+    /**
+     * Retrieves the value for the given {@code key} as configured in the current environment. By
+     * {@linkplain EnvironmentConfig#EnvironmentConfig() default}, the {@linkplain
+     * System#getenv(String) system environment variables} are used for lookup.
+     *
+     * @param key the config key
+     * @return the value or {@code null} if not defined
+     */
+    String getValue(String key);
   }
 }

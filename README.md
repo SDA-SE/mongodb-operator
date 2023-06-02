@@ -181,7 +181,7 @@ $ ./stop.sh
    > Task :jib
    
    Containerizing application to localhost:5000/mongodb-operator:local...
-   Base image 'gcr.io/distroless/java11-debian11:nonroot' does not use a specific image digest - build may not be reproducible
+   Base image 'gcr.io/distroless/java17-debian11:nonroot' does not use a specific image digest - build may not be reproducible
    The credential helper (docker-credential-desktop) has nothing for server URL: localhost:5000
    
    Got output:

@@ -39,11 +39,11 @@ jobs:
           name: java-ci-test-results
           path: ./build
 
-      - name: Set up JDK 11
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: 11
+          java-version: 17
           cache: 'gradle'
 
       - name: Sonarcloud
