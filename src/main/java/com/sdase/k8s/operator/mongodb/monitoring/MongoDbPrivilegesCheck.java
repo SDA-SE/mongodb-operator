@@ -50,7 +50,7 @@ public class MongoDbPrivilegesCheck implements ReadinessCheck {
     return user.map(
             u ->
                 u.getRoles().stream()
-                    .map(User.UserRole::getRole)
+                    .map(User.UserRole::role)
                     .anyMatch(requiredRolesAnyOf::contains))
         .orElse(false);
   }

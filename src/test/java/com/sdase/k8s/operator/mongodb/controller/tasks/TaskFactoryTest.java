@@ -25,9 +25,9 @@ class TaskFactoryTest {
 
     var actual = defaultTaskFactory.newDeleteTask(given);
 
-    assertThat(actual.getSource()).isSameAs(given);
-    assertThat(actual.getDatabaseName()).contains(givenNamespace).contains(givenName);
-    assertThat(actual.getUsername()).contains(givenNamespace).contains(givenName);
+    assertThat(actual.source()).isSameAs(given);
+    assertThat(actual.databaseName()).contains(givenNamespace).contains(givenName);
+    assertThat(actual.username()).contains(givenNamespace).contains(givenName);
   }
 
   @Test
@@ -54,17 +54,17 @@ class TaskFactoryTest {
 
     var actual = defaultTaskFactory.newCreateTask(given, givenConnectionString);
 
-    assertThat(actual.getSource()).isSameAs(given);
-    assertThat(actual.getDatabaseName()).contains(givenNamespace).contains(givenName);
-    assertThat(actual.getUsername()).contains(givenNamespace).contains(givenName);
-    final var password = actual.getPassword();
+    assertThat(actual.source()).isSameAs(given);
+    assertThat(actual.databaseName()).contains(givenNamespace).contains(givenName);
+    assertThat(actual.username()).contains(givenNamespace).contains(givenName);
+    final var password = actual.password();
     assertThat(password).isNotBlank();
-    assertThat(actual.getConnectionString())
+    assertThat(actual.connectionString())
         .isEqualTo(
             ConnectionStringUtil.createConnectionString(
-                actual.getDatabaseName(),
-                actual.getUsername(),
-                actual.getPassword(),
+                actual.databaseName(),
+                actual.username(),
+                actual.password(),
                 "readPreference=secondaryPreferred&retryWrites=false",
                 givenConnectionString));
   }

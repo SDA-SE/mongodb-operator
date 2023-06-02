@@ -29,21 +29,5 @@ public class User {
     return roles;
   }
 
-  public static class UserRole {
-    private final String role;
-    private final String db;
-
-    public UserRole(String role, String db) {
-      this.role = role;
-      this.db = db;
-    }
-
-    public String getRole() {
-      return role;
-    }
-
-    public String getDb() {
-      return db;
-    }
-  }
+  public record UserRole(String role, String db) {}
 }

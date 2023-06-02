@@ -14,11 +14,11 @@ public class V1SecretBuilder {
 
   Secret createSecretForOwner(CreateDatabaseTask createDatabaseTask) {
     var secret = new Secret();
-    var owner = createDatabaseTask.getSource();
-    var database = createDatabaseTask.getDatabaseName();
-    var username = createDatabaseTask.getUsername();
-    var password = createDatabaseTask.getPassword();
-    var connectionString = createDatabaseTask.getConnectionString();
+    var owner = createDatabaseTask.source();
+    var database = createDatabaseTask.databaseName();
+    var username = createDatabaseTask.username();
+    var password = createDatabaseTask.password();
+    var connectionString = createDatabaseTask.connectionString();
     secret.setData(
         Map.of(
             owner.getSpec().getSecret().getDatabaseKey(),

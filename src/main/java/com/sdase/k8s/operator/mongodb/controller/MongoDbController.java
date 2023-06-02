@@ -51,17 +51,17 @@ public class MongoDbController
       var deleteDatabaseTask = taskFactory.newDeleteTask(resource);
       var userDropped =
           mongoDbService.dropDatabaseUser(
-              deleteDatabaseTask.getDatabaseName(), deleteDatabaseTask.getUsername());
+              deleteDatabaseTask.databaseName(), deleteDatabaseTask.username());
       if (!userDropped) {
         throw new IllegalStateException("Failed to drop user");
       }
-      if (deleteDatabaseTask.isPruneDb()) {
-        boolean databaseDeleted = mongoDbService.dropDatabase(deleteDatabaseTask.getDatabaseName());
+      if (deleteDatabaseTask.pruneDb()) {
+        boolean databaseDeleted = mongoDbService.dropDatabase(deleteDatabaseTask.databaseName());
         if (!databaseDeleted) {
           if (context.getRetryInfo().map(RetryInfo::isLastAttempt).orElse(false)) {
             LOG.warn(
                 "Last attempt to delete database {} failed. Skipping.",
-                deleteDatabaseTask.getDatabaseName());
+                deleteDatabaseTask.databaseName());
             return DeleteControl.defaultDelete();
           }
           throw new IllegalStateException("Failed to drop database");
@@ -104,7 +104,7 @@ public class MongoDbController
       MongoDbCustomResource resource, MongoDbResourceConditions trackedConditions) {
     try {
       var task = taskFactory.newCreateTask(resource, mongoDbService.getConnectionString());
-      trackedConditions.applyUsernameCreated(task.getUsername());
+      trackedConditions.applyUsernameCreated(task.username());
       return Optional.of(task);
     } catch (IllegalNameException e) {
       trackedConditions.applyUsernameCreationFailed(e.getMessage());
@@ -118,7 +118,7 @@ public class MongoDbController
       MongoDbResourceConditions trackedConditions) {
     var databaseCreated =
         mongoDbService.createDatabaseWithUser(
-            task.getDatabaseName(), task.getUsername(), task.getPassword());
+            task.databaseName(), task.username(), task.password());
     if (databaseCreated == CreateDatabaseResult.FAILED) {
       trackedConditions.applyDatabaseCreationFailed();
       return databaseCreated;

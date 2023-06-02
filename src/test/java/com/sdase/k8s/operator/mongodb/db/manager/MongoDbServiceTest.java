@@ -261,7 +261,7 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
               assertThat(u.getId()).isNotBlank();
               assertThat(u.getUsername()).isNotBlank();
               assertThat(u.getRoles())
-                  .extracting(User.UserRole::getRole, User.UserRole::getDb)
+                  .extracting(User.UserRole::role, User.UserRole::db)
                   .containsAnyOf(tuple("userAdminAnyDatabase", "admin"), tuple("root", "admin"));
             });
   }
