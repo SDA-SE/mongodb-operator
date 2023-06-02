@@ -169,13 +169,10 @@ public class MongoDbService {
         new BasicDBObject("usersInfo", Map.of("user", username, "db", userDatabase(databaseName)));
     var result = mongoClient.getDatabase(userDatabase(databaseName)).runCommand(command);
     LOG.debug("findUser: received result from usersInfo command: {}", result);
-    if (result.get("users") instanceof Collection) {
-      var users = (Collection<?>) result.get("users");
-      if (users.size() == 1) {
-        var firstAndOnlyResult = users.iterator().next();
-        LOG.debug("findUser: Found user {}@{}", username, databaseName);
-        return Optional.of((Document) firstAndOnlyResult);
-      }
+    if (result.get("users") instanceof Collection<?> users && users.size() == 1) {
+      var firstAndOnlyResult = users.iterator().next();
+      LOG.debug("findUser: Found user {}@{}", username, databaseName);
+      return Optional.of((Document) firstAndOnlyResult);
     }
     LOG.info("findUser: User {}@{} not found", username, databaseName);
     return Optional.empty();
@@ -210,12 +207,12 @@ public class MongoDbService {
   private boolean isOk(Document response) {
     // be generous with the type: different MongoDB API implementations return different types
     var okValue = response.get("ok", Object.class);
-    if (okValue instanceof Double) {
+    if (okValue instanceof Double okValueDouble) {
       // MongoDB returns Double
-      return Double.compare((Double) okValue, 1.0D) == 0;
-    } else if (okValue instanceof Integer) {
+      return Double.compare(okValueDouble, 1.0D) == 0;
+    } else if (okValue instanceof Integer okValueInt) {
       // AWS DocumentDB returns Integer
-      return (Integer) okValue == 1;
+      return okValueInt == 1;
     } else {
       return false;
     }

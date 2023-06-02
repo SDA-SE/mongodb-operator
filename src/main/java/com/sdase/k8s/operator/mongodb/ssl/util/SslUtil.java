@@ -63,13 +63,11 @@ public class SslUtil {
     if (certificateObject == null) {
       return null;
     }
-    if (certificateObject instanceof X509CertificateHolder) {
-      X509CertificateHolder certHolder = (X509CertificateHolder) certificateObject;
+    if (certificateObject instanceof X509CertificateHolder certHolder) {
       return new JcaX509CertificateConverter().getCertificate(certHolder);
     }
-    if (certificateObject instanceof X509TrustedCertificateBlock) {
-      X509CertificateHolder certHolder =
-          ((X509TrustedCertificateBlock) certificateObject).getCertificateHolder();
+    if (certificateObject instanceof X509TrustedCertificateBlock certificateBlock) {
+      X509CertificateHolder certHolder = certificateBlock.getCertificateHolder();
       return new JcaX509CertificateConverter().getCertificate(certHolder);
     }
     throw new CertificateException(

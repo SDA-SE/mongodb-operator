@@ -73,7 +73,7 @@ class V1SecretBuilderTest {
   @Test
   void shouldCreateUniqueUsernameAndPlaceItInConfiguredDataKey() {
     var given = taskWithMongoDbTestDbInMyNamespace();
-    given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
+    given.source().getSpec().setSecret(secretSpecWithShortenedKeys());
 
     var actual = builder.createSecretForOwner(given);
 
@@ -94,16 +94,16 @@ class V1SecretBuilderTest {
   @Test
   void shouldCreateConnectionString() {
     var given = taskWithMongoDbTestDbInMyNamespace();
-    given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
+    given.source().getSpec().setSecret(secretSpecWithShortenedKeys());
 
     var actual = builder.createSecretForOwner(given);
 
     assertThat(Base64.getDecoder().decode(actual.getData().get("c")))
         .isEqualTo(
             ConnectionStringUtil.createConnectionString(
-                    given.getDatabaseName(),
-                    given.getUsername(),
-                    given.getPassword(),
+                    given.databaseName(),
+                    given.username(),
+                    given.password(),
                     "readPreference=secondaryPreferred&retryWrites=false",
                     MONGODB_OPERATOR_CONNECTION_STRING)
                 .getBytes(StandardCharsets.UTF_8));
@@ -112,7 +112,7 @@ class V1SecretBuilderTest {
   @Test
   void shouldCreatePasswordAndPlaceItInConfiguredPasswordKey() {
     var given = taskWithMongoDbTestDbInMyNamespace();
-    given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
+    given.source().getSpec().setSecret(secretSpecWithShortenedKeys());
 
     var actual = builder.createSecretForOwner(given);
 
@@ -133,7 +133,7 @@ class V1SecretBuilderTest {
   @Test
   void shouldCreateDatabaseAndPlaceItInConfiguredPasswordKey() {
     var given = taskWithMongoDbTestDbInMyNamespace();
-    given.getSource().getSpec().setSecret(secretSpecWithShortenedKeys());
+    given.source().getSpec().setSecret(secretSpecWithShortenedKeys());
 
     var actual = builder.createSecretForOwner(given);
 
