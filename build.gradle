@@ -17,7 +17,7 @@ idea.module.inheritOutputDirs = true
 
 version = System.getenv('SEMANTIC_VERSION')
 
-sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_17
 tasks.withType(JavaCompile) {
   options.encoding = 'UTF-8'
 }
@@ -25,7 +25,7 @@ tasks.withType(JavaCompile) {
 jib {
   container.ports = ['8081']
   container.args = []
-  from.image = 'gcr.io/distroless/java11-debian11:nonroot'
+  from.image = 'gcr.io/distroless/java17-debian11:nonroot'
   container.user = 10001
   to.image = "$rootProject.name:latest"
   container.labels = [
@@ -105,7 +105,7 @@ test {
 wrapper { gradleVersion = '6.5' }
 
 spotless {
-  java { googleJavaFormat('1.9') }
+  java { googleJavaFormat('1.17.0') }
   enforceCheck = false
 }
 

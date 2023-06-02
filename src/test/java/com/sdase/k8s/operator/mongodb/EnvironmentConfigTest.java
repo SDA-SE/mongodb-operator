@@ -3,34 +3,42 @@ package com.sdase.k8s.operator.mongodb;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import com.sdase.k8s.operator.mongodb.EnvironmentConfig.ConfigKeyResolver;
 import jakarta.validation.ValidationException;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junitpioneer.jupiter.ClearEnvironmentVariable;
-import org.junitpioneer.jupiter.SetEnvironmentVariable;
 
 class EnvironmentConfigTest {
 
+  Map<String, String> givenEnvironment = new HashMap<>();
+  ConfigKeyResolver configKeyResolver = givenEnvironment::get;
+
+  @BeforeEach
+  void clearGiven() {
+    givenEnvironment.clear();
+  }
+
   @Test
-  @SetEnvironmentVariable(key = "MONGODB_CONNECTION_STRING", value = "mongodb://localhost")
   void shouldFindMongoDbConfiguration() {
-    var actual = new EnvironmentConfig();
+    givenEnvironment.put("MONGODB_CONNECTION_STRING", "mongodb://localhost");
+    var actual = new EnvironmentConfig(configKeyResolver);
 
     assertThat(actual.getMongodbConnectionString()).isEqualTo("mongodb://localhost");
   }
 
   @Test
-  @SetEnvironmentVariable(key = "MONGODB_CONNECTION_STRING", value = "   ")
   void shouldRejectEmptyMongoDbConfiguration() {
-    assertThatExceptionOfType(ValidationException.class).isThrownBy(EnvironmentConfig::new);
+    givenEnvironment.put("MONGODB_CONNECTION_STRING", "   ");
+    assertThatExceptionOfType(ValidationException.class)
+        .isThrownBy(() -> new EnvironmentConfig(configKeyResolver));
   }
 
   @Test
-  @SetEnvironmentVariable(
-      key = "MONGODB_CONNECTION_STRING",
-      value = "mongodb://only.to.avoid.failure")
-  @ClearEnvironmentVariable(key = "TRUSTED_CERTIFICATES_DIR")
   void shouldUseDefaultTrustedCertificatesDir() {
-    var environmentConfig = new EnvironmentConfig();
+    givenEnvironment.put("MONGODB_CONNECTION_STRING", "mongodb://only.to.avoid.failure");
+    var environmentConfig = new EnvironmentConfig(configKeyResolver);
 
     assertThat(environmentConfig)
         .extracting(EnvironmentConfig::getTrustedCertificatesDir)
@@ -38,12 +46,14 @@ class EnvironmentConfigTest {
   }
 
   @Test
-  @SetEnvironmentVariable(
-      key = "MONGODB_CONNECTION_STRING",
-      value = "mongodb://only.to.avoid.failure")
-  @SetEnvironmentVariable(key = "TRUSTED_CERTIFICATES_DIR", value = "/var/example/test")
   void shouldConfigureTrustedCertificatesDir() {
-    var environmentConfig = new EnvironmentConfig();
+    givenEnvironment.putAll(
+        Map.of(
+            "MONGODB_CONNECTION_STRING",
+            "mongodb://only.to.avoid.failure",
+            "TRUSTED_CERTIFICATES_DIR",
+            "/var/example/test"));
+    var environmentConfig = new EnvironmentConfig(configKeyResolver);
 
     assertThat(environmentConfig)
         .extracting(EnvironmentConfig::getTrustedCertificatesDir)
@@ -51,7 +61,6 @@ class EnvironmentConfigTest {
   }
 
   @Test
-  @ClearEnvironmentVariable(key = "MONGODB_CONNECTION_STRING")
   void shouldRejectAbsentMongoDbConfiguration() {
     assertThatExceptionOfType(ValidationException.class).isThrownBy(EnvironmentConfig::new);
   }
