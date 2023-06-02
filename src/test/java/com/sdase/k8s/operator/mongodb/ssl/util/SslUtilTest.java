@@ -65,8 +65,9 @@ class SslUtilTest {
   }
 
   private String readPemContent(String pemResource) throws IOException {
-    return new String(
-        getClass().getResourceAsStream(pemResource).readAllBytes(), StandardCharsets.UTF_8);
+    try (var pemContentStream = getClass().getResourceAsStream(pemResource)) {
+      return new String(pemContentStream.readAllBytes(), StandardCharsets.UTF_8);
+    }
   }
 
   private List<Certificate> extractCertificates(KeyStore truststore) throws KeyStoreException {

@@ -80,9 +80,8 @@ class CertificateCollectorTest {
   }
 
   private String readPemContent(String pemResource) {
-    try {
-      return new String(
-          getClass().getResourceAsStream(pemResource).readAllBytes(), StandardCharsets.UTF_8);
+    try (var pemContentStream = getClass().getResourceAsStream(pemResource)) {
+      return new String(pemContentStream.readAllBytes(), StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
