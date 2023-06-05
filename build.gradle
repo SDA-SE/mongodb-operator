@@ -17,7 +17,12 @@ idea.module.inheritOutputDirs = true
 
 version = System.getenv('SEMANTIC_VERSION')
 
-sourceCompatibility = JavaVersion.VERSION_17
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17)
+    vendor = JvmVendorSpec.ADOPTIUM
+  }
+}
 tasks.withType(JavaCompile) {
   options.encoding = 'UTF-8'
 }
@@ -101,8 +106,6 @@ dependencies {
 test {
   useJUnitPlatform()
 }
-
-wrapper { gradleVersion = '6.5' }
 
 spotless {
   java { googleJavaFormat('1.17.0') }
