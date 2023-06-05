@@ -2,19 +2,16 @@ package com.sdase.k8s.operator.mongodb.db.manager;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.ImmutableMongodConfig;
-import de.flapdoodle.embed.mongo.config.MongodConfig;
-import de.flapdoodle.embed.mongo.config.Net;
+import de.flapdoodle.embed.mongo.commands.MongodArguments;
 import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.runtime.Network;
-import java.io.IOException;
+import de.flapdoodle.embed.mongo.transitions.Mongod;
+import de.flapdoodle.embed.mongo.transitions.RunningMongodProcess;
+import de.flapdoodle.reverse.Transition;
+import de.flapdoodle.reverse.TransitionWalker;
+import de.flapdoodle.reverse.transitions.Start;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -33,14 +30,7 @@ public abstract class AbstractMongoDbTest {
   private static final String OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME =
       "TEST_MONGODB_CONNECTION_STRING";
 
-  /**
-   * please store Starter or RuntimeConfig in a static final field if you want to use artifact store
-   * caching (or else disable caching)
-   */
-  private static final MongodStarter starter = MongodStarter.getDefaultInstance();
-
-  private static MongodExecutable mongodExe;
-  private static MongodProcess mongod;
+  private static TransitionWalker.ReachedState<RunningMongodProcess> runningInstance;
 
   private static MongoClient mongo;
 
@@ -49,7 +39,7 @@ public abstract class AbstractMongoDbTest {
 
   private static Map<String, String> createdDatabases;
 
-  protected static void startDb() throws IOException {
+  protected static void startDb() {
 
     createdDatabases = new HashMap<>();
 
@@ -62,11 +52,11 @@ public abstract class AbstractMongoDbTest {
       mongo = new MongoClient(connectionString);
     } else {
       LOG.info("Test will start local MongoDB database.");
-      String host = Network.getLocalHost().getHostName();
-      int port = getFreeServerPort();
-      var mongodConfig = createMongodConfig(host, port);
-      mongodExe = starter.prepare(mongodConfig);
-      mongod = mongodExe.start();
+      runningInstance =
+          Mongod.instance().withMongodArguments(configureMongoDb()).start(Version.Main.V4_0);
+      var serverAddress = runningInstance.asState().value().getServerAddress();
+      var host = serverAddress.getHost();
+      var port = serverAddress.getPort();
 
       var username = "test-user";
       var password = UUID.randomUUID().toString();
@@ -75,10 +65,6 @@ public abstract class AbstractMongoDbTest {
       mongo = new MongoClient(String.format("%s:%d", host, port)); // "no user" is admin in local db
       createDatabaseUser(username, password);
     }
-  }
-
-  private static int getFreeServerPort() throws IOException {
-    return Network.freeServerPorts(Network.getLocalHost(), 10)[new Random().nextInt(10)];
   }
 
   protected static void removeDatabase(String databaseName) {
@@ -96,8 +82,7 @@ public abstract class AbstractMongoDbTest {
     removeDatabases();
     if (!useExternalDb) {
       dropTestUser();
-      mongod.stop();
-      mongodExe.stop();
+      runningInstance.close();
     }
   }
 
@@ -118,15 +103,9 @@ public abstract class AbstractMongoDbTest {
     return connectionString;
   }
 
-  private static MongodConfig createMongodConfig(String host, int port) {
-    return createMongodConfigBuilder(host, port).build();
-  }
-
-  private static ImmutableMongodConfig.Builder createMongodConfigBuilder(String host, int port) {
-    return ImmutableMongodConfig.builder()
-        .version(Version.Main.V4_0)
-        .putArgs("--noscripting", "")
-        .net(new Net(host, port, false));
+  private static Transition<MongodArguments> configureMongoDb() {
+    return Start.to(MongodArguments.class)
+        .initializedWith(MongodArguments.defaults().withArgs(Map.of("--noscripting", "")));
   }
 
   private static void createDatabaseUser(String username, String password) {
