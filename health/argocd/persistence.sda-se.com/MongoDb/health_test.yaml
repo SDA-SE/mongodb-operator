@@ -1,0 +1,31 @@
+tests:
+  - healthStatus:
+      status: Progressing
+      message: Waiting for database creation.
+    inputPath: testdata/progressing_noStatus.yaml
+  - healthStatus:
+      status: Progressing
+      message: Waiting for database creation.
+    inputPath: testdata/progressing_emptyConditions.yaml
+  - healthStatus:
+      status: Degraded
+      message: Missing conditions.
+    inputPath: testdata/degraded_twoConditionsTrue.yaml
+  - healthStatus:
+      status: Degraded
+      message: >-
+        Unable to create valid name with less than 64 characters from namespace my-namespace and
+        name my-database-has-very-very-long-name-that-is-actually-too-long
+    inputPath: testdata/degraded_username.yaml
+  - healthStatus:
+      status: Degraded
+      message: Database creation failed
+    inputPath: testdata/degraded_database.yaml
+  - healthStatus:
+      status: Degraded
+      message: Secret creation failed
+    inputPath: testdata/degraded_secret.yaml
+  - healthStatus:
+      status: Healthy
+      message: Database and secret created.
+    inputPath: testdata/healthy.yaml

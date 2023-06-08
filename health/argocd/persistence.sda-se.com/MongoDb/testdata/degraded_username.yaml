@@ -1,0 +1,36 @@
+apiVersion: persistence.sda-se.com/v1beta1
+kind: MongoDb
+metadata:
+  creationTimestamp: '2023-03-17T09:53:26Z'
+  finalizers:
+    - mongodbs.persistence.sda-se.com/finalizer
+  generation: 1
+  name: my-database-has-very-very-long-name-that-is-actually-too-long
+  namespace: my-namespace
+  uid: 6d8a3e01-88e5-44c6-9701-bbaf00abed5b
+spec:
+  database:
+    pruneAfterDelete: true
+status:
+  attempts: 1
+  conditions:
+    - lastTransitionTime: '2023-03-17T09:53:26.270552Z'
+      message: >-
+        Unable to create valid name with less than 64 characters from namespace my-namespace and
+        name my-database-has-very-very-long-name-that-is-actually-too-long
+      observedGeneration: 1
+      reason: CreateOrUpdate
+      status: 'False'
+      type: CreateUsername
+    - lastTransitionTime: '2023-03-17T09:53:26.270607Z'
+      message: Database created
+      observedGeneration: 1
+      reason: CreateOrUpdate
+      status: 'Unknown'
+      type: CreateDatabase
+    - lastTransitionTime: '2023-03-17T09:53:26.270625Z'
+      message: Secret created
+      observedGeneration: 1
+      reason: CreateOrUpdate
+      status: 'Unknown'
+      type: CreateSecret
