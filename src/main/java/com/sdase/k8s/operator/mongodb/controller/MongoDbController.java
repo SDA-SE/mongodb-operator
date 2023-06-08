@@ -17,12 +17,15 @@ import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 @ControllerConfiguration
 public class MongoDbController
     implements Reconciler<MongoDbCustomResource>, Cleaner<MongoDbCustomResource> {
 
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbController.class);
+  private static final String MDC_RESOURCE_NAMESPACE_KEY = "resource_namespace";
+  private static final String MDC_RESOURCE_NAME_KEY = "resource_name";
 
   private final KubernetesClientAdapter kubernetesClientAdapter;
   private final TaskFactory taskFactory;
@@ -43,61 +46,63 @@ public class MongoDbController
   @Override
   public DeleteControl cleanup(
       MongoDbCustomResource resource, Context<MongoDbCustomResource> context) {
-    LOG.info(
-        "MongoDb {}/{} deleted",
-        resource.getMetadata().getNamespace(),
-        resource.getMetadata().getName());
-    try {
-      var deleteDatabaseTask = taskFactory.newDeleteTask(resource);
-      var userDropped =
-          mongoDbService.dropDatabaseUser(
-              deleteDatabaseTask.databaseName(), deleteDatabaseTask.username());
-      if (!userDropped) {
-        throw new IllegalStateException("Failed to drop user");
-      }
-      if (deleteDatabaseTask.pruneDb()) {
-        boolean databaseDeleted = mongoDbService.dropDatabase(deleteDatabaseTask.databaseName());
-        if (!databaseDeleted) {
-          if (context.getRetryInfo().map(RetryInfo::isLastAttempt).orElse(false)) {
-            LOG.warn(
-                "Last attempt to delete database {} failed. Skipping.",
-                deleteDatabaseTask.databaseName());
-            return DeleteControl.defaultDelete();
-          }
-          throw new IllegalStateException("Failed to drop database");
+    String namespace = resource.getMetadata().getNamespace();
+    String name = resource.getMetadata().getName();
+    try (var ignoredMdcNamespace = MDC.putCloseable(MDC_RESOURCE_NAMESPACE_KEY, namespace);
+        var ignoredMdcName = MDC.putCloseable(MDC_RESOURCE_NAME_KEY, name)) {
+      LOG.info("MongoDb {}/{} deleted", namespace, name);
+      try {
+        var deleteDatabaseTask = taskFactory.newDeleteTask(resource);
+        var userDropped =
+            mongoDbService.dropDatabaseUser(
+                deleteDatabaseTask.databaseName(), deleteDatabaseTask.username());
+        if (!userDropped) {
+          throw new IllegalStateException("Failed to drop user");
         }
+        if (deleteDatabaseTask.pruneDb()) {
+          boolean databaseDeleted = mongoDbService.dropDatabase(deleteDatabaseTask.databaseName());
+          if (!databaseDeleted) {
+            if (context.getRetryInfo().map(RetryInfo::isLastAttempt).orElse(false)) {
+              LOG.warn(
+                  "Last attempt to delete database {} failed. Skipping.",
+                  deleteDatabaseTask.databaseName());
+              return DeleteControl.defaultDelete();
+            }
+            throw new IllegalStateException("Failed to drop database");
+          }
+        }
+      } catch (IllegalNameException e) {
+        LOG.warn(
+            "Ignoring delete request for MongoDb {}/{}, name is invalid. The database may not exist. Reason: {}",
+            namespace,
+            name,
+            e.getMessage());
       }
-    } catch (IllegalNameException e) {
-      LOG.warn(
-          "Ignoring delete request for MongoDb {}/{}, name is invalid. The database may not exist. Reason: {}",
-          resource.getMetadata().getNamespace(),
-          resource.getMetadata().getName(),
-          e.getMessage());
+      return DeleteControl.defaultDelete();
     }
-    return DeleteControl.defaultDelete();
   }
 
   @Override
   public UpdateControl<MongoDbCustomResource> reconcile(
       MongoDbCustomResource resource, Context<MongoDbCustomResource> context) {
-    LOG.info(
-        "MongoDb {}/{} created or updated",
-        resource.getMetadata().getNamespace(),
-        resource.getMetadata().getName());
-    var conditions = new MongoDbResourceConditions();
-    if (conditions.fulfilled(resource)) {
-      LOG.info(
-          "MongoDb {}/{} already up to date",
-          resource.getMetadata().getNamespace(),
-          resource.getMetadata().getName());
-      return UpdateControl.noUpdate();
+    String namespace = resource.getMetadata().getNamespace();
+    String name = resource.getMetadata().getName();
+    try (var ignoredMdcNamespace = MDC.putCloseable(MDC_RESOURCE_NAMESPACE_KEY, namespace);
+        var ignoredMdcName = MDC.putCloseable(MDC_RESOURCE_NAME_KEY, name)) {
+      LOG.info("MongoDb {}/{} created or updated", namespace, name);
+      var conditions = new MongoDbResourceConditions();
+      if (conditions.fulfilled(resource)) {
+        LOG.info("MongoDb {}/{} already up to date", namespace, name);
+        return UpdateControl.noUpdate();
+      }
+
+      createDatabaseTask(resource, conditions)
+          .filter(
+              task -> CreateDatabaseResult.CREATED == createDatabase(task, resource, conditions))
+          .ifPresent(task -> createSecret(task, resource, conditions));
+
+      return conditions.createStatusUpdate(resource);
     }
-
-    createDatabaseTask(resource, conditions)
-        .filter(task -> CreateDatabaseResult.CREATED == createDatabase(task, resource, conditions))
-        .ifPresent(task -> createSecret(task, resource, conditions));
-
-    return conditions.createStatusUpdate(resource);
   }
 
   private Optional<CreateDatabaseTask> createDatabaseTask(
