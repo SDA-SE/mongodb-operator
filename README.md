@@ -18,6 +18,8 @@ Pleaser refer to the [deployment documentation](docs/deployment.md) for installi
 in a Kubernetes Cluster or to the [usage documentation](docs/usage) to see how to request a database
 for a workload.
 The full documentation is available on [GitHub Pages](https://sda-se.github.io/mongodb-operator/).
+If ArgoCD is used for deployment, the [provided custom health check](./health/argocd/README.md) can
+be used to include `MongoDb` resource in the application health.
 
 The image is hosted at [quay.io/sdase/mongodb-operator](https://quay.io/repository/sdase/mongodb-operator).
 

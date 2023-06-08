@@ -1,0 +1,34 @@
+apiVersion: persistence.sda-se.com/v1beta1
+kind: MongoDb
+metadata:
+  creationTimestamp: '2023-03-17T09:53:26Z'
+  finalizers:
+    - mongodbs.persistence.sda-se.com/finalizer
+  generation: 1
+  name: my-database
+  namespace: my-namespace
+  uid: 6d8a3e01-88e5-44c6-9701-bbaf00abed5b
+spec:
+  database:
+    pruneAfterDelete: true
+status:
+  attempts: 1
+  conditions:
+    - lastTransitionTime: '2023-03-17T09:53:26.270552Z'
+      message: Username my-namespace_my-database created.
+      observedGeneration: 1
+      reason: CreateOrUpdate
+      status: 'True'
+      type: CreateUsername
+    - lastTransitionTime: '2023-03-17T09:53:26.270607Z'
+      message: Database created
+      observedGeneration: 1
+      reason: CreateOrUpdate
+      status: 'True'
+      type: CreateDatabase
+    - lastTransitionTime: '2023-03-17T09:53:26.270625Z'
+      message: Secret created
+      observedGeneration: 1
+      reason: CreateOrUpdate
+      status: 'True'
+      type: CreateSecret

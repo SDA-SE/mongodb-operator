@@ -3,6 +3,7 @@ site_name: 'MongoDB Operator'
 nav:
   - MongoDB Operator: index.md
   - Deployment: deployment.md
+  - ArgoCD: argocd.md
   - Usage: usage.md
   - How the MongoDB Operator works: process.md
 
