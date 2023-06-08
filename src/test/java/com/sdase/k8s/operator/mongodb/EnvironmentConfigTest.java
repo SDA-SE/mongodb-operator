@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class EnvironmentConfigTest {
 
@@ -58,6 +60,39 @@ class EnvironmentConfigTest {
     assertThat(environmentConfig)
         .extracting(EnvironmentConfig::getTrustedCertificatesDir)
         .isEqualTo("/var/example/test");
+  }
+
+  @Test
+  void shouldUseRegularLoggingByDefault() {
+    givenEnvironment.put("MONGODB_CONNECTION_STRING", "mongodb://only.to.avoid.failure");
+    var environmentConfig = new EnvironmentConfig(configKeyResolver);
+
+    assertThat(environmentConfig)
+        .extracting(EnvironmentConfig::isEnableJsonLogging)
+        .isEqualTo(false);
+  }
+
+  @Test
+  void shouldUseRegularLoggingFalse() {
+    givenEnvironment.put("MONGODB_CONNECTION_STRING", "mongodb://only.to.avoid.failure");
+    givenEnvironment.put("ENABLE_JSON_LOGGING", "false");
+    var environmentConfig = new EnvironmentConfig(configKeyResolver);
+
+    assertThat(environmentConfig)
+        .extracting(EnvironmentConfig::isEnableJsonLogging)
+        .isEqualTo(false);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"true", "  true  ", "TRUE", "TruE"})
+  void shouldUseJsonLogging(String configValue) {
+    givenEnvironment.put("MONGODB_CONNECTION_STRING", "mongodb://only.to.avoid.failure");
+    givenEnvironment.put("ENABLE_JSON_LOGGING", configValue);
+    var environmentConfig = new EnvironmentConfig(configKeyResolver);
+
+    assertThat(environmentConfig)
+        .extracting(EnvironmentConfig::isEnableJsonLogging)
+        .isEqualTo(true);
   }
 
   @Test

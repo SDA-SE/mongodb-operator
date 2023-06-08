@@ -109,6 +109,18 @@ be created in the `admin` database when AWS DocumentDB is used.
     Startup will fail if the directory is not readable.
   * Default: `/var/trust/certificates`
 
+#### Logging
+
+* `ENABLE_JSON_LOGGING` _boolean_
+  * Enables logging as Json if `true` (case-insensitive).
+    Configuration errors are never logged as Json.
+    Each log will be one line of Json, containing the keys:
+    * `level`: `"INFO"`, `"WARN"` or `"ERROR"`.
+    * `message`: The log message.
+    * `exception`: The exception, if any.
+    * `mdc`: Object with additional key-value information, if any.
+  * Default: _none_, effectively `false` 
+
 ### Endpoints
 
 The image exposes port `8081` for monitoring purposes.

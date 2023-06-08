@@ -91,7 +91,8 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
         new Thread(
             () -> {
               try {
-                environmentVariables.execute(() -> new MongoDbOperator(client, port));
+                environmentVariables.execute(
+                    () -> new MongoDbOperator(new EnvironmentConfig(), client, port));
               } catch (Exception e) {
                 throw new RuntimeException(e);
               }

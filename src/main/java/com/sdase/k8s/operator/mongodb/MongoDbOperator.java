@@ -5,6 +5,7 @@ import com.sdase.k8s.operator.mongodb.controller.MongoDbController;
 import com.sdase.k8s.operator.mongodb.controller.V1SecretBuilder;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
+import com.sdase.k8s.operator.mongodb.logging.LogConfigurer;
 import com.sdase.k8s.operator.mongodb.monitoring.MongoDbPrivilegesCheck;
 import com.sdase.k8s.operator.mongodb.monitoring.MonitoringServer;
 import com.sdase.k8s.operator.mongodb.monitoring.ReadinessCheck;
@@ -21,11 +22,12 @@ import javax.net.ssl.SSLContext;
 
 public class MongoDbOperator {
 
-  public MongoDbOperator(KubernetesClient kubernetesClient, int monitoringPort) {
+  public MongoDbOperator(
+      EnvironmentConfig config, KubernetesClient kubernetesClient, int monitoringPort) {
     var operator = new Operator(kubernetesClient, ConfigurationServiceProvider.instance());
     // timeout as in ConfigurationService.DEFAULT_TERMINATION_TIMEOUT_SECONDS
     operator.installShutdownHook(Duration.ofSeconds(10L));
-    var mongoDbService = createMongoDbService();
+    var mongoDbService = createMongoDbService(config);
     var mongoDbPrivilegesCheck = verifyPrivileges(mongoDbService);
     operator.register(createMongoDbController(kubernetesClient, mongoDbService));
     operator.start(); // adds some checks and produces some logs, exits on error
@@ -46,8 +48,7 @@ public class MongoDbOperator {
         new V1SecretBuilder());
   }
 
-  private MongoDbService createMongoDbService() {
-    var config = new EnvironmentConfig();
+  private MongoDbService createMongoDbService(EnvironmentConfig config) {
     return createSslContext(config.getTrustedCertificatesDir())
         .map(sc -> new MongoDbService(config.getMongodbConnectionString(), sc))
         .orElseGet(() -> new MongoDbService(config.getMongodbConnectionString()));
@@ -78,8 +79,10 @@ public class MongoDbOperator {
   }
 
   public static void main(String[] args) {
+    var config = new EnvironmentConfig();
+    LogConfigurer.configure(config.isEnableJsonLogging());
     try (var client = new KubernetesClientBuilder().build()) {
-      new MongoDbOperator(client, 8081);
+      new MongoDbOperator(config, client, 8081);
     }
   }
 }
