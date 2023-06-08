@@ -11,3 +11,21 @@ secretGenerator:
   - name: mongodb-operator
     literals:
       - mongodbConnectionString=mongodb://test-root:test-s3cr3t@mongodb.mongodb
+
+patches:
+  - target:
+      name: mongodb-operator
+      kind: Deployment
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mongodb-operator
+      spec:
+        template:
+          spec:
+            containers:
+              - name: operator
+                env:
+                  - name: ENABLE_JSON_LOGGING
+                    value: "false"

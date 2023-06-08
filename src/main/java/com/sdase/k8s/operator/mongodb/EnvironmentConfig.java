@@ -17,6 +17,8 @@ public class EnvironmentConfig {
 
   private String trustedCertificatesDir;
 
+  private boolean enableJsonLogging;
+
   private final ConfigKeyResolver configKeyResolver;
 
   public EnvironmentConfig() {
@@ -38,12 +40,17 @@ public class EnvironmentConfig {
     return trustedCertificatesDir;
   }
 
+  public boolean isEnableJsonLogging() {
+    return enableJsonLogging;
+  }
+
   private void createConfig() {
     mongodbConnectionString = configKeyResolver.getValue("MONGODB_CONNECTION_STRING");
     trustedCertificatesDir = configKeyResolver.getValue("TRUSTED_CERTIFICATES_DIR");
     if (StringUtils.isBlank(trustedCertificatesDir)) {
       trustedCertificatesDir = DEFAULT_TRUSTED_CERTIFICATES_DIR;
     }
+    enableJsonLogging = toBoolean(configKeyResolver.getValue("ENABLE_JSON_LOGGING"));
   }
 
   private void validateConfig() {
@@ -61,6 +68,13 @@ public class EnvironmentConfig {
           cv -> LOG.info("{} is invalid: {}", cv.getPropertyPath(), cv.getMessage()));
       throw new ValidationException("Invalid configuration. Check log for further information.");
     }
+  }
+
+  private boolean toBoolean(String value) {
+    if (StringUtils.isBlank(value)) {
+      return false;
+    }
+    return value.trim().equalsIgnoreCase("true");
   }
 
   interface ConfigKeyResolver {

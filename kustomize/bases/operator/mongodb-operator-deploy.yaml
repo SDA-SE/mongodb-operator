@@ -22,6 +22,8 @@ spec:
           image: localhost:5000/mongodb-operator:local
           imagePullPolicy: Always
           env:
+            - name: ENABLE_JSON_LOGGING
+              value: "true"
             - name: MONGODB_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
