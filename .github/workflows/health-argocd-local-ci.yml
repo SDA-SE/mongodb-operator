@@ -20,5 +20,5 @@ jobs:
       - uses: leafo/gh-actions-luarocks@v4
       - name: Test
         run: |
-          luarocks --server=http://rocks.moonscript.org install lyaml
+          luarocks --server=https://rocks.moonscript.org install lyaml
           lua health/argocd/persistence.sda-se.com/MongoDb/health_test.lua
