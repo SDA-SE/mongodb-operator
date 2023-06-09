@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.net.ssl.SSLContext;
 import org.bson.Document;
@@ -160,7 +159,7 @@ public class MongoDbService {
         userDocument.getString("user"),
         userDocument.getList("roles", Document.class).stream()
             .map(d -> new User.UserRole(d.getString("role"), d.getString("db")))
-            .collect(Collectors.toList()));
+            .toList());
   }
 
   private Optional<Document> findUser(String databaseName, String username) {
