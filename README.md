@@ -73,7 +73,7 @@ $ ./stop.sh
 
 1. Create local Docker Registry
    
-   Start a local registry in Docker so you can run locally built images in the kubernetes cluster.
+   Start a local registry in Docker, so you can run locally built images in the kubernetes cluster.
    
    ```console
    $ docker run -d --restart=always -p "127.0.0.1:5000:5000" --name "kind-registry" registry:2
@@ -245,8 +245,9 @@ $ ./stop.sh
    $ kubectl get -n local-test mongo
    NAME   AGE
    test   33s
-   $ kubectl get -n local-test secret
-   TODO this needs to be implemented
+   $ kubectl get -n local-test secret local-test-db
+   NAME            TYPE     DATA   AGE
+   local-test-db   Opaque   2      42s
    ```
    
 1. Cleanup
