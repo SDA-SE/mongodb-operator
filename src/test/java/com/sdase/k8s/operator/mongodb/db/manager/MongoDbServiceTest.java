@@ -9,7 +9,6 @@ import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService.CreateDatabaseRe
 import com.sdase.k8s.operator.mongodb.db.manager.model.User;
 import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
 import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
   private final MongoDbService mongoDbService = new MongoDbService(getMongoDbConnectionString());
 
   @BeforeAll
-  static void beforeAll() throws IOException {
+  static void beforeAll() {
     startDb();
   }
 
