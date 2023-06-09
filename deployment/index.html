@@ -285,6 +285,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    Logging
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -465,6 +472,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    Logging
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -593,6 +607,22 @@ be created in the <code>admin</code> database when AWS DocumentDB is used.</p>
   The configuration is ignored if no files are mounted.
   Startup will fail if the directory is not readable.</li>
 <li>Default: <code>/var/trust/certificates</code></li>
+</ul>
+</li>
+</ul>
+<h4 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>ENABLE_JSON_LOGGING</code> <em>boolean</em><ul>
+<li>Enables logging as Json if <code>true</code> (case-insensitive).
+  Configuration errors are never logged as Json.
+  Each log will be one line of Json, containing the keys:<ul>
+<li><code>level</code>: <code>"INFO"</code>, <code>"WARN"</code> or <code>"ERROR"</code>.</li>
+<li><code>message</code>: The log message.</li>
+<li><code>exception</code>: The exception, if any.</li>
+<li><code>mdc</code>: Object with additional key-value information, if any.</li>
+</ul>
+</li>
+<li>Default: <em>none</em>, effectively <code>false</code> </li>
 </ul>
 </li>
 </ul>
