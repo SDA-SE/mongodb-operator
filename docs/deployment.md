@@ -55,7 +55,7 @@ must be applied.
 
 ### Database    
 
-A MongoDB database instance or a AWS DocumentDB cluster must be set up separately from the
+A MongoDB database instance or an AWS DocumentDB cluster must be set up separately from the
 deployment of the MongoDB Operator.
 
 A user for MongoDB Operator must be created.
