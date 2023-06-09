@@ -26,7 +26,7 @@ $ brew install luarocks
 ==> Summary
 🍺  /opt/homebrew/Cellar/luarocks/3.9.2: 103 files, 728.3KB
 ==> Running `brew cleanup luarocks`...
-$ luarocks --server=http://rocks.moonscript.org install lyaml
+$ luarocks --server=https://rocks.moonscript.org install lyaml
 lyaml 6.2.8-1 is now installed in /opt/homebrew (license: MIT/X11)
 ```
 
