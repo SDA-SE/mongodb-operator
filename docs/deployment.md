@@ -16,6 +16,43 @@ naming conflicts.
 A database instance managed by multiple MongoDB Operators for multiple clusters would cause name
 conflicts and access to the same database from multiple clusters.
 
+## Deployment with Kustomize
+
+The easiest way to deploy the MongoDB Operator is to use the remote base with [Kustomize](https://kustomize.io/).
+The `kustomization.yaml` must include the versioned remote base and provide a secret for the MongoDB
+connection with a user granting [the required privileges](#database).
+
+!!! example "Deployment with Kustomize"
+    In default namespace `mongodb-operator`:
+
+    ```yaml
+    # Namespace mongodb-operator is created by the remote base
+    --8<-- "kustomize/overlays/remote-examples/namespace/kustomization.yaml"
+    ```
+
+    In custom namespace:
+    ```yaml
+    # kustomization.yaml
+    --8<-- "kustomize/overlays/remote-examples/no-namespace/kustomization.yaml"
+    
+    # custom-namespace-ns.yaml
+    --8<-- "kustomize/overlays/remote-examples/no-namespace/custom-namespace-ns.yaml"
+    ```
+
+    !!! warning "Plain Secrets"
+        Do not use plain secrets in GitOps repositories!
+        Consider tools like [Sealed Secrets](https://sealed-secrets.netlify.app/) or
+        [External Secrets](https://external-secrets.io/) to provide secrets for GitOps deployments
+        securely.
+    
+    ??? info "Don't reference the default branch"
+        Never use a remote base from the default branch (without `?ref=x.y.z`).
+        Due to the release process, it is possible that the image referenced in the default branch
+        does not exist yet.
+        Deployments will fail.
+        Also breaking releases may be deployed unexpectitly when not referencing a defined tag.
+
+## Manual Deployment
 
 ### Kubernetes
 
