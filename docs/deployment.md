@@ -76,7 +76,7 @@ The image is hosted at [quay.io/sdase/mongodb-operator](https://quay.io/reposito
 
 ### Base Image
 
-This container is based on the distroless [SDA OpenJDK base image](https://quay.io/repository/sdase/openjdk-runtime).
+This container is based on the distroless [Java image by Google](https://console.cloud.google.com/gcr/images/distroless/GLOBAL/java17-debian11:nonroot/details).
 The base image provides both manual and automatic ways to configure memory limits of the JVM.
 
 ### Environment Variables
