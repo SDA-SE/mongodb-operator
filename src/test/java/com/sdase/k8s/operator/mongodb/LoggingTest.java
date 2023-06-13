@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sdase.k8s.operator.mongodb.logging.LogConfigurer;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.StdIo;
@@ -137,6 +138,46 @@ class LoggingTest {
                           \tat app//com.sdase.k8s.operator.mongodb.LoggingTest.shouldLogExceptionAsJson(LoggingTest.java:100)
                           """);
             });
+  }
+
+  @Test
+  @StdIo
+  void shouldLogInfoAndAboveJson(StdOut out) {
+    LogConfigurer.configure(true);
+    LOG.trace("trace shouldLogInfoAndAbove");
+    LOG.debug("debug shouldLogInfoAndAbove");
+    LOG.info("info shouldLogInfoAndAbove");
+    LOG.warn("warn shouldLogInfoAndAbove");
+    LOG.error("error shouldLogInfoAndAbove");
+    await()
+        .untilAsserted(
+            () ->
+                assertThat(StringUtils.join(out.capturedLines(), "\n"))
+                    .contains("error shouldLogInfoAndAbove")
+                    .contains("warn shouldLogInfoAndAbove")
+                    .contains("info shouldLogInfoAndAbove")
+                    .doesNotContain("debug shouldLogInfoAndAbove")
+                    .doesNotContain("trace shouldLogInfoAndAbove"));
+  }
+
+  @Test
+  @StdIo
+  void shouldLogInfoAndAboveRegular(StdOut out) {
+    LogConfigurer.configure(false);
+    LOG.trace("trace shouldLogInfoAndAbove");
+    LOG.debug("debug shouldLogInfoAndAbove");
+    LOG.info("info shouldLogInfoAndAbove");
+    LOG.warn("warn shouldLogInfoAndAbove");
+    LOG.error("error shouldLogInfoAndAbove");
+    await()
+        .untilAsserted(
+            () ->
+                assertThat(StringUtils.join(out.capturedLines(), "\n"))
+                    .contains("error shouldLogInfoAndAbove")
+                    .contains("warn shouldLogInfoAndAbove")
+                    .contains("info shouldLogInfoAndAbove")
+                    .doesNotContain("debug shouldLogInfoAndAbove")
+                    .doesNotContain("trace shouldLogInfoAndAbove"));
   }
 
   static class TestException extends RuntimeException {

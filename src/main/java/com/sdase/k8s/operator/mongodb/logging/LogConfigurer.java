@@ -1,5 +1,6 @@
 package com.sdase.k8s.operator.mongodb.logging;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.layout.TTLLLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -26,6 +27,7 @@ public class LogConfigurer {
       } else {
         rootLogger.addAppender(defaultAppender(loggerContext));
       }
+      rootLogger.setLevel(Level.INFO);
     }
   }
 
