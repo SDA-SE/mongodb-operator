@@ -80,7 +80,7 @@ dependencies {
   // logging
   annotationProcessor "org.slf4j:slf4j-api:${slf4jVersion}"
   implementation "org.slf4j:slf4j-api:${slf4jVersion}"
-  implementation 'ch.qos.logback:logback-classic:1.4.7', {
+  implementation 'ch.qos.logback:logback-classic:1.4.8', {
     exclude group: "org.slf4j", module: "slf4j-api"
   }
   implementation "ch.qos.logback.contrib:logback-json-classic:${logbackContribVersion}", {
