@@ -14,7 +14,7 @@ plugins:
         "kustomize/overlays/remote-examples/no-namespace/kustomization.yaml",
         "kustomize/release/no-namespace/kustomization.yaml"
       ],
-      "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      "message": "chore(release): prepare remote base for version ${nextRelease.version}\n\n${nextRelease.notes}"
     }
   ]
   - "@semantic-release/git"
