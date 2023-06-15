@@ -4,7 +4,19 @@ debug: true
 plugins:
   - "@semantic-release/commit-analyzer"
   - "@semantic-release/release-notes-generator"
-  - ["@semantic-release/exec", { "prepareCmd": "./release-prepare.sh \"${nextRelease.version}\"" }]
+  - [ "@semantic-release/exec", { "prepareCmd": "./release-prepare.sh \"${nextRelease.version}\"" } ]
+  # assets must match the files changed in release-prepare.sh
+  - [
+    "@semantic-release/git",
+    {
+      "assets": [
+        "kustomize/overlays/remote-examples/namespace/kustomization.yaml",
+        "kustomize/overlays/remote-examples/no-namespace/kustomization.yaml",
+        "kustomize/release/no-namespace/kustomization.yaml"
+      ],
+      "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+    }
+  ]
   - "@semantic-release/git"
   - "@semantic-release/github"
 branches:
