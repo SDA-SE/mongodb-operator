@@ -70,12 +70,16 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_RELEASE_TOKEN }} # can't use standard GITHUB_TOKEN
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 14
 
+      # Do we really need to set up Java here?
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
