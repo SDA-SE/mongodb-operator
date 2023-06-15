@@ -206,7 +206,21 @@
     MongoDB Operator Requirements
   </a>
   
-    <nav class="md-nav" aria-label="MongoDB Operator Requirements">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-with-kustomize" class="md-nav__link">
+    Deployment with Kustomize
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-deployment" class="md-nav__link">
+    Manual Deployment
+  </a>
+  
+    <nav class="md-nav" aria-label="Manual Deployment">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -393,7 +407,21 @@
     MongoDB Operator Requirements
   </a>
   
-    <nav class="md-nav" aria-label="MongoDB Operator Requirements">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-with-kustomize" class="md-nav__link">
+    Deployment with Kustomize
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-deployment" class="md-nav__link">
+    Manual Deployment
+  </a>
+  
+    <nav class="md-nav" aria-label="Manual Deployment">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -525,6 +553,85 @@ Database names and usernames are created based on namespace name and MongoDB res
 naming conflicts.
 A database instance managed by multiple MongoDB Operators for multiple clusters would cause name
 conflicts and access to the same database from multiple clusters.</p>
+<h2 id="deployment-with-kustomize">Deployment with Kustomize<a class="headerlink" href="#deployment-with-kustomize" title="Permanent link">&para;</a></h2>
+<p>The easiest way to deploy the MongoDB Operator is to use the remote base with <a href="https://kustomize.io/">Kustomize</a>.
+The <code>kustomization.yaml</code> must include the versioned remote base and provide a secret for the MongoDB
+connection with a user granting <a href="#database">the required privileges</a>.</p>
+<div class="admonition example">
+<p class="admonition-title">Deployment with Kustomize</p>
+<p>In default namespace <code>mongodb-operator</code>:</p>
+<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Namespace mongodb-operator is created by the remote base</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kustomize.config.k8s.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Kustomization</span>
+<span class="nt">resources</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/SDA-SE/mongodb-operator//kustomize/release?ref=0.16.0</span>
+<span class="nt">secretGenerator</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongodb-operator</span>
+<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongodb-operator</span>
+<span class="w">    </span><span class="nt">literals</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongodbConnectionString=mongodb://user:s3cr3t@mongodb.mongodb:27017</span>
+</code></pre></div></td></tr></table></div>
+<p>In custom namespace:
+<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># kustomization.yaml</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kustomize.config.k8s.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Kustomization</span>
+<span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-namespace</span>
+<span class="nt">resources</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-namespace-ns.yaml</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/SDA-SE/mongodb-operator//kustomize/release/no-namespace?ref=0.16.0</span>
+<span class="nt">secretGenerator</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongodb-operator</span>
+<span class="w">    </span><span class="nt">literals</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongodbConnectionString=mongodb://user:s3cr3t@mongodb.mongodb:27017</span>
+
+<span class="c1"># custom-namespace-ns.yaml</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Namespace</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">custom-namespace</span>
+</code></pre></div></td></tr></table></div></p>
+<div class="admonition warning">
+<p class="admonition-title">Plain Secrets</p>
+<p>Do not use plain secrets in GitOps repositories!
+Consider tools like <a href="https://sealed-secrets.netlify.app/">Sealed Secrets</a> or
+<a href="https://external-secrets.io/">External Secrets</a> to provide secrets for GitOps deployments
+securely.</p>
+</div>
+<details class="info">
+<summary>Don't reference the default branch</summary>
+<p>Never use a remote base from the default branch (without <code>?ref=x.y.z</code>).
+Due to the release process, it is possible that the image referenced in the default branch
+does not exist yet.
+Deployments will fail.
+Also breaking releases may be deployed unexpectitly when not referencing a defined tag.</p>
+</details>
+</div>
+<h2 id="manual-deployment">Manual Deployment<a class="headerlink" href="#manual-deployment" title="Permanent link">&para;</a></h2>
 <h3 id="kubernetes">Kubernetes<a class="headerlink" href="#kubernetes" title="Permanent link">&para;</a></h3>
 <p>An <a href="https://github.com/SDA-SE/mongodb-operator/tree/master/kustomize/bases/operator">example deployment of the MongoDB Operator</a>
 that covers the following requirements is available in the GitHub Repository of the MongoDB
