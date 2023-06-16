@@ -556,7 +556,8 @@ conflicts and access to the same database from multiple clusters.</p>
 <h2 id="deployment-with-kustomize">Deployment with Kustomize<a class="headerlink" href="#deployment-with-kustomize" title="Permanent link">&para;</a></h2>
 <p>The easiest way to deploy the MongoDB Operator is to use the remote base with <a href="https://kustomize.io/">Kustomize</a>.
 The <code>kustomization.yaml</code> must include the versioned remote base and provide a secret for the MongoDB
-connection with a user granting <a href="#database">the required privileges</a>.</p>
+connection with a user granting <a href="#database">the required privileges</a>.
+The remote bases <a href="#logging">enable Json logging</a> by default.</p>
 <div class="admonition example">
 <p class="admonition-title">Deployment with Kustomize</p>
 <p>In default namespace <code>mongodb-operator</code>:</p>
@@ -729,7 +730,7 @@ be created in the <code>admin</code> database when AWS DocumentDB is used.</p>
 <li><code>mdc</code>: Object with additional key-value information, if any.</li>
 </ul>
 </li>
-<li>Default: <em>none</em>, effectively <code>false</code> </li>
+<li>Default: <em>none</em>, effectively <code>false</code></li>
 </ul>
 </li>
 </ul>
