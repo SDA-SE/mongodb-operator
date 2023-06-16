@@ -167,3 +167,6 @@ It provides the following endpoints:
 
 * Readiness: `http://{serviceUrl}:8081/health/readiness`
 * Liveness: `http://{serviceUrl}:8081/health/liveness`
+* Metrics in prometheus format: `http://{serviceUrl}:8081/metrics/prometheus`
+  
+  The provided metrics should be compatible with [the JVM Micrometer Dashboard](https://grafana.com/grafana/dashboards/4701-jvm-micrometer/)
