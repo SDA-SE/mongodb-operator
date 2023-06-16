@@ -740,6 +740,10 @@ be created in the <code>admin</code> database when AWS DocumentDB is used.</p>
 <ul>
 <li>Readiness: <code>http://{serviceUrl}:8081/health/readiness</code></li>
 <li>Liveness: <code>http://{serviceUrl}:8081/health/liveness</code></li>
+<li>
+<p>Metrics in prometheus format: <code>http://{serviceUrl}:8081/metrics/prometheus</code></p>
+<p>The provided metrics should be compatible with <a href="https://grafana.com/grafana/dashboards/4701-jvm-micrometer/">the JVM Micrometer Dashboard</a></p>
+</li>
 </ul>
 
 
