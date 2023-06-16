@@ -21,6 +21,7 @@ conflicts and access to the same database from multiple clusters.
 The easiest way to deploy the MongoDB Operator is to use the remote base with [Kustomize](https://kustomize.io/).
 The `kustomization.yaml` must include the versioned remote base and provide a secret for the MongoDB
 connection with a user granting [the required privileges](#database).
+The remote bases [enable Json logging](#logging) by default.
 
 !!! example "Deployment with Kustomize"
     In default namespace `mongodb-operator`:
@@ -156,7 +157,7 @@ be created in the `admin` database when AWS DocumentDB is used.
     * `message`: The log message.
     * `exception`: The exception, if any.
     * `mdc`: Object with additional key-value information, if any.
-  * Default: _none_, effectively `false` 
+  * Default: _none_, effectively `false`
 
 ### Endpoints
 
