@@ -14,8 +14,12 @@ import okhttp3.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junitpioneer.jupiter.RetryingTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class MonitoringServerTest {
+
+  private static final Logger LOG = LoggerFactory.getLogger(MonitoringServerTest.class);
 
   private MonitoringServer monitoringServer;
   private int port;
@@ -87,6 +91,27 @@ class MonitoringServerTest {
             });
   }
 
+  @RetryingTest(5)
+  void shouldProvideMetricsPrometheusEndpoint() {
+    var httpClient = new OkHttpClient();
+    var request = metricsEndpointRequest();
+    await()
+        .atMost(30, TimeUnit.SECONDS)
+        .untilAsserted(
+            () -> {
+              try (Response response = httpClient.newCall(request).execute()) {
+                assertThat(response.header("Content-type")).isEqualTo("text/plain");
+                assertThat(response.code()).isEqualTo(200);
+                assertThat(response.body()).isNotNull();
+                String responseBody = response.body().string();
+                LOG.info("Scraped metrics:\n{}", responseBody);
+                assertThat(responseBody).contains("jvm_memory_max_bytes");
+                assertThat(responseBody.lines().filter(l -> !l.startsWith("#")))
+                    .allSatisfy(l -> assertThat(l).contains("application=\"mongodb-operator\""));
+              }
+            });
+  }
+
   private Request readinessEndpointRequest() {
     var pingEndpoint = String.format("http://localhost:%d/health/readiness", port);
     return new Request.Builder().url(pingEndpoint).get().build();
@@ -95,5 +120,10 @@ class MonitoringServerTest {
   private Request livenessEndpointRequest() {
     var pingEndpoint = String.format("http://localhost:%d/health/liveness", port);
     return new Request.Builder().url(pingEndpoint).get().build();
+  }
+
+  private Request metricsEndpointRequest() {
+    var metricsEndpoint = String.format("http://localhost:%d/metrics/prometheus", port);
+    return new Request.Builder().url(metricsEndpoint).get().build();
   }
 }
