@@ -121,6 +121,7 @@ spec:
       subresources:
         # enables the status subresource
         status: {}
+
   # either Namespaced or Cluster
   scope: Namespaced
   names:
