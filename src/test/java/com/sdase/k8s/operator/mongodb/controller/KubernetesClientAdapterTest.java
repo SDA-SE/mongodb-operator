@@ -2,7 +2,6 @@ package com.sdase.k8s.operator.mongodb.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.fabric8.kubernetes.api.model.Secret;
@@ -37,6 +36,8 @@ class KubernetesClientAdapterTest {
 
   @InjectMocks KubernetesClientAdapter kubernetesClientAdapter;
 
+  @Mock Resource<Secret> secretResourceMock;
+
   ArgumentCaptor<String> namespaceCaptor = ArgumentCaptor.forClass(String.class);
   ArgumentCaptor<Secret> createdSecretCaptor = ArgumentCaptor.forClass(Secret.class);
 
@@ -49,9 +50,8 @@ class KubernetesClientAdapterTest {
 
   @Test
   void shouldCallKubernetesClientToCreateSecret() {
-    //noinspection unchecked
     when(secretNonNamespaceOperationMock.resource(createdSecretCaptor.capture()))
-        .thenReturn(mock(Resource.class));
+        .thenReturn(secretResourceMock);
 
     var givenSecret = new Secret();
 
