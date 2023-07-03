@@ -8,6 +8,8 @@ spec:
   group: persistence.sda-se.com
   # list of versions supported by this CustomResourceDefinition
   versions:
+    # It is very unlikely, that a later released version v1 will incompatible with this beta spec.
+    # To gather more feedback, feature requests and experience, we will keep v1beta1 for a while.
     - name: v1beta1
       # Each version can be enabled/disabled by Served flag.
       served: true
