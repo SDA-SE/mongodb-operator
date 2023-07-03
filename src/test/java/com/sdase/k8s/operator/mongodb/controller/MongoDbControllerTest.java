@@ -40,6 +40,7 @@ import io.javaoperatorsdk.operator.api.reconciler.dependent.managed.ManagedDepen
 import io.javaoperatorsdk.operator.processing.event.EventSourceRetriever;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -565,6 +566,11 @@ class MongoDbControllerTest {
     @Override
     public KubernetesClient getClient() {
       return kubernetesClientAdapterMock.getKubernetesClient();
+    }
+
+    @Override
+    public ExecutorService getWorkflowExecutorService() {
+      return null;
     }
   }
 }
