@@ -116,7 +116,9 @@ dependencies {
   testImplementation 'io.fabric8:kubernetes-server-mock:6.7.2', {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
+    exclude group: "junit"
   }
+  testImplementation "junit:junit:4.13.1"
 }
 
 test {
