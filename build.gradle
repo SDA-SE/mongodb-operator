@@ -61,11 +61,16 @@ dependencies {
   implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
+    exclude group: 'com.squareup.okio', module: 'okio'
   }
   annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
+    // recheck when operator-framework is upgraded
+    exclude group: 'com.squareup.okio', module: 'okio'
   }
+  // upgrade from transitive 1.15.0 in okhttp to fix CVE-2023-3635
+  implementation 'com.squareup.okio:okio:3.4.0'
 
   implementation "org.mongodb:mongodb-driver-sync:${mongoDbDriverVersion}"
 
@@ -117,6 +122,7 @@ dependencies {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
     exclude group: "junit"
+    exclude group: 'com.squareup.okio', module: 'okio'
   }
   testImplementation "junit:junit:4.13.2"
 }
