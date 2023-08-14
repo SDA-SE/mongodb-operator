@@ -1,5 +1,6 @@
 package com.sdase.k8s.operator.mongodb.db.manager;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.tuple;
@@ -9,6 +10,7 @@ import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService.CreateDatabaseRe
 import com.sdase.k8s.operator.mongodb.db.manager.model.User;
 import com.sdase.k8s.operator.mongodb.ssl.CertificateCollector;
 import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
+import de.flapdoodle.embed.mongo.distribution.Version;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -20,15 +22,62 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
-class MongoDbServiceTest extends AbstractMongoDbTest {
+abstract class MongoDbServiceTest extends AbstractMongoDbTest {
+
+  static class MongoDb40Test extends MongoDbServiceTest {
+    @BeforeAll
+    static void beforeAll() {
+      startDb(Version.Main.V4_0);
+    }
+  }
+
+  @DisabledIfEnvironmentVariable(
+      named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
+      matches = ".+",
+      disabledReason = "Don't execute multiple times with external database.")
+  static class MongoDb42Test extends MongoDbServiceTest {
+    @BeforeAll
+    static void beforeAll() {
+      startDb(Version.Main.V4_2);
+    }
+  }
+
+  @DisabledIfEnvironmentVariable(
+      named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
+      matches = ".+",
+      disabledReason = "Don't execute multiple times with external database.")
+  static class MongoDb44Test extends MongoDbServiceTest {
+    @BeforeAll
+    static void beforeAll() {
+      startDb(Version.Main.V4_4);
+    }
+  }
+
+  @DisabledIfEnvironmentVariable(
+      named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
+      matches = ".+",
+      disabledReason = "Don't execute multiple times with external database.")
+  static class MongoDb50Test extends MongoDbServiceTest {
+    @BeforeAll
+    static void beforeAll() {
+      startDb(Version.Main.V5_0);
+    }
+  }
+
+  @DisabledIfEnvironmentVariable(
+      named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
+      matches = ".+",
+      disabledReason = "Don't execute multiple times with external database.")
+  static class MongoDb60Test extends MongoDbServiceTest {
+    @BeforeAll
+    static void beforeAll() {
+      startDb(Version.Main.V6_0);
+    }
+  }
 
   private final MongoDbService mongoDbService = new MongoDbService(getMongoDbConnectionString());
-
-  @BeforeAll
-  static void beforeAll() {
-    startDb();
-  }
 
   @AfterAll
   static void afterAll() {
@@ -220,7 +269,7 @@ class MongoDbServiceTest extends AbstractMongoDbTest {
       throws URISyntaxException {
 
     var givenPathToDirectoryWithCertificates =
-        Path.of(getClass().getResource("/ssl").toURI()).toString();
+        Path.of(requireNonNull(getClass().getResource("/ssl")).toURI()).toString();
 
     var sslContextOptional =
         new CertificateCollector(givenPathToDirectoryWithCertificates)
