@@ -76,7 +76,14 @@ public abstract class AbstractMongoDbTest {
       connectionString = String.format("mongodb://%s:%s@%s:%d", username, password, host, port);
       mongo = new MongoClient(String.format("%s:%d", host, port)); // "no user" is admin in local db
       createDatabaseUser(username, password);
+      logVersion();
     }
+  }
+
+  private static void logVersion() {
+    Document document = mongo.getDatabase("admin").runCommand(new Document("buildInfo", 1));
+    String version = (String) document.get("version");
+    LOG.info("Testing with version {}", version);
   }
 
   private static TransitionWalker.ReachedState<RunningMongodProcess> doStart(
