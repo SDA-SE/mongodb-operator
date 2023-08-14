@@ -6,12 +6,20 @@ import de.flapdoodle.embed.mongo.commands.MongodArguments;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.mongo.transitions.Mongod;
 import de.flapdoodle.embed.mongo.transitions.RunningMongodProcess;
+import de.flapdoodle.os.CommonArchitecture;
+import de.flapdoodle.os.CommonOS;
+import de.flapdoodle.os.ImmutablePlatform;
+import de.flapdoodle.os.Platform;
+import de.flapdoodle.reverse.State;
+import de.flapdoodle.reverse.StateID;
 import de.flapdoodle.reverse.Transition;
 import de.flapdoodle.reverse.TransitionWalker;
+import de.flapdoodle.reverse.transitions.ImmutableStart;
 import de.flapdoodle.reverse.transitions.Start;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -52,8 +60,7 @@ public abstract class AbstractMongoDbTest {
       mongo = new MongoClient(connectionString);
     } else {
       LOG.info("Test will start local MongoDB database.");
-      runningInstance =
-          Mongod.instance().withMongodArguments(configureMongoDb()).start(Version.Main.V4_0);
+      runningInstance = doStart();
       var serverAddress = runningInstance.asState().value().getServerAddress();
       var host = serverAddress.getHost();
       var port = serverAddress.getPort();
@@ -65,6 +72,40 @@ public abstract class AbstractMongoDbTest {
       mongo = new MongoClient(String.format("%s:%d", host, port)); // "no user" is admin in local db
       createDatabaseUser(username, password);
     }
+  }
+
+  private static TransitionWalker.ReachedState<RunningMongodProcess> doStart() {
+    try {
+      return Mongod.instance().withMongodArguments(configureMongoDb()).start(Version.Main.V4_0);
+    } catch (Exception e) {
+      if (e.getCause() instanceof IllegalArgumentException
+          && e.getCause().getMessage().contains("OS_X")
+          && e.getCause().getMessage().contains("ARM_64")) {
+        LOG.info("Failed to start on OS_X ARM_64, trying with X86_64", e);
+        return startOsxX86();
+      }
+      throw e;
+    }
+  }
+
+  private static TransitionWalker.ReachedState<RunningMongodProcess> startOsxX86() {
+    // no downloads for OsX arm anymore, try with x86
+    ImmutablePlatform platform =
+        ImmutablePlatform.builder()
+            .operatingSystem(CommonOS.OS_X)
+            .distribution(Optional.empty())
+            .version(Optional.empty())
+            .architecture(CommonArchitecture.X86_64)
+            .build();
+    ImmutableStart<Platform> platformStart =
+        ImmutableStart.<Platform>builder()
+            .destination(StateID.of(Platform.class))
+            .action(() -> State.of(platform))
+            .build();
+    return Mongod.instance()
+        .withMongodArguments(configureMongoDb())
+        .withPlatform(platformStart)
+        .start(Version.Main.V4_0);
   }
 
   protected static void removeDatabase(String databaseName) {
