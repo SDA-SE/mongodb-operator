@@ -3,6 +3,7 @@ package com.sdase.k8s.operator.mongodb.db.manager;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import de.flapdoodle.embed.mongo.commands.MongodArguments;
+import de.flapdoodle.embed.mongo.distribution.IFeatureAwareVersion;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.mongo.transitions.Mongod;
 import de.flapdoodle.embed.mongo.transitions.RunningMongodProcess;
@@ -35,7 +36,7 @@ public abstract class AbstractMongoDbTest {
    * href="https://docs.mongodb.com/manual/reference/connection-string/">MongoDB Connection
    * String</a> of the database used in tests instead of starting a dedicated instance.
    */
-  private static final String OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME =
+  static final String OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME =
       "TEST_MONGODB_CONNECTION_STRING";
 
   private static TransitionWalker.ReachedState<RunningMongodProcess> runningInstance;
@@ -48,6 +49,10 @@ public abstract class AbstractMongoDbTest {
   private static Map<String, String> createdDatabases;
 
   protected static void startDb() {
+    startDb(Version.Main.V4_0);
+  }
+
+  protected static void startDb(IFeatureAwareVersion mongoDbVersion) {
 
     createdDatabases = new HashMap<>();
 
@@ -60,7 +65,7 @@ public abstract class AbstractMongoDbTest {
       mongo = new MongoClient(connectionString);
     } else {
       LOG.info("Test will start local MongoDB database.");
-      runningInstance = doStart();
+      runningInstance = doStart(mongoDbVersion);
       var serverAddress = runningInstance.asState().value().getServerAddress();
       var host = serverAddress.getHost();
       var port = serverAddress.getPort();
@@ -74,21 +79,23 @@ public abstract class AbstractMongoDbTest {
     }
   }
 
-  private static TransitionWalker.ReachedState<RunningMongodProcess> doStart() {
+  private static TransitionWalker.ReachedState<RunningMongodProcess> doStart(
+      IFeatureAwareVersion mongoDbVersion) {
     try {
-      return Mongod.instance().withMongodArguments(configureMongoDb()).start(Version.Main.V4_0);
+      return Mongod.instance().withMongodArguments(configureMongoDb()).start(mongoDbVersion);
     } catch (Exception e) {
       if (e.getCause() instanceof IllegalArgumentException
           && e.getCause().getMessage().contains("OS_X")
           && e.getCause().getMessage().contains("ARM_64")) {
         LOG.info("Failed to start on OS_X ARM_64, trying with X86_64", e);
-        return startOsxX86();
+        return startOsxX86(mongoDbVersion);
       }
       throw e;
     }
   }
 
-  private static TransitionWalker.ReachedState<RunningMongodProcess> startOsxX86() {
+  private static TransitionWalker.ReachedState<RunningMongodProcess> startOsxX86(
+      IFeatureAwareVersion mongoDbVersion) {
     // no downloads for OsX arm anymore, try with x86
     ImmutablePlatform platform =
         ImmutablePlatform.builder()
@@ -105,7 +112,7 @@ public abstract class AbstractMongoDbTest {
     return Mongod.instance()
         .withMongodArguments(configureMongoDb())
         .withPlatform(platformStart)
-        .start(Version.Main.V4_0);
+        .start(mongoDbVersion);
   }
 
   protected static void removeDatabase(String databaseName) {
