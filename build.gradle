@@ -46,7 +46,7 @@ jib {
 project.ext {
   mongoDbDriverVersion = "4.10.2"
   slf4jVersion = "2.0.7"
-  operatorFrameworkVersion = "4.4.1"
+  operatorFrameworkVersion = "4.4.2"
   mockitoVersion = "5.2.0"
   jacksonVersion = "2.15.2"
   logbackContribVersion = "0.1.5"
@@ -68,6 +68,7 @@ dependencies {
     exclude group: "org.slf4j"
     // recheck when operator-framework is upgraded
     exclude group: 'com.squareup.okio', module: 'okio'
+    exclude group: "org.apache.commons", module: "commons-lang3"
   }
   // upgrade from transitive 1.15.0 in okhttp to fix CVE-2023-3635
   implementation 'com.squareup.okio:okio:3.5.0'
@@ -98,6 +99,8 @@ dependencies {
 
   implementation 'io.micrometer:micrometer-registry-prometheus:1.11.3'
 
+  implementation "org.apache.commons:commons-lang3:3.13.0"
+
   // test
   testImplementation enforcedPlatform("org.junit:junit-bom:5.10.0")
   testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -109,6 +112,7 @@ dependencies {
   }
   testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.8.0', {
     exclude group: "org.slf4j", module: "slf4j-api"
+    exclude group: "org.apache.commons", module: "commons-lang3"
   }
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
   testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
