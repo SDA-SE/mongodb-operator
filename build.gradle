@@ -115,12 +115,17 @@ dependencies {
     exclude group: "org.apache.commons", module: "commons-lang3"
   }
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
-  testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
-  testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.1", {
-    // conflicts with mockitoVersion
-    exclude group: 'org.mockito', 'module': 'mockito-inline'
+  testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}", {
+    // conflict of 1.14.1 and 1.14.7 in uk.org.webcompere:system-stubs-jupiter
+    exclude group: 'net.bytebuddy', 'module': 'byte-buddy'
+    exclude group: 'net.bytebuddy', 'module': 'byte-buddy-agent'
   }
-  testImplementation "org.mockito:mockito-inline:${mockitoVersion}"
+  testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.1"
+  testImplementation "org.mockito:mockito-inline:${mockitoVersion}", {
+    // conflict of 1.14.1 and 1.14.7 in uk.org.webcompere:system-stubs-jupiter
+    exclude group: 'net.bytebuddy', 'module': 'byte-buddy'
+    exclude group: 'net.bytebuddy', 'module': 'byte-buddy-agent'
+  }
   testImplementation 'org.awaitility:awaitility:4.2.0'
   testImplementation 'io.fabric8:kubernetes-server-mock:6.7.2', {
     // self managed to avoid conflicts
