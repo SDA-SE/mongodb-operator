@@ -1,5 +1,6 @@
 package com.sdase.k8s.operator.mongodb.monitoring;
 
+import io.javalin.Javalin;
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
@@ -17,7 +18,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Service;
 
 public class MonitoringServer implements AutoCloseable {
 
@@ -26,7 +26,7 @@ public class MonitoringServer implements AutoCloseable {
   private static final String MIME_TYPE_TEXT_PLAIN = "text/plain";
   private final int port;
   private final Supplier<Boolean> isReady;
-  private final Service service;
+  private final Javalin server;
   private final MeterRegistry meterRegistry;
   private final PrometheusMeterRegistry prometheusMeterRegistry;
   private final List<AutoCloseable> closeOnShutdown = new ArrayList<>();
@@ -34,7 +34,7 @@ public class MonitoringServer implements AutoCloseable {
   public MonitoringServer(int port, Collection<ReadinessCheck> readinessChecks) {
     this.port = port;
     this.isReady = () -> readinessChecks.stream().allMatch(ReadinessCheck::isReady);
-    this.service = Service.ignite();
+    this.server = Javalin.create();
     this.prometheusMeterRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
     this.meterRegistry = new CompositeMeterRegistry(Clock.SYSTEM, List.of(prometheusMeterRegistry));
     this.meterRegistry.config().commonTags("application", "mongodb-operator");
@@ -43,39 +43,34 @@ public class MonitoringServer implements AutoCloseable {
 
   public MonitoringServer start() {
 
-    service.port(port);
+    server.start(port);
 
-    service.get(
+    server.get(
         "/health/readiness",
-        (req, res) -> {
-          res.type(MIME_TYPE_TEXT_PLAIN);
+        ctx -> {
+          ctx.contentType(MIME_TYPE_TEXT_PLAIN);
           var ready = Boolean.TRUE.equals(this.isReady.get());
-          res.status(ready ? 200 : 503);
-          return ready ? "UP" : "OUT_OF_SERVICE";
+          ctx.status(ready ? 200 : 503);
+          ctx.result(ready ? "UP" : "OUT_OF_SERVICE");
         });
 
-    service.get(
+    server.get(
         "/health/liveness",
-        (req, res) -> {
-          res.type(MIME_TYPE_TEXT_PLAIN);
-          res.status(200);
-          return "UP";
+        ctx -> {
+          ctx.contentType(MIME_TYPE_TEXT_PLAIN);
+          ctx.status(200);
+          ctx.result("UP");
         });
 
-    service.get(
+    server.get(
         "/metrics/prometheus",
-        (req, res) -> {
+        ctx -> {
           String response = prometheusMeterRegistry.scrape();
-          res.type(MIME_TYPE_TEXT_PLAIN);
-          res.status(200);
-          return response;
+          ctx.contentType(MIME_TYPE_TEXT_PLAIN);
+          ctx.result(response);
         });
 
-    closeOnShutdown.add(
-        () -> {
-          service.stop();
-          service.awaitStop();
-        });
+    closeOnShutdown.add(server);
 
     return this;
   }

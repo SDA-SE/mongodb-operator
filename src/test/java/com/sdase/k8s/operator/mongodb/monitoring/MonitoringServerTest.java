@@ -27,8 +27,10 @@ class MonitoringServerTest {
 
   @BeforeEach
   void startServer() throws IOException {
-    try (ServerSocket serverSocket = new ServerSocket(0)) {
-      port = serverSocket.getLocalPort();
+    while (monitoringServer == null) {
+      try (ServerSocket serverSocket = new ServerSocket(0)) {
+        port = serverSocket.getLocalPort();
+      }
       monitoringServer = new MonitoringServer(port, List.of(ready::get)).start();
     }
   }
@@ -36,6 +38,8 @@ class MonitoringServerTest {
   @AfterEach
   void stopServer() {
     monitoringServer.stop();
+    monitoringServer = null;
+    port = 0;
   }
 
   @RetryingTest(5)

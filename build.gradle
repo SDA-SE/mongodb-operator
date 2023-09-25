@@ -56,7 +56,7 @@ dependencies {
 
   implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
   annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
-  implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:9.4.52.v20230823')
+  implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:11.0.16')
 
   implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
     // self managed to avoid conflicts
@@ -78,9 +78,12 @@ dependencies {
   implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
   implementation 'jakarta.el:jakarta.el-api:5.0.1'
   implementation 'org.bouncycastle:bcpkix-jdk18on:1.76'
-  implementation "com.sparkjava:spark-core:2.9.4", {
+  implementation "io.javalin:javalin:5.6.1", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
+    // older versions than in okio
+    exclude group: "org.jetbrains", module: "annotations"
+    exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
   }
 
   // logging
