@@ -2,6 +2,7 @@ package com.sdase.k8s.operator.mongodb;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Spark;
 import uk.org.webcompere.systemstubs.SystemStubs;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 
@@ -110,7 +110,15 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
       await().atMost(20, SECONDS).untilAsserted(this::assertReadinessEndpointAvailable);
     } finally {
       testThread.interrupt();
-      Spark.stop();
+      await()
+          .untilAsserted(
+              () ->
+                  assertThatNoException()
+                      .isThrownBy(
+                          () -> {
+                            //noinspection EmptyTryBlock
+                            try (var ignored = new ServerSocket(port)) {}
+                          }));
     }
   }
 
