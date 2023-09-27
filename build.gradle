@@ -78,7 +78,7 @@ dependencies {
   implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
   implementation 'jakarta.el:jakarta.el-api:5.0.1'
   implementation 'org.bouncycastle:bcpkix-jdk18on:1.76'
-  implementation "io.javalin:javalin:5.6.1", {
+  implementation "io.javalin:javalin:5.6.2", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
     // older versions than in okio
