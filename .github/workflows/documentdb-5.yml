@@ -34,7 +34,7 @@ jobs:
           chmod 700 ~/.ssh &&
           chmod 400 ~/.ssh/pem &&
           ssh -i ~/.ssh/pem -L "27017:${DDB5_HOST}:27017" "${DDB_EC2_USER_AND_HOST}" -fN -M -S ddb-socket &&
-          ssh -S ddb-socket -O check "${DDB5_EC2_USER_AND_HOST}" &&
+          ssh -S ddb-socket -O check "${DDB_EC2_USER_AND_HOST}" &&
           sudo echo "${DDB5_HOSTS_MAP}" | sudo tee -a /etc/hosts
 
       - name: Test with Gradle
@@ -42,8 +42,8 @@ jobs:
         env:
           # secrets required:
           # - secrets.DDB5_HOST # expected: sample-cluster.node.zone.docdb.amazonaws.com
-          # - secrets.DDB5_USERNAME # expected: example-user
-          # - secrets.DDB5_PASSWORD # expected: a-s3cr3t
+          # - secrets.DDB_USERNAME # expected: example-user
+          # - secrets.DDB_PASSWORD # expected: a-s3cr3t
           TEST_MONGODB_CONNECTION_STRING: "mongodb://${{ secrets.DDB_USERNAME }}:${{ secrets.DDB_PASSWORD }}@${{ secrets.DDB5_HOST }}/admin?tls=false&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
         with:
           timeout_minutes: 10
