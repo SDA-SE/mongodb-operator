@@ -24,17 +24,17 @@ jobs:
         env:
           DDB5_HOST: ${{ secrets.DDB5_HOST }} # expected: sample-cluster.node.zone.docdb.amazonaws.com
           DDB5_HOSTS_MAP: ${{ secrets.DDB5_HOSTS_MAP }} # expected: config for /etc/hosts including all propagated hostnames
-          DDB5_EC2_FINGERPRINT: ${{ secrets.DDB5_EC2_FINGERPRINT }} # expected: hostname.ec2.proxy.to.forward.com,123.123.123.123 ecdsa-sha2-nistp256 ...
-          DDB5_EC2_USER_AND_HOST: ${{ secrets.DDB5_EC2_USER_AND_HOST }} # expected: username@hostname.ec2.proxy.to.forward.com
-          DDB5_EC2_CERTIFICATE: ${{ secrets.DDB5_EC2_CERTIFICATE }} # expected: pem certificate
+          DDB_EC2_FINGERPRINT: ${{ secrets.DDB_EC2_FINGERPRINT }} # expected: hostname.ec2.proxy.to.forward.com,123.123.123.123 ecdsa-sha2-nistp256 ...
+          DDB_EC2_USER_AND_HOST: ${{ secrets.DDB_EC2_USER_AND_HOST }} # expected: username@hostname.ec2.proxy.to.forward.com
+          DDB_EC2_CERTIFICATE: ${{ secrets.DDB_EC2_CERTIFICATE }} # expected: pem certificate
         run: >
           mkdir -p ~/.ssh &&
-          echo "${DDB5_EC2_FINGERPRINT}" >> ~/.ssh/known_hosts &&
-          echo "${DDB5_EC2_CERTIFICATE}" > ~/.ssh/pem &&
+          echo "${DDB_EC2_FINGERPRINT}" >> ~/.ssh/known_hosts &&
+          echo "${DDB_EC2_CERTIFICATE}" > ~/.ssh/pem &&
           chmod 700 ~/.ssh &&
           chmod 400 ~/.ssh/pem &&
-          ssh -i ~/.ssh/pem -L "27017:${DDB5_HOST}:27017" "${DDB5_EC2_USER_AND_HOST}" -fN -M -S ddb-socket &&
-          ssh -S ddb-socket -O check "${DDB5_EC2_USER_AND_HOST}" &&
+          ssh -i ~/.ssh/pem -L "27017:${DDB5_HOST}:27017" "${DDB_EC2_USER_AND_HOST}" -fN -M -S ddb-socket &&
+          ssh -S ddb-socket -O check "${DDB_EC2_USER_AND_HOST}" &&
           sudo echo "${DDB5_HOSTS_MAP}" | sudo tee -a /etc/hosts
 
       - name: Test with Gradle
@@ -42,9 +42,9 @@ jobs:
         env:
           # secrets required:
           # - secrets.DDB5_HOST # expected: sample-cluster.node.zone.docdb.amazonaws.com
-          # - secrets.DDB5_USERNAME # expected: example-user
-          # - secrets.DDB5_PASSWORD # expected: a-s3cr3t
-          TEST_MONGODB_CONNECTION_STRING: "mongodb://${{ secrets.DDB5_USERNAME }}:${{ secrets.DDB5_PASSWORD }}@${{ secrets.DDB5_HOST }}/admin?tls=false&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
+          # - secrets.DDB_USERNAME # expected: example-user
+          # - secrets.DDB_PASSWORD # expected: a-s3cr3t
+          TEST_MONGODB_CONNECTION_STRING: "mongodb://${{ secrets.DDB_USERNAME }}:${{ secrets.DDB_PASSWORD }}@${{ secrets.DDB5_HOST }}/admin?tls=false&readPreference=secondaryPreferred&retryWrites=false"
         with:
           timeout_minutes: 10
           max_attempts: 3
