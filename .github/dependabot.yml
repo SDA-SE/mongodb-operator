@@ -17,4 +17,4 @@ updates:
     include: scope
   ignore:
     - dependency-name: org.eclipse.jetty:jetty-bom
-      update-types: ["major"]
+      update-types: ["version-update:semver-major"]
