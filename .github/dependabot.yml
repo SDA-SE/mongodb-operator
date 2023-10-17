@@ -15,3 +15,6 @@ updates:
     prefix: fix
     prefix-development: chore
     include: scope
+  ignore:
+    - dependency-name: org.eclipse.jetty:jetty-bom
+      update-types: ["major"]
