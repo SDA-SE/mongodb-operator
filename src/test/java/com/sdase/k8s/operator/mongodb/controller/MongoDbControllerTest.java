@@ -34,6 +34,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.javaoperatorsdk.operator.api.config.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
+import io.javaoperatorsdk.operator.api.reconciler.IndexedResourceCache;
 import io.javaoperatorsdk.operator.api.reconciler.ResourceDiscriminator;
 import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.managed.ManagedDependentResourceContext;
@@ -570,6 +571,11 @@ class MongoDbControllerTest {
 
     @Override
     public ExecutorService getWorkflowExecutorService() {
+      return null;
+    }
+
+    @Override
+    public IndexedResourceCache<MongoDbCustomResource> getPrimaryCache() {
       return null;
     }
   }
