@@ -18,7 +18,7 @@ jobs:
           && chmod 755 /usr/local/bin/plantuml
       - uses: actions/setup-python@c4e89fac7e8767b327bbad6cb4d859eda999cf08 #v.4.1.0
         with:
-          python-version: 3.x
+          python-version: 3.11
       - run: pip install mkdocs-techdocs-core # Includes material theme
       - run: pip install mkdocs-build-plantuml-plugin
       - run: git fetch origin gh-pages # Get latest history
