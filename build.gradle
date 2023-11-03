@@ -30,7 +30,7 @@ tasks.withType(JavaCompile) {
 jib {
   container.ports = ['8081']
   container.args = []
-  from.image = 'gcr.io/distroless/java17-debian11:nonroot'
+  from.image = 'gcr.io/distroless/java21-debian12:nonroot'
   container.user = 10001
   to.image = "$rootProject.name:latest"
   container.labels = [
