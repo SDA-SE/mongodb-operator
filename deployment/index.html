@@ -713,6 +713,8 @@ be created in the <code>admin</code> database when AWS DocumentDB is used.</p>
 <li>Directory in the container where CA certificates or certificate bundles in PEM format can be
   mounted. These certificates are used to verify SSL connections to the database.
   The configuration is ignored if no files are mounted.
+  To consider, the mounted certifaces, the <code>MONGODB_CONNECTION_STRING</code> must contain the query
+  parameter <code>tls=true</code>.
   Startup will fail if the directory is not readable.</li>
 <li>Default: <code>/var/trust/certificates</code></li>
 </ul>
