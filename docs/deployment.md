@@ -52,6 +52,19 @@ The remote bases [enable Json logging](#logging) by default.
         does not exist yet.
         Deployments will fail.
         Also breaking releases may be deployed unexpectitly when not referencing a defined tag.
+    
+    ??? info "TLS connections"
+        To connect to MongoDB or DocumentDB using TLS, add the query param `tls=true` to the secret
+        `MONGODB_CONNECTION_STRING` and reference the CA in PEM format in a `configMapGenerator`
+        like this:
+        
+        ```yaml
+        configMapGenerator:
+          - name: mongodb-operator-ca-pem
+            behavior: merge
+            files:
+              - ca-of-my-mongo-server.pem
+        ```
 
 ## Manual Deployment
 

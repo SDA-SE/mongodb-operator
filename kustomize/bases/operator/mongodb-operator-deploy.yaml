@@ -44,3 +44,10 @@ spec:
               port: 8081
               path: /health/liveness
             initialDelaySeconds: 10
+          volumeMounts:
+            - name: pem-files
+              mountPath: /var/trust/certificates/
+      volumes:
+        - name: pem-files
+          configMap:
+            name: mongodb-operator-ca-pem

@@ -7,3 +7,6 @@ resources:
   - mongodb-operator-cr.yaml
   - mongodb-operator-crb.yaml
   - mongodb-operator-deploy.yaml
+
+configMapGenerator:
+  - name: mongodb-operator-ca-pem
