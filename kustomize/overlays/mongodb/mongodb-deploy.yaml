@@ -18,7 +18,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: mongodb
-          image: mongo:3.6
+          image: mongo:5.0.22-focal
           imagePullPolicy: Always
           resources:
             limits:
