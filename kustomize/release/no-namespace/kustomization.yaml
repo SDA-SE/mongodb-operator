@@ -5,4 +5,4 @@ resources:
 images:
   - name: localhost:5000/mongodb-operator
     newName: quay.io/sdase/mongodb-operator
-    newTag: 0.19.0
+    newTag: 0.20.0
