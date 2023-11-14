@@ -631,6 +631,22 @@ does not exist yet.
 Deployments will fail.
 Also breaking releases may be deployed unexpectitly when not referencing a defined tag.</p>
 </details>
+<details class="info">
+<summary>TLS connections</summary>
+<p>To connect to MongoDB or DocumentDB using TLS, add the query param <code>tls=true</code> to the secret
+<code>MONGODB_CONNECTION_STRING</code> and reference the CA in PEM format in a <code>configMapGenerator</code>
+like this:</p>
+<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">configMapGenerator</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongodb-operator-ca-pem</span>
+<span class="w">    </span><span class="nt">behavior</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">merge</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ca-of-my-mongo-server.pem</span>
+</code></pre></div></td></tr></table></div>
+</details>
 </div>
 <h2 id="manual-deployment">Manual Deployment<a class="headerlink" href="#manual-deployment" title="Permanent link">&para;</a></h2>
 <h3 id="kubernetes">Kubernetes<a class="headerlink" href="#kubernetes" title="Permanent link">&para;</a></h3>
