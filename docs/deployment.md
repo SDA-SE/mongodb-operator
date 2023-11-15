@@ -126,8 +126,7 @@ temporary test deployments could create a big amount of temporary used databases
 The image is hosted at [quay.io/sdase/mongodb-operator](https://quay.io/repository/sdase/mongodb-operator).
 
 ### Base Image
-
-This container is based on the distroless [Java image by Google](https://console.cloud.google.com/gcr/images/distroless/GLOBAL/java17-debian11:nonroot/details).
+This container is based on the distroless [Java image by Google](https://console.cloud.google.com/gcr/images/distroless/GLOBAL/java21-debian12:nonroot/details).
 The base image provides both manual and automatic ways to configure memory limits of the JVM.
 
 ### Environment Variables
