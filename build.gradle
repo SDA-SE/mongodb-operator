@@ -62,7 +62,9 @@ dependencies {
   implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
+    // recheck when operator-framework is upgraded
     exclude group: 'com.squareup.okio', module: 'okio'
+    exclude group: "org.apache.commons", module: "commons-lang3"
   }
   annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
     // self managed to avoid conflicts
