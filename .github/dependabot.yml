@@ -18,3 +18,13 @@ updates:
   ignore:
     - dependency-name: org.eclipse.jetty:jetty-bom
       update-types: ["version-update:semver-major"]
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: "weekly"
+  labels:
+    - "dependencies"
+  commit-message:
+    prefix: "chore"
+    prefix-development: "chore"
+    include: scope
