@@ -165,18 +165,13 @@ spotless {
   enforceCheck = false
 }
 
-// TOOD don't filter configurations after https://github.com/diffplug/spotless/issues/1965 is fixed
-configurations.all {
-  def importantConfigurations = ['compile', 'testCompile', 'runtime', 'testRuntime', 'implementation', 'testImplementation']
-  if (importantConfigurations.stream().anyMatch(it.name::startsWith)) {
+configurations.configureEach {
+  if (it.name.startsWith("spotless")) {
+    // Workaround for https://github.com/diffplug/spotless/issues/1965.
+  } else {
     it.resolutionStrategy {
-      // fail eagerly on version conflict (includes transitive dependencies)
-      // e.g. multiple different versions of the same dependency (group and name are equal)
       failOnVersionConflict()
     }
-  }
-  else {
-    println "Skipping ${it.name}"
   }
 }
 
