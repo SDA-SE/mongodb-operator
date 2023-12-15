@@ -161,15 +161,22 @@ test {
 }
 
 spotless {
-  java { googleJavaFormat('1.17.0') }
+  java { googleJavaFormat('1.18.1') }
   enforceCheck = false
 }
 
+// TOOD don't filter configurations after https://github.com/diffplug/spotless/issues/1965 is fixed
 configurations.all {
-  resolutionStrategy {
-    // fail eagerly on version conflict (includes transitive dependencies)
-    // e.g. multiple different versions of the same dependency (group and name are equal)
-    failOnVersionConflict()
+  def importantConfigurations = ['compile', 'testCompile', 'runtime', 'testRuntime', 'implementation', 'testImplementation']
+  if (importantConfigurations.stream().anyMatch(it.name::startsWith)) {
+    it.resolutionStrategy {
+      // fail eagerly on version conflict (includes transitive dependencies)
+      // e.g. multiple different versions of the same dependency (group and name are equal)
+      failOnVersionConflict()
+    }
+  }
+  else {
+    println "Skipping ${it.name}"
   }
 }
 
