@@ -103,7 +103,7 @@ dependencies {
     exclude group: "ch.qos.logback", module: "logback-core"
   }
 
-  implementation 'io.micrometer:micrometer-registry-prometheus:1.12.0'
+  implementation 'io.micrometer:micrometer-registry-prometheus:1.12.1'
 
   implementation "org.apache.commons:commons-lang3:3.14.0"
 
