@@ -74,7 +74,7 @@ dependencies {
     exclude group: "org.apache.commons", module: "commons-lang3"
   }
   // upgrade from transitive 1.15.0 in okhttp to fix CVE-2023-3635
-  implementation 'com.squareup.okio:okio:3.6.0'
+  implementation 'com.squareup.okio:okio:3.7.0'
 
   implementation "org.mongodb:mongodb-driver-sync:${mongoDbDriverVersion}"
 
