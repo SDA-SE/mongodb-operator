@@ -70,7 +70,7 @@ public class MonitoringServer implements AutoCloseable {
           ctx.result(response);
         });
 
-    closeOnShutdown.add(server);
+    closeOnShutdown.add(server::stop);
 
     return this;
   }
