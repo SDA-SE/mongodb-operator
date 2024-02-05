@@ -38,7 +38,7 @@ jobs:
           sudo echo "${DDB_HOSTS_MAP}" | sudo tee -a /etc/hosts
 
       - name: Test with Gradle
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         env:
           # secrets required:
           # - secrets.DDB_HOST # expected: sample-cluster.node.zone.docdb.amazonaws.com

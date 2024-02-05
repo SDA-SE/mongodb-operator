@@ -25,7 +25,7 @@ jobs:
           cache: 'gradle'
 
       - name: Setup environment
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 10
           max_attempts: 10
@@ -34,7 +34,7 @@ jobs:
           command: ./start.sh
 
       - name: Run tests
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 10
           max_attempts: 10
@@ -43,7 +43,7 @@ jobs:
           command: ./test.sh
 
       - name: Tear down environment
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         if: "always()"
         with:
           timeout_minutes: 5
