@@ -85,7 +85,6 @@ dependencies {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
     // older versions than in okio
-    exclude group: "org.jetbrains", module: "annotations"
     exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
   }
 

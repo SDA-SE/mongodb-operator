@@ -73,7 +73,9 @@ class MongoDbControllerTest {
 
   @Mock MongoDbService mongoDbServiceMock;
 
-  @Spy V1SecretBuilder v1SecretBuilderMock = new V1SecretBuilder();
+  @SuppressWarnings("unused")
+  @Spy
+  V1SecretBuilder v1SecretBuilderMock = new V1SecretBuilder();
 
   @InjectMocks MongoDbController mongoDbController;
 
@@ -539,6 +541,7 @@ class MongoDbControllerTest {
     }
 
     @Override
+    @SuppressWarnings("removal")
     public <T> Optional<T> getSecondaryResource(Class<T> expectedType, String eventSourceName) {
       return Optional.empty();
     }
