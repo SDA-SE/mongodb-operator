@@ -107,7 +107,7 @@ dependencies {
   implementation "org.apache.commons:commons-lang3:3.14.0"
 
   // test
-  testImplementation enforcedPlatform("org.junit:junit-bom:5.10.1")
+  testImplementation enforcedPlatform("org.junit:junit-bom:5.10.2")
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit-pioneer:junit-pioneer:2.2.0'
   testImplementation 'org.assertj:assertj-core:3.25.3', {
