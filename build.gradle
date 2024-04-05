@@ -82,7 +82,7 @@ dependencies {
   implementation "io.javalin:javalin:6.1.3", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
-    // conflict with Kotlin version in Okia 3.9.0
+    // conflict with Kotlin version in Okio 3.9.0
     exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
   }
 
@@ -135,13 +135,17 @@ dependencies {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
     exclude group: 'com.squareup.okio', module: 'okio'
+    exclude group: 'junit', module: 'junit'
   }
+  // CVE-2020-15250 in 4.12
+  // -> pulled transitively from OkHttp3 mockwebserver used by kubernetes-server-mock
+  testImplementation 'junit:junit:4.13.2'
 }
 
 dependencyLocking { lockAllConfigurations() }
 
 // Task for creating gradle.lockfile per module. Needed for Trivy vulnerability scan.
-task resolveAndLockAll {
+tasks.register('resolveAndLockAll') {
   doFirst {
     assert gradle.startParameter.writeDependencyLocks
   }
