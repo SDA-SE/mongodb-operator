@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - https://github.com/SDA-SE/mongodb-operator//kustomize/release?ref=1.0.27
+  - https://github.com/SDA-SE/mongodb-operator//kustomize/release?ref=1.0.28
 secretGenerator:
   - name: mongodb-operator
     namespace: mongodb-operator
