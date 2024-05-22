@@ -57,7 +57,7 @@ dependencies {
 
   implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
   annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
-  implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:11.0.20')
+  implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:11.0.21')
 
   implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
     // self managed to avoid conflicts
