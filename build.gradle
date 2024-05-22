@@ -47,7 +47,7 @@ project.ext {
   mongoDbDriverVersion = "5.1.0"
   slf4jVersion = "2.0.13"
   operatorFrameworkVersion = "4.9.0"
-  kubernetesServerMockVersion = "6.11.0" // align with transitive dependency of operator framework
+  kubernetesServerMockVersion = "6.12.1" // align with transitive dependency of operator framework
   mockitoVersion = "5.2.0"
   jacksonVersion = "2.17.1"
   logbackContribVersion = "0.1.5"
