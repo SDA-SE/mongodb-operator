@@ -117,7 +117,7 @@ dependencies {
     // CVE-2024-25710 + CVE-2024-26308 in transitive version 1.25.0
     exclude group: "org.apache.commons", module: "commons-compress"
   }
-  testImplementation 'org.apache.commons:commons-compress:1.26.1'
+  testImplementation 'org.apache.commons:commons-compress:1.26.2'
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
   testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}", {
     // conflict of 1.14.1 and 1.14.7 in uk.org.webcompere:system-stubs-jupiter
