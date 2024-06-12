@@ -100,7 +100,7 @@ dependencies {
     exclude group: "ch.qos.logback", module: "logback-core"
   }
 
-  implementation 'io.micrometer:micrometer-registry-prometheus:1.13.0'
+  implementation 'io.micrometer:micrometer-registry-prometheus:1.13.1'
 
   // test
   testImplementation enforcedPlatform("org.junit:junit-bom:5.10.2")
