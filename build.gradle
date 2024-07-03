@@ -103,7 +103,7 @@ dependencies {
   implementation 'io.micrometer:micrometer-registry-prometheus:1.13.1'
 
   // test
-  testImplementation enforcedPlatform("org.junit:junit-bom:5.10.2")
+  testImplementation enforcedPlatform("org.junit:junit-bom:5.10.3")
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit-pioneer:junit-pioneer:2.2.0'
   testImplementation 'org.assertj:assertj-core:3.26.0', {
