@@ -44,7 +44,7 @@ jib {
 }
 
 project.ext {
-  mongoDbDriverVersion = "5.1.1"
+  mongoDbDriverVersion = "5.1.2"
   slf4jVersion = "2.0.13"
   operatorFrameworkVersion = "4.9.1"
   kubernetesServerMockVersion = "6.12.1" // align with transitive dependency of operator framework
