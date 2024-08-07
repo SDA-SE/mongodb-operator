@@ -37,7 +37,7 @@ jobs:
           ./gradlew jibDockerBuild &&
           docker run --rm --entrypoint="echo" mongodb-operator:latest 'image is not distroless' && exit 1 || echo 'image is distroless'
 
-      - uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+      - uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         if: always()
         with:
           name: java-ci-test-results
