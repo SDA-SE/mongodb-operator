@@ -131,7 +131,7 @@ dependencies {
     exclude group: 'net.bytebuddy', 'module': 'byte-buddy'
     exclude group: 'net.bytebuddy', 'module': 'byte-buddy-agent'
   }
-  testImplementation 'org.awaitility:awaitility:4.2.1'
+  testImplementation 'org.awaitility:awaitility:4.2.2'
   testImplementation "io.fabric8:kubernetes-server-mock:${kubernetesServerMockVersion}", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
