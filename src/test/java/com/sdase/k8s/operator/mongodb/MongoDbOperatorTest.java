@@ -116,8 +116,9 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
                   assertThatNoException()
                       .isThrownBy(
                           () -> {
-                            //noinspection EmptyTryBlock
-                            try (var ignored = new ServerSocket(port)) {}
+                            try (var ignored = new ServerSocket(port)) {
+                              LOG.info("Server stopped");
+                            }
                           }));
     }
   }
