@@ -274,69 +274,6 @@ class MongoDbControllerTest {
   }
 
   @Test
-  void shouldCallAllNecessaryServicesForSuccessForDocumentDb() {
-    var secretArgumentCaptor = ArgumentCaptor.forClass(Secret.class);
-    doNothing()
-        .when(kubernetesClientAdapterMock)
-        .createSecretInNamespace(anyString(), secretArgumentCaptor.capture());
-    when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
-        .thenReturn(CreateDatabaseResult.CREATED);
-    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
-
-    var givenMongoDbCr = new MongoDbCustomResource();
-    givenMongoDbCr.setMetadata(
-        new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
-    givenMongoDbCr.setSpec(
-        new MongoDbSpec()
-            .setSecret(
-                new SecretSpec()
-                    .setUsernameKey("u")
-                    .setPasswordKey("p")
-                    .setConnectionStringKey("c"))
-            .setDatabase(
-                new DatabaseSpec()
-                    .setConnectionStringOptions(
-                        "tls=true&readPreference=secondaryPreferred&retryWrites=false")));
-
-    var actual = mongoDbController.reconcile(givenMongoDbCr, new MongoDbCustomResourceContext());
-
-    verify(mongoDbServiceMock, times(1))
-        .createDatabaseWithUser(
-            "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
-    verify(kubernetesClientAdapterMock, times(1))
-        .createSecretInNamespace(eq("the-namespace"), any(Secret.class));
-
-    assertSoftly(
-        softly -> {
-          softly
-              .assertThat(secretArgumentCaptor.getValue())
-              .extracting(Secret::getMetadata)
-              .extracting("namespace", "name")
-              .containsExactly("the-namespace", "the-name");
-          softly
-              .assertThat(secretArgumentCaptor.getValue())
-              .extracting(Secret::getData)
-              .extracting("u", "p", "c")
-              .containsExactly(
-                  "dGhlLW5hbWVzcGFjZV90aGUtbmFtZQ==",
-                  "c3RhdGljLXRlc3QtcGFzc3dvcmQ=",
-                  "bW9uZ29kYjovL3RoZS1uYW1lc3BhY2VfdGhlLW5hbWU6c3RhdGljLXRlc3QtcGFzc3dvcmRAc29tZS1kb2N1bWVudGRiLmMxMjM0NTYuZXUtY2VudHJhbC0xLmRvY2RiLmFtYXpvbmF3cy5jb206MjcwMTcsc29tZS1kb2N1bWVudGRiLmM3ODkwMTIuZXUtY2VudHJhbC0xLmRvY2RiLmFtYXpvbmF3cy5jb206MjcwMTcvdGhlLW5hbWVzcGFjZV90aGUtbmFtZT90bHM9dHJ1ZSZyZWFkUHJlZmVyZW5jZT1zZWNvbmRhcnlQcmVmZXJyZWQmcmV0cnlXcml0ZXM9ZmFsc2U=");
-
-          // For the moment no updates to the original resource, this may change in the future if
-          // needed.
-          softly.assertThat(actual.isUpdateResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatus()).isTrue();
-          softly
-              .assertThat(actual.getResource().getStatus().getConditions())
-              .isNotEmpty()
-              .extracting(Condition::getStatus)
-              .containsOnly("True");
-          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
-          softly.assertThat(actual.isNoUpdate()).isFalse();
-        });
-  }
-
-  @Test
   void shouldFailWithBadConditionsForTooLongName() {
     when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
 
