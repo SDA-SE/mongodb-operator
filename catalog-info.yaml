@@ -3,14 +3,13 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: mongodb-operator
-  description: |
-    Bootstraps databases in existing MongoDB clusters based on a custom MongoDB resource.
+  title: MongoDB Operator
+  description:
+    $text: docs/index.md
   tags:
     - kubernetes
     - operator
   annotations:
-    sda.se/summary:
-      $text: docs/index.md
     backstage.io/techdocs-ref: dir:.
     defectdojo.org/product-name: "sdadev | mongodb-operator | quay.io/sdase/mongodb-operator"
     defectdojo.org/branch-name: "quay.io/sdase/mongodb-operator"
