@@ -11,7 +11,7 @@ metadata:
     - operator
   annotations:
     backstage.io/techdocs-ref: dir:.
-    defectdojo.org/product-name: "sdadev | mongodb-operator | quay.io/sdase/mongodb-operator"
+    defectdojo.org/product-name: "development-dev-dev | mongodb-operator"
     defectdojo.org/branch-name: "quay.io/sdase/mongodb-operator"
   links:
     - url: https://medium.com/sda-se/kubernetes-operator-to-the-rescue-how-our-own-mongodb-operator-improved-our-deployments-6d5ba3324abc
