@@ -79,7 +79,7 @@ dependencies {
 
   implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
   implementation 'jakarta.el:jakarta.el-api:6.0.1'
-  implementation 'org.bouncycastle:bcpkix-jdk18on:1.78.1'
+  implementation 'org.bouncycastle:bcpkix-jdk18on:1.79'
   implementation "io.javalin:javalin:6.3.0", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
