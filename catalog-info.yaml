@@ -47,7 +47,7 @@ metadata:
 spec:
   # Although not officially supported, we can use this type. The spec will be shown as source.
   type: crd
-  owner: "group:default/tachyon"
+  owner: group:default/sda_se_open_industry_solutions
   lifecycle: experimental
   definition:
     $text: ./kustomize/bases/operator/mongodbs-crd.yaml
