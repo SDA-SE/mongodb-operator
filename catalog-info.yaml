@@ -19,7 +19,7 @@ metadata:
 spec:
   type: service
   lifecycle: experimental
-  owner: "group:default/tachyon"
+  owner: group:default/sda_se_open_industry_solutions
   providesApis:
     - mongodbs-crd
 ---
