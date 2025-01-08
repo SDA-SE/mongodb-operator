@@ -107,7 +107,7 @@ dependencies {
   testImplementation enforcedPlatform("org.junit:junit-bom:5.11.4")
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit-pioneer:junit-pioneer:2.3.0'
-  testImplementation 'org.assertj:assertj-core:3.27.1', {
+  testImplementation 'org.assertj:assertj-core:3.27.2', {
     // conflict of 1.12.10 in assertj vs 1.12.13 in mockito-core
     exclude group: "net.bytebuddy", module: "byte-buddy"
     exclude group: "net.bytebuddy", module: "byte-buddy-agent"
