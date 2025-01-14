@@ -263,7 +263,6 @@ $ ./stop.sh
    kind-registry
    ```
 
-
 ## Documentation
 
 This service contains a documentation that is built using [TechDocs](https://backstage.io/docs/features/techdocs/techdocs-overview)
