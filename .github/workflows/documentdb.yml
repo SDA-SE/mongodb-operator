@@ -23,7 +23,7 @@ jobs:
       - name: Connect DocumentDB
         env:
           DDB_HOST: ${{ secrets.DDB_HOST }} # expected: sample-cluster.node.zone.docdb.amazonaws.com
-          DDB_HOSTS_MAP: ${{ secrets.DDB_HOSTS_MAP }} # expected: config for /etc/hosts including all propagated hostnames
+          DDB_HOSTS_MAP: ${{ secrets.DDB_HOSTS_MAP }} # expected: config for /etc/hosts including all propagated hostnames (master, cluster, cluster-ro) pointing to 127.0.0.1
           DDB_EC2_FINGERPRINT: ${{ secrets.DDB_EC2_FINGERPRINT }} # expected: hostname.ec2.proxy.to.forward.com,123.123.123.123 ecdsa-sha2-nistp256 ...
           DDB_EC2_USER_AND_HOST: ${{ secrets.DDB_EC2_USER_AND_HOST }} # expected: username@hostname.ec2.proxy.to.forward.com
           DDB_EC2_CERTIFICATE: ${{ secrets.DDB_EC2_CERTIFICATE }} # expected: pem certificate
