@@ -8,6 +8,10 @@ plugins {
   id 'org.cyclonedx.bom' version '2.0.0'
 }
 
+cyclonedxBom {
+  schemaVersion = "1.5"
+}
+
 repositories {
   mavenCentral()
 }
