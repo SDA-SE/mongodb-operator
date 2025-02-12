@@ -144,6 +144,9 @@ dependencies {
   // CVE-2020-15250 in 4.12
   // -> pulled transitively from OkHttp3 mockwebserver used by kubernetes-server-mock
   testImplementation 'junit:junit:4.13.2'
+  testImplementation 'com.squareup.okhttp3:okhttp:3.12.12', {
+    exclude group: 'com.squareup.okio', module: 'okio'
+  }
 }
 
 dependencyLocking { lockAllConfigurations() }

@@ -97,9 +97,9 @@ public class MongoDbResourceConditions {
         createSecretSuccessful,
         resource.getStatus().getAttempts());
     if (allConditionsTrue(resource)) {
-      return UpdateControl.updateStatus(resource);
+      return UpdateControl.patchStatus(resource);
     } else {
-      return UpdateControl.updateStatus(resource)
+      return UpdateControl.patchStatus(resource)
           .rescheduleAfter(
               RECONCILE_REQUEST_MIN_DURATION_ON_ERROR_SECONDS * resource.getStatus().getAttempts(),
               TimeUnit.SECONDS);

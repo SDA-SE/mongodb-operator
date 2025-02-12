@@ -2,7 +2,6 @@ package com.sdase.k8s.operator.mongodb.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -24,6 +23,7 @@ import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService.CreateDatabaseRe
 import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbStatus;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
 import io.fabric8.kubernetes.api.model.Condition;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -35,13 +35,16 @@ import io.javaoperatorsdk.operator.api.config.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
 import io.javaoperatorsdk.operator.api.reconciler.IndexedResourceCache;
-import io.javaoperatorsdk.operator.api.reconciler.ResourceDiscriminator;
 import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
-import io.javaoperatorsdk.operator.api.reconciler.dependent.managed.ManagedDependentResourceContext;
+import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.javaoperatorsdk.operator.api.reconciler.dependent.managed.ManagedWorkflowAndDependentResourceContext;
 import io.javaoperatorsdk.operator.processing.event.EventSourceRetriever;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,7 +95,7 @@ class MongoDbControllerTest {
 
     var actual = mongoDbController.cleanup(given, new MongoDbCustomResourceContext());
 
-    // By default owned resources (like the created secret) will be deleted as well.
+    // By default, owned resources (like the created secret) will be deleted as well.
     assertThat(actual).usingRecursiveComparison().isEqualTo(DeleteControl.defaultDelete());
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
     verifyNoMoreInteractions(mongoDbServiceMock);
@@ -118,7 +121,7 @@ class MongoDbControllerTest {
 
     var actual = mongoDbController.cleanup(given, contextMock);
 
-    // By default owned resources (like the created secret) will be deleted as well.
+    // By default, owned resources (like the created secret) will be deleted as well.
     assertThat(actual).usingRecursiveComparison().isEqualTo(DeleteControl.defaultDelete());
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
     verifyNoMoreInteractions(mongoDbServiceMock);
@@ -140,7 +143,7 @@ class MongoDbControllerTest {
     assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(() -> mongoDbController.cleanup(given, givenContext));
 
-    // By default owned resources (like the created secret) will be deleted as well.
+    // By default, owned resources (like the created secret) will be deleted as well.
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
   }
 
@@ -159,7 +162,7 @@ class MongoDbControllerTest {
 
     var actual = mongoDbController.cleanup(given, new MongoDbCustomResourceContext());
 
-    // By default owned resources (like the created secret) will be deleted as well.
+    // By default, owned resources (like the created secret) will be deleted as well.
     assertThat(actual).usingRecursiveComparison().isEqualTo(DeleteControl.defaultDelete());
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
     verify(mongoDbServiceMock).dropDatabase("the-namespace_the-name");
@@ -186,7 +189,7 @@ class MongoDbControllerTest {
     assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(() -> mongoDbController.cleanup(given, contextMock));
 
-    // By default owned resources (like the created secret) will be deleted as well.
+    // By default, owned resources (like the created secret) will be deleted as well.
     verify(mongoDbServiceMock).dropDatabaseUser("the-namespace_the-name", "the-namespace_the-name");
     verify(mongoDbServiceMock).dropDatabase("the-namespace_the-name");
   }
@@ -261,14 +264,10 @@ class MongoDbControllerTest {
 
           // For the moment no updates to the original resource, this may change in the future if
           // needed.
-          softly.assertThat(actual.isUpdateResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatus()).isTrue();
-          softly
-              .assertThat(actual.getResource().getStatus().getConditions())
-              .isNotEmpty()
-              .extracting(Condition::getStatus)
-              .containsOnly("True");
-          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isTrue();
+          softly.assertThat(areAllStatusConditionsTrue(actual)).isTrue();
+          softly.assertThat(actual.isPatchResourceAndStatus()).isFalse();
           softly.assertThat(actual.isNoUpdate()).isFalse();
         });
   }
@@ -301,16 +300,14 @@ class MongoDbControllerTest {
         softly -> {
           // For the moment no updates to the original resource, this may change in the future if
           // needed.
-          softly.assertThat(actual.isUpdateResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isTrue();
           softly
-              .assertThat(actual.getResource().getStatus().getConditions())
-              .extracting(Condition::getType, Condition::getStatus)
-              .containsExactlyInAnyOrder(
-                  tuple("CreateUsername", "False"),
-                  tuple("CreateDatabase", "Unknown"),
-                  tuple("CreateSecret", "Unknown"));
-          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+              .assertThat(extractStatusConditions(actual))
+              .containsEntry("CreateUsername", "False")
+              .containsEntry("CreateDatabase", "Unknown")
+              .containsEntry("CreateSecret", "Unknown");
+          softly.assertThat(actual.isPatchResourceAndStatus()).isFalse();
           softly.assertThat(actual.isNoUpdate()).isFalse();
         });
   }
@@ -353,16 +350,14 @@ class MongoDbControllerTest {
               .extracting(Secret::getData)
               .extracting("u", "p")
               .containsExactly("dGhlLW5hbWVzcGFjZV90aGUtbmFtZQ==", "c3RhdGljLXRlc3QtcGFzc3dvcmQ=");
-          softly.assertThat(actual.isUpdateResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isTrue();
           softly
-              .assertThat(actual.getResource().getStatus().getConditions())
-              .extracting(Condition::getType, Condition::getStatus)
-              .containsExactlyInAnyOrder(
-                  tuple("CreateUsername", "True"),
-                  tuple("CreateDatabase", "True"),
-                  tuple("CreateSecret", "False"));
-          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+              .assertThat(extractStatusConditions(actual))
+              .containsEntry("CreateUsername", "True")
+              .containsEntry("CreateDatabase", "True")
+              .containsEntry("CreateSecret", "False");
+          softly.assertThat(actual.isPatchResourceAndStatus()).isFalse();
           softly.assertThat(actual.isNoUpdate()).isFalse();
         });
   }
@@ -388,16 +383,14 @@ class MongoDbControllerTest {
     verifyNoInteractions(kubernetesClientAdapterMock);
     assertSoftly(
         softly -> {
-          softly.assertThat(actual.isUpdateResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isTrue();
           softly
-              .assertThat(actual.getResource().getStatus().getConditions())
-              .extracting(Condition::getType, Condition::getStatus)
-              .containsExactlyInAnyOrder(
-                  tuple("CreateUsername", "True"),
-                  tuple("CreateDatabase", "False"),
-                  tuple("CreateSecret", "Unknown"));
-          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+              .assertThat(extractStatusConditions(actual))
+              .containsEntry("CreateUsername", "True")
+              .containsEntry("CreateDatabase", "False")
+              .containsEntry("CreateSecret", "Unknown");
+          softly.assertThat(actual.isPatchResourceAndStatus()).isFalse();
           softly.assertThat(actual.isNoUpdate()).isFalse();
         });
   }
@@ -423,16 +416,14 @@ class MongoDbControllerTest {
     verifyNoInteractions(kubernetesClientAdapterMock);
     assertSoftly(
         softly -> {
-          softly.assertThat(actual.isUpdateResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatus()).isTrue();
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isTrue();
           softly
-              .assertThat(actual.getResource().getStatus().getConditions())
-              .extracting(Condition::getType, Condition::getStatus)
-              .containsExactlyInAnyOrder(
-                  tuple("CreateUsername", "True"),
-                  tuple("CreateDatabase", "True"),
-                  tuple("CreateSecret", "True"));
-          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+              .assertThat(extractStatusConditions(actual))
+              .containsEntry("CreateUsername", "True")
+              .containsEntry("CreateDatabase", "True")
+              .containsEntry("CreateSecret", "True");
+          softly.assertThat(actual.isPatchResourceAndStatus()).isFalse();
           softly.assertThat(actual.isNoUpdate()).isFalse();
         });
   }
@@ -444,25 +435,46 @@ class MongoDbControllerTest {
         new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
     givenMongoDbCr.setSpec(
         new MongoDbSpec().setSecret(new SecretSpec().setUsernameKey("u").setPasswordKey("p")));
+    //noinspection OptionalGetWithoutIsPresent
     givenMongoDbCr =
         new MongoDbResourceConditions()
             .applyUsernameCreated("the-namespace_the-name")
             .applyDatabaseCreated()
             .applySecretCreated()
             .createStatusUpdate(givenMongoDbCr)
-            .getResource();
+            .getResource()
+            .get();
     var givenContext = new MongoDbCustomResourceContext();
 
     var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
 
     assertSoftly(
         softly -> {
-          softly.assertThat(actual.isUpdateResource()).isFalse();
-          softly.assertThat(actual.isUpdateStatus()).isFalse();
-          softly.assertThat(actual.isUpdateResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isFalse();
+          softly.assertThat(actual.isPatchResourceAndStatus()).isFalse();
           softly.assertThat(actual.isNoUpdate()).isTrue();
         });
     verifyNoInteractions(taskFactorySpy, mongoDbServiceMock, kubernetesClientAdapterMock);
+  }
+
+  private boolean areAllStatusConditionsTrue(UpdateControl<MongoDbCustomResource> resource) {
+    Map<String, String> conditionsByName = extractStatusConditions(resource);
+    return !conditionsByName.isEmpty()
+        && conditionsByName.values().stream().allMatch("True"::equals);
+  }
+
+  private Map<String, String> extractStatusConditions(
+      UpdateControl<MongoDbCustomResource> resource) {
+    return resource
+        .getResource()
+        .map(MongoDbCustomResource::getStatus)
+        .map(MongoDbStatus::getConditions)
+        .map(
+            conditions ->
+                conditions.stream()
+                    .collect(Collectors.toMap(Condition::getType, Condition::getStatus)))
+        .orElse(new HashMap<>());
   }
 
   private class MongoDbCustomResourceContext implements Context<MongoDbCustomResource> {
@@ -478,14 +490,7 @@ class MongoDbControllerTest {
     }
 
     @Override
-    @SuppressWarnings("removal")
     public <T> Optional<T> getSecondaryResource(Class<T> expectedType, String eventSourceName) {
-      return Optional.empty();
-    }
-
-    @Override
-    public <R> Optional<R> getSecondaryResource(
-        Class<R> expectedType, ResourceDiscriminator<R, MongoDbCustomResource> discriminator) {
       return Optional.empty();
     }
 
@@ -495,7 +500,7 @@ class MongoDbControllerTest {
     }
 
     @Override
-    public ManagedDependentResourceContext managedDependentResourceContext() {
+    public ManagedWorkflowAndDependentResourceContext managedWorkflowAndDependentResourceContext() {
       return null;
     }
 
@@ -517,6 +522,11 @@ class MongoDbControllerTest {
     @Override
     public IndexedResourceCache<MongoDbCustomResource> getPrimaryCache() {
       return null;
+    }
+
+    @Override
+    public boolean isNextReconciliationImminent() {
+      return false;
     }
   }
 }
