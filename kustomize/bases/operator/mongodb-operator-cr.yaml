@@ -5,13 +5,13 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["create", "update"]
+    verbs: ["create", "update", "patch"]
   - apiGroups: ["persistence.sda-se.com"]
     resources: ["mongodbs"]
-    verbs: ["watch", "list", "get", "update"]
+    verbs: ["watch", "list", "get", "update", "patch"]
   - apiGroups: ["persistence.sda-se.com"]
     resources: ["mongodbs/status"]
-    verbs: ["watch", "list", "get", "update"]
+    verbs: ["watch", "list", "get", "update", "patch"]
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
     resourceNames:

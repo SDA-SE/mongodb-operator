@@ -85,14 +85,17 @@ The MongoDB Operator requires a `ServiceAccount` with some privileges for the Ku
   * `list`
   * `get`
   * `update`
+  * `patch`
 * For the resource `mongodbs/status` the following verbs are required:
   * `watch`
   * `list`
   * `get`
   * `update`
+  * `patch`
 * For the resource `secrets` the following verbs are required:
   * `create`
   * `update`
+  * `patch`
 * For the resource `customresourcedefinitions` with the resource name
   `mongodbs.persistence.sda-se.com` the following verbs are required:
   * `get`
@@ -104,7 +107,7 @@ The [CRD `mongodbs`](https://github.com/SDA-SE/mongodb-operator/tree/master/kust
 must be applied.
 
 
-### Database    
+### Database
 
 A MongoDB database instance or an AWS DocumentDB cluster must be set up separately from the
 deployment of the MongoDB Operator.
