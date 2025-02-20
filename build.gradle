@@ -69,7 +69,10 @@ dependencies {
     exclude group: "org.slf4j"
     // recheck when operator-framework is upgraded
     exclude group: 'com.squareup.okio', module: 'okio'
+    // vulnerability in 4.1.117.Final, may be removed when netty is updated in operator framework
+    exclude group: 'io.netty', module: 'netty-common'
   }
+  implementation 'io.netty:netty-common:4.1.118.Final'
   annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
     // self managed to avoid conflicts
     exclude group: "org.slf4j"
@@ -140,6 +143,8 @@ dependencies {
     exclude group: "org.slf4j"
     exclude group: 'com.squareup.okio', module: 'okio'
     exclude group: 'junit', module: 'junit'
+    // vulnerability in 4.1.117.Final
+    exclude group: 'io.netty', module: 'netty-common'
   }
   // CVE-2020-15250 in 4.12
   // -> pulled transitively from OkHttp3 mockwebserver used by kubernetes-server-mock
