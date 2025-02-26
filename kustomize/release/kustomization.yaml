@@ -4,3 +4,37 @@ namespace: mongodb-operator
 resources:
   - mongodb-operator-ns.yaml
   - no-namespace
+images:
+  - name: quay.io/sdase/mongodb-operator
+    newName: mongodb-operator
+    newTag: local-2
+
+secretGenerator:
+  - name: mongodb-operator
+    literals:
+      - mongodbConnectionString=mongodb://test-root:test-s3cr3t@mongodb.mongodb
+
+patches:
+  - target:
+      kind: Deployment
+      name: mongodb-operator
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      name: mongodb-operator
+      kind: Deployment
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mongodb-operator
+      spec:
+        template:
+          spec:
+            containers:
+              - name: operator
+                env:
+                  - name: ENABLE_JSON_LOGGING
+                    value: "false"
