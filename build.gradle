@@ -67,16 +67,14 @@ dependencies {
   annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
   implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:11.0.24')
   implementation enforcedPlatform('org.jetbrains.kotlin:kotlin-bom:2.1.10')
+  annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
+  implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
 
   implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
-    // self managed to avoid conflicts
-    exclude group: "org.slf4j"
     // recheck when operator-framework is upgraded
     exclude group: 'com.squareup.okio', module: 'okio'
   }
   annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
-    // self managed to avoid conflicts
-    exclude group: "org.slf4j"
     // recheck when operator-framework is upgraded
     exclude group: 'com.squareup.okio', module: 'okio'
   }
@@ -88,17 +86,11 @@ dependencies {
   implementation 'org.hibernate.validator:hibernate-validator:8.0.2.Final'
   implementation 'jakarta.el:jakarta.el-api:6.0.1'
   implementation 'org.bouncycastle:bcpkix-jdk18on:1.80'
-  implementation "io.javalin:javalin:6.4.0", {
-    // self managed to avoid conflicts
-    exclude group: "org.slf4j"
-  }
+  implementation "io.javalin:javalin:6.4.0"
 
   // logging
-  annotationProcessor "org.slf4j:slf4j-api:${slf4jVersion}"
-  implementation "org.slf4j:slf4j-api:${slf4jVersion}"
-  implementation 'ch.qos.logback:logback-classic:1.5.17', {
-    exclude group: "org.slf4j", module: "slf4j-api"
-  }
+  implementation "org.slf4j:slf4j-api"
+  implementation 'ch.qos.logback:logback-classic:1.5.17'
   implementation "ch.qos.logback.contrib:logback-json-classic:${logbackContribVersion}", {
     exclude group: "ch.qos.logback", module: "logback-classic"
     exclude group: "ch.qos.logback", module: "logback-core"
@@ -120,7 +112,6 @@ dependencies {
   }
   // try to replace local commons-compress management on update!
   testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.18.1', {
-    exclude group: "org.slf4j", module: "slf4j-api"
     // newer version from operator-framework
     exclude group: "org.apache.commons", module: "commons-lang3"
   }
@@ -138,11 +129,8 @@ dependencies {
   }
   testImplementation 'org.awaitility:awaitility:4.3.0'
   testImplementation "io.fabric8:kubernetes-server-mock:${kubernetesServerMockVersion}", {
-    // self managed to avoid conflicts
-    exclude group: "org.slf4j"
     exclude group: 'com.squareup.okio', module: 'okio'
     exclude group: 'junit', module: 'junit'
-    // vulnerability in 4.1.117.Final
   }
   // CVE-2020-15250 in 4.12
   // -> pulled transitively from OkHttp3 mockwebserver used by kubernetes-server-mock
