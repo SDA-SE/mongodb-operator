@@ -86,7 +86,7 @@ dependencies {
   implementation 'org.hibernate.validator:hibernate-validator:8.0.2.Final'
   implementation 'jakarta.el:jakarta.el-api:6.0.1'
   implementation 'org.bouncycastle:bcpkix-jdk18on:1.80'
-  implementation "io.javalin:javalin:6.4.0"
+  implementation "io.javalin:javalin:6.5.0"
 
   // logging
   implementation "org.slf4j:slf4j-api"
