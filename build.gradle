@@ -90,7 +90,7 @@ dependencies {
 
   // logging
   implementation "org.slf4j:slf4j-api"
-  implementation 'ch.qos.logback:logback-classic:1.5.17'
+  implementation 'ch.qos.logback:logback-classic:1.5.18'
   implementation "ch.qos.logback.contrib:logback-json-classic:${logbackContribVersion}", {
     exclude group: "ch.qos.logback", module: "logback-classic"
     exclude group: "ch.qos.logback", module: "logback-core"
