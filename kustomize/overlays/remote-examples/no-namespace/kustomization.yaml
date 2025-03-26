@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: custom-namespace
 resources:
   - custom-namespace-ns.yaml
-  - https://github.com/SDA-SE/mongodb-operator//kustomize/release/no-namespace?ref=2.0.5
+  - https://github.com/SDA-SE/mongodb-operator//kustomize/release/no-namespace?ref=2.0.6
 secretGenerator:
   - name: mongodb-operator
     literals:
