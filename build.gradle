@@ -121,7 +121,7 @@ dependencies {
     exclude group: 'net.bytebuddy', 'module': 'byte-buddy'
     exclude group: 'net.bytebuddy', 'module': 'byte-buddy-agent'
   }
-  testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.7"
+  testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.8"
   testImplementation "org.mockito:mockito-inline:${mockitoVersion}", {
     // conflict of 1.14.1 and 1.14.7 in uk.org.webcompere:system-stubs-jupiter
     exclude group: 'net.bytebuddy', 'module': 'byte-buddy'
