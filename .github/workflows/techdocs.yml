@@ -8,14 +8,19 @@ on:
   pull_request:
 
 jobs:
-  verify:
+  publish-docs:
+    name: Build and publish docs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        site:
+          - directory: ./
     container:
       image: spotify/techdocs:v1.2.6
       options: '--entrypoint ""'
-    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
-      - name: Check techdocs-cli
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Check mkdocs
         run: mkdocs --verbose build --clean
-        working-directory: ./workspace
+        working-directory: ${{ matrix.site.directory }}
