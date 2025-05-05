@@ -10,14 +10,12 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-
+    container:
+      image: spotify/techdocs:v1.2.6
+      options: '--entrypoint ""'
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
-
-      - name: Verify TechDocs
-        run: >
-          docker run
-          -v ${PWD}:/workspace
-          quay.io/sdase/techdocs:1
-          techdocs-cli generate --no-docker --verbose --source-dir /workspace
+      - name: Check techdocs-cli
+        run: mkdocs --verbose build --clean
+        working-directory: ./workspace
