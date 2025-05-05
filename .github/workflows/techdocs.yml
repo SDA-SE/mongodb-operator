@@ -18,7 +18,6 @@ jobs:
           - directory: ./
     container:
       image: spotify/techdocs:v1.2.6
-      options: '--entrypoint ""'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Check mkdocs
