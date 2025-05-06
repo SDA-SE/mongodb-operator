@@ -14,6 +14,8 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
         with:
           fetch-depth: 1
+      - run: apk --no-cache add git
+      - run: git config user.name 'github-actions[bot]' && git config user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Dry run generated mkdocs
         if: github.event_name == 'pull_request'
         run: mkdocs build --config-file mkdocs.yml && ls -al
@@ -27,4 +29,4 @@ jobs:
           retention-days: 1
       - name: Publish generated mkdocs
         if: github.event_name != 'pull_request'
-        run: mkdocs gh-deploy --config-file mkdocs.yml -r 'github-actions[bot]'
+        run: mkdocs gh-deploy --config-file mkdocs.yml
