@@ -30,4 +30,5 @@ jobs:
             site
           retention-days: 1
       - name: Publish generated mkdocs
+        if: github.event_name != 'pull_request'
         run: mkdocs gh-deploy --config-file mkdocs.yml
