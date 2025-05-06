@@ -17,6 +17,7 @@ jobs:
           fetch-depth: 1
       - run: ls -al
       - run: git init
+      - run: git fetch origin gh-pages
       - name: Dry run generated mkdocs
         if: github.event_name == 'pull_request'
         run: mkdocs build --config-file mkdocs.yml && ls -al
