@@ -17,8 +17,6 @@ jobs:
           fetch-depth: 1
       - run: ls -al
       - run: git init
-      - run: git config user.name 'github-actions[bot]' && git config user.email 'github-actions[bot]@users.noreply.github.com'
-      - run: apk --no-cache add git
       - name: Dry run generated mkdocs
         if: github.event_name == 'pull_request'
         run: mkdocs build --config-file mkdocs.yml && ls -al
@@ -32,4 +30,4 @@ jobs:
           retention-days: 1
       - name: Publish generated mkdocs
         if: github.event_name != 'pull_request'
-        run: mkdocs gh-deploy --config-file mkdocs.yml
+        run: mkdocs gh-deploy --config-file mkdocs.yml -r 'github-actions[bot]'
