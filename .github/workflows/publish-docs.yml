@@ -16,7 +16,9 @@ jobs:
         with:
           fetch-depth: 1
       - run: ls -al
+      - run: git config --global --add safe.directory /__w/mongodb-operator/mongodb-operator
       - run: git init
+      - run: git config user.name 'github-actions[bot]' && git config user.email 'github-actions[bot]@users.noreply.github.com'
       - run: git fetch origin gh-pages
       - name: Dry run generated mkdocs
         if: github.event_name == 'pull_request'
