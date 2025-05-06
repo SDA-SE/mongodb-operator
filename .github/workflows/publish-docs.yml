@@ -16,6 +16,7 @@ jobs:
           fetch-depth: 1
       - run: apk --no-cache add git
       - run: git config user.name 'github-actions[bot]' && git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - run: ls -al
       - name: Dry run generated mkdocs
         if: github.event_name == 'pull_request'
         run: mkdocs build --config-file mkdocs.yml && ls -al
