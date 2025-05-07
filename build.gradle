@@ -56,7 +56,7 @@ project.ext {
   mockitoVersion = "5.2.0"
   jacksonVersion = "2.18.3"
   logbackContribVersion = "0.1.5"
-  nettyVersion = "4.2.0.Final"
+  nettyVersion = "4.2.1.Final"
 }
 
 dependencies {
