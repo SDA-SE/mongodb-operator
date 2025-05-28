@@ -79,7 +79,7 @@ dependencies {
     exclude group: 'com.squareup.okio', module: 'okio'
   }
   // upgrade from transitive 1.15.0 in okhttp to fix CVE-2023-3635
-  implementation 'com.squareup.okio:okio:3.11.0'
+  implementation 'com.squareup.okio:okio:3.12.0'
 
   implementation "org.mongodb:mongodb-driver-sync:${mongoDbDriverVersion}"
 
