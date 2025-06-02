@@ -520,6 +520,11 @@ class MongoDbControllerTest {
     }
 
     @Override
+    public MongoDbCustomResource getPrimaryResource() {
+      return null;
+    }
+
+    @Override
     public IndexedResourceCache<MongoDbCustomResource> getPrimaryCache() {
       return null;
     }
