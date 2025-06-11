@@ -131,6 +131,8 @@ dependencies {
   testImplementation "io.fabric8:kubernetes-server-mock:${kubernetesServerMockVersion}", {
     exclude group: 'com.squareup.okio', module: 'okio'
     exclude group: 'junit', module: 'junit'
+    // comes in newer version directly for implementation scope
+    exclude group: 'org.bouncycastle', module: 'bcpkix-jdk18on'
   }
   // CVE-2020-15250 in 4.12
   // -> pulled transitively from OkHttp3 mockwebserver used by kubernetes-server-mock
