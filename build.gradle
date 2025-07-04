@@ -70,16 +70,8 @@ dependencies {
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
 
-  implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
-    // recheck when operator-framework is upgraded
-    exclude group: 'com.squareup.okio', module: 'okio'
-  }
-  annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}", {
-    // recheck when operator-framework is upgraded
-    exclude group: 'com.squareup.okio', module: 'okio'
-  }
-  // upgrade from transitive 1.15.0 in okhttp to fix CVE-2023-3635
-  implementation 'com.squareup.okio:okio:3.14.0'
+  implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}"
+  annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}"
 
   implementation "org.mongodb:mongodb-driver-sync:${mongoDbDriverVersion}"
 
@@ -129,7 +121,6 @@ dependencies {
   }
   testImplementation 'org.awaitility:awaitility:4.3.0'
   testImplementation "io.fabric8:kubernetes-server-mock:${kubernetesServerMockVersion}", {
-    exclude group: 'com.squareup.okio', module: 'okio'
     exclude group: 'junit', module: 'junit'
     // comes in newer version directly for implementation scope
     exclude group: 'org.bouncycastle', module: 'bcpkix-jdk18on'
@@ -137,9 +128,7 @@ dependencies {
   // CVE-2020-15250 in 4.12
   // -> pulled transitively from OkHttp3 mockwebserver used by kubernetes-server-mock
   testImplementation 'junit:junit:4.13.2'
-  testImplementation 'com.squareup.okhttp3:okhttp:4.12.0', {
-    exclude group: 'com.squareup.okio', module: 'okio'
-  }
+  testImplementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }
 
 dependencyLocking { lockAllConfigurations() }
