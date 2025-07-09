@@ -67,6 +67,14 @@ ignore {
   licenseMapping[input.Name] == permissive[_]
 }
 
+# ch.qos.logback:logback-parent is dual licensed as LGPL 2.1 or Eclipse Public License v1.0
+# see https://github.com/qos-ch/logback/blob/master/LICENSE.txt
+# cyclonedx identifies GNU Lesser General Public License
+ignore {
+  input.PkgName == "ch.qos.logback:logback-parent"
+  input.Name == "GNU Lesser General Public License"
+}
+
 # ch.qos.logback:logback-classic is dual licensed as LGPL 2.1 or Eclipse Public License v1.0
 # see https://github.com/qos-ch/logback/blob/master/LICENSE.txt
 # cyclonedx identifies GNU Lesser General Public License
