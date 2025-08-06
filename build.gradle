@@ -52,7 +52,7 @@ project.ext {
   mongoDbDriverVersion = "5.4.0"
   slf4jVersion = "2.0.17"
   // Check on upgrade, if org.apache.commons:commons-lang3 enforcement below (L147) is still needed!
-  operatorFrameworkVersion = "5.1.1"
+  operatorFrameworkVersion = "5.1.2"
   kubernetesServerMockVersion = "7.3.1" // align with transitive dependency of operator framework
   mockitoVersion = "5.2.0"
   jacksonVersion = "2.19.2"
