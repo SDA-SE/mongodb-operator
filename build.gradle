@@ -96,7 +96,7 @@ dependencies {
   testImplementation 'org.junit-pioneer:junit-pioneer:2.3.0'
   testImplementation 'org.assertj:assertj-core:3.27.3'
   // try to replace local commons-compress management on update!
-  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.20.1', {
+  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.21.0', {
     // newer version from operator-framework
     exclude group: "org.apache.commons", module: "commons-lang3"
   }
