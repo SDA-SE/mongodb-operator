@@ -94,7 +94,7 @@ dependencies {
   testImplementation enforcedPlatform('net.bytebuddy:byte-buddy-parent:1.17.6')
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit-pioneer:junit-pioneer:2.3.0'
-  testImplementation 'org.assertj:assertj-core:3.27.3'
+  testImplementation 'org.assertj:assertj-core:3.27.4'
   // try to replace local commons-compress management on update!
   testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.21.0', {
     // newer version from operator-framework
