@@ -87,7 +87,7 @@ dependencies {
   implementation 'ch.qos.logback:logback-classic'
   implementation "ch.qos.logback.contrib:logback-json-classic:${logbackContribVersion}"
   implementation "ch.qos.logback.contrib:logback-jackson:${logbackContribVersion}"
-  implementation 'io.micrometer:micrometer-registry-prometheus:1.15.2'
+  implementation 'io.micrometer:micrometer-registry-prometheus:1.15.3'
 
   // test
   testImplementation enforcedPlatform("org.junit:junit-bom:5.13.4")
