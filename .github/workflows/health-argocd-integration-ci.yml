@@ -21,7 +21,7 @@ jobs:
         with:
           path: argocd
           repository: "argoproj/argo-cd"
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v6
         with:
           # match argocd version in https://github.com/argoproj/argo-cd/blob/master/go.mod
           go-version: '1.21'
