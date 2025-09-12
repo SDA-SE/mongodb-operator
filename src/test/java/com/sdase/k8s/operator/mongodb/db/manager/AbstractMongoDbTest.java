@@ -49,7 +49,7 @@ public abstract class AbstractMongoDbTest {
   private static Map<String, String> createdDatabases;
 
   protected static void startDb() {
-    startDb(Version.Main.V4_0);
+    startDb(Version.Main.V5_0);
   }
 
   protected static void startDb(IFeatureAwareVersion mongoDbVersion) {
