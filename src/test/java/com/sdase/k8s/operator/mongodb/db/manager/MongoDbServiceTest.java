@@ -26,13 +26,6 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 abstract class MongoDbServiceTest extends AbstractMongoDbTest {
 
-  static class MongoDb40Test extends MongoDbServiceTest {
-    @BeforeAll
-    static void beforeAll() {
-      startDb(Version.Main.V4_0);
-    }
-  }
-
   @DisabledIfEnvironmentVariable(
       named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
       matches = ".+",
@@ -55,10 +48,6 @@ abstract class MongoDbServiceTest extends AbstractMongoDbTest {
     }
   }
 
-  @DisabledIfEnvironmentVariable(
-      named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
-      matches = ".+",
-      disabledReason = "Don't execute multiple times with external database.")
   static class MongoDb50Test extends MongoDbServiceTest {
     @BeforeAll
     static void beforeAll() {
