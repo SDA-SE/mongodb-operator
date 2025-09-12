@@ -77,6 +77,28 @@ abstract class MongoDbServiceTest extends AbstractMongoDbTest {
     }
   }
 
+  @DisabledIfEnvironmentVariable(
+      named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
+      matches = ".+",
+      disabledReason = "Don't execute multiple times with external database.")
+  static class MongoDb80Test extends MongoDbServiceTest {
+    @BeforeAll
+    static void beforeAll() {
+      startDb(Version.Main.V8_0);
+    }
+  }
+
+  @DisabledIfEnvironmentVariable(
+      named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
+      matches = ".+",
+      disabledReason = "Don't execute multiple times with external database.")
+  static class MongoDb81Test extends MongoDbServiceTest {
+    @BeforeAll
+    static void beforeAll() {
+      startDb(Version.Main.V8_1);
+    }
+  }
+
   private final MongoDbService mongoDbService = new MongoDbService(getMongoDbConnectionString());
 
   @AfterAll
