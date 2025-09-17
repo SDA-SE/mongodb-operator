@@ -67,7 +67,7 @@ dependencies {
   implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
   annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
   implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:11.0.26')
-  implementation enforcedPlatform('org.jetbrains.kotlin:kotlin-bom:2.2.10')
+  implementation enforcedPlatform('org.jetbrains.kotlin:kotlin-bom:2.2.20')
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.18')
