@@ -141,10 +141,6 @@ configurations.configureEach {
   } else {
     it.resolutionStrategy {
       failOnVersionConflict()
-      // Upgrade transitive dependency of io.javaoperatorsdk:operator-framework:5.1.1
-      // to fix CVE-2025-48924 in 3.17.0
-      // Check for removal on upgrade of io.javaoperatorsdk:operator-framework > 5.1.1
-      force 'org.apache.commons:commons-lang3:3.18.0'
     }
   }
 }
