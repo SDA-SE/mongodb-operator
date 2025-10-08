@@ -109,7 +109,7 @@ dependencies {
     // comes in newer version directly for implementation scope
     exclude group: 'org.bouncycastle', module: 'bcpkix-jdk18on'
   }
-  testImplementation 'com.squareup.okhttp3:okhttp:5.1.0'
+  testImplementation 'com.squareup.okhttp3:okhttp:5.2.0'
 }
 
 dependencyLocking { lockAllConfigurations() }
