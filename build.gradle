@@ -108,6 +108,8 @@ dependencies {
   testImplementation "io.fabric8:kubernetes-server-mock:${kubernetesServerMockVersion}", {
     // comes in newer version directly for implementation scope
     exclude group: 'org.bouncycastle', module: 'bcpkix-jdk18on'
+    // version mismatch with kubernetes-client from operator-framework
+    exclude group: 'io.fabric8', module: 'zjsonpatch'
   }
   testImplementation 'com.squareup.okhttp3:okhttp:5.2.0'
 }
