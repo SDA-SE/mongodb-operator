@@ -55,7 +55,7 @@ project.ext {
   operatorFrameworkVersion = "5.1.4"
   kubernetesServerMockVersion = "7.4.0" // align with transitive dependency of operator framework
   mockitoVersion = "5.2.0"
-  jacksonVersion = "2.20.0"
+  jacksonVersion = "2.20.1"
   logbackContribVersion = "0.1.5"
   nettyVersion = "4.2.7.Final"
 }
