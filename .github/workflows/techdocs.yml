@@ -19,7 +19,7 @@ jobs:
     container:
       image: spotify/techdocs:v1.2.6
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
       - name: Check mkdocs
         run: mkdocs --verbose build --clean
         working-directory: ${{ matrix.site.directory }}
