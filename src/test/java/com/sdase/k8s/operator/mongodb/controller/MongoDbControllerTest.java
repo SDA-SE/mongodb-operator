@@ -533,5 +533,15 @@ class MongoDbControllerTest {
     public boolean isNextReconciliationImminent() {
       return false;
     }
+
+    @Override
+    public boolean isPrimaryResourceDeleted() {
+      return false;
+    }
+
+    @Override
+    public boolean isPrimaryResourceFinalStateUnknown() {
+      return false;
+    }
   }
 }
