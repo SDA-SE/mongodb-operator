@@ -70,7 +70,7 @@ dependencies {
   implementation enforcedPlatform('org.jetbrains.kotlin:kotlin-bom:2.3.0')
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
-  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.22')
+  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.23')
 
   implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}"
   annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}"
