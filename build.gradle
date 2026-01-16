@@ -51,9 +51,7 @@ jib {
 project.ext {
   mongoDbDriverVersion = "5.6.2"
   slf4jVersion = "2.0.17"
-  // Check on upgrade, if org.apache.commons:commons-lang3 enforcement below (L147) is still needed!
   operatorFrameworkVersion = "5.2.2"
-  kubernetesServerMockVersion = "7.4.0" // align with transitive dependency of operator framework
   mockitoVersion = "5.2.0"
   jacksonVersion = "2.20.1"
   logbackContribVersion = "0.1.5"
@@ -68,18 +66,22 @@ dependencies {
   annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
   implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:11.0.26')
   implementation enforcedPlatform('org.jetbrains.kotlin:kotlin-bom:2.3.0')
+  implementation enforcedPlatform('org.bouncycastle:bc-jdk18on-bom:1.83')
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.24')
+  implementation enforcedPlatform("io.javaoperatorsdk:java-operator-sdk:${operatorFrameworkVersion}")
+  implementation enforcedPlatform("io.javaoperatorsdk:operator-framework-bom:${operatorFrameworkVersion}")
+  annotationProcessor enforcedPlatform("io.javaoperatorsdk:operator-framework-bom:${operatorFrameworkVersion}")
 
-  implementation "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}"
-  annotationProcessor "io.javaoperatorsdk:operator-framework:${operatorFrameworkVersion}"
+  implementation 'io.javaoperatorsdk:operator-framework'
+  annotationProcessor 'io.javaoperatorsdk:operator-framework'
 
   implementation "org.mongodb:mongodb-driver-sync:${mongoDbDriverVersion}"
 
   implementation 'org.hibernate.validator:hibernate-validator:9.1.0.Final'
   implementation 'jakarta.el:jakarta.el-api:6.0.1'
-  implementation 'org.bouncycastle:bcpkix-jdk18on:1.83'
+  implementation 'org.bouncycastle:bcpkix-jdk18on'
   implementation "io.javalin:javalin:6.7.0"
 
   // logging
@@ -95,22 +97,13 @@ dependencies {
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit-pioneer:junit-pioneer:2.3.0'
   testImplementation 'org.assertj:assertj-core:3.27.6'
-  // try to replace local commons-compress management on update!
-  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.22.0', {
-    // newer version from operator-framework
-    exclude group: "org.apache.commons", module: "commons-lang3"
-  }
+  testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.22.0'
   testImplementation "org.mongodb:mongodb-driver-legacy:${mongoDbDriverVersion}"
   testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
   testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.8"
   testImplementation "org.mockito:mockito-inline:${mockitoVersion}"
   testImplementation 'org.awaitility:awaitility:4.3.0'
-  testImplementation "io.fabric8:kubernetes-server-mock:${kubernetesServerMockVersion}", {
-    // comes in newer version directly for implementation scope
-    exclude group: 'org.bouncycastle', module: 'bcpkix-jdk18on'
-    // version mismatch with kubernetes-client from operator-framework
-    exclude group: 'io.fabric8', module: 'zjsonpatch'
-  }
+  testImplementation "io.fabric8:kubernetes-server-mock"
   testImplementation 'com.squareup.okhttp3:okhttp:5.3.2'
 }
 
