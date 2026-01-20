@@ -5,7 +5,7 @@ metadata:
   name: mongodb-operator
   title: MongoDB Operator
   description:
-    $text: docs/index.md
+    $text: docs/index-summary-description.md
   tags:
     - kubernetes
     - operator
