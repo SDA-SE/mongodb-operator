@@ -4,8 +4,19 @@ kind: Component
 metadata:
   name: mongodb-operator
   title: MongoDB Operator
-  description:
-    $text: docs/index.md
+  description: |
+    # MongoDB Operator
+  
+    A Kubernetes Operator that creates users and databases in existing MongoDB clusters based on a
+    custom resource.
+  
+    Based on the resource name, a secret is created that contains the dynamically generated database
+    name, username and password.
+  
+    When the operator is installed in a cluster, a database can be requested with a MongoDB resource
+    as shown on the usage page
+  
+    The MongoDB Operator is tested with MongoDB and DocumentDB.
   tags:
     - kubernetes
     - operator
@@ -27,23 +38,25 @@ apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
   name: mongodbs-crd
-  description: CRD to request a MongoDB database from the mongodb-operator.
+  title: MongoDB Operator CRD
+  description: |
+    CRD to request a MongoDB database from the mongodb-operator.
+    
+    A MongoDB custom resource initiates a request for a database for the namespace where it is located.
+    A database user with access to a database named `[metadata.namespace]_[metadata.name]`
+    will be created by the MongoDB Controller in an already existing MongoDB instance.
+    A secret containing username and a random password with the same `metadata.name` as this
+    custom resource will be provided in the same namespace.
+  
+    Currently the database host, port, options and other parameters than username and
+    password must be set according the MongoDB instance configured for the cluster in the
+    MongoDB Controller.
+    The secret and the user will be removed, when this custom resource is deleted.
+  
+    The database will be deleted if `spec.database.pruneAfterDelete` is `true`.
   tags:
     - kubernetes
     - operator
-  annotations:
-    sda.se/summary: |
-      A MongoDB custom resource initiates a request for a database for the namespace where it
-      is located.
-      A database user with access to a database named `[metadata.namespace]_[metadata.name]`
-      will be created by the MongoDB Controller in an already existing MongoDB instance.
-      A secret containing username and a random password with the same `metadata.name` as this
-      custom resource will be provided in the same namespace.
-      Currently the database host, port, options and other parameters than username and
-      password must be set according the MongoDB instance configured for the cluster in the
-      MongoDB Controller.
-      The secret and the user will be removed, when this custom resource is deleted.
-      The database will be deleted if `spec.database.pruneAfterDelete` is `true`.
 spec:
   # Although not officially supported, we can use this type. The spec will be shown as source.
   type: crd
