@@ -46,6 +46,10 @@ jib {
       'org.opencontainers.image.licenses': "MIT",
       'org.opencontainers.image.description': "A Kubernetes Operator that creates users and databases in existing MongoDB clusters based on a custom resource.",
   ]
+  container.jvmFlags = [
+      '-XX:MaxRAMPercentage=70',
+      '-XshowSettings:vm'
+  ]
 }
 
 project.ext {
