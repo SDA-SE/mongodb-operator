@@ -97,7 +97,7 @@ dependencies {
 
   // test
   testImplementation enforcedPlatform("org.junit:junit-bom:6.0.2")
-  testImplementation enforcedPlatform('net.bytebuddy:byte-buddy-parent:1.18.3')
+  testImplementation enforcedPlatform('net.bytebuddy:byte-buddy-parent:1.18.4')
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit-pioneer:junit-pioneer:2.3.0'
   testImplementation 'org.assertj:assertj-core:3.27.6'
