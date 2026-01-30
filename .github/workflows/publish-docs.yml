@@ -9,7 +9,7 @@ jobs:
     name: Build and publish docs
     runs-on: ubuntu-latest
     container:
-      image: spotify/techdocs:v1.2.6
+      image: spotify/techdocs:v1.2.8
     steps:
       - run: apk --no-cache add git
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
