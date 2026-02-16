@@ -73,7 +73,7 @@ dependencies {
   implementation enforcedPlatform('org.bouncycastle:bc-jdk18on-bom:1.83')
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
-  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.29')
+  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.32')
   implementation enforcedPlatform("io.javaoperatorsdk:java-operator-sdk:${operatorFrameworkVersion}")
   implementation enforcedPlatform("io.javaoperatorsdk:operator-framework-bom:${operatorFrameworkVersion}")
   annotationProcessor enforcedPlatform("io.javaoperatorsdk:operator-framework-bom:${operatorFrameworkVersion}")
