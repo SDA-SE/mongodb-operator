@@ -73,7 +73,10 @@ dependencies {
   implementation enforcedPlatform('org.bouncycastle:bc-jdk18on-bom:1.83')
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
-  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.32')
+  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.32'), {
+    // pulls old v5 Servlet API
+    exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
+  }
   implementation enforcedPlatform("io.javaoperatorsdk:java-operator-sdk:${operatorFrameworkVersion}")
   implementation enforcedPlatform("io.javaoperatorsdk:operator-framework-bom:${operatorFrameworkVersion}")
   annotationProcessor enforcedPlatform("io.javaoperatorsdk:operator-framework-bom:${operatorFrameworkVersion}")
@@ -86,7 +89,13 @@ dependencies {
   implementation 'org.hibernate.validator:hibernate-validator:9.1.0.Final'
   implementation 'jakarta.el:jakarta.el-api:6.0.1'
   implementation 'org.bouncycastle:bcpkix-jdk18on'
-  implementation "io.javalin:javalin:7.0.0"
+  implementation "io.javalin:javalin:7.0.0", {
+    // conflict within transitive org.eclipse.jetty.ee10:jetty-ee10-annotations:12.1.6
+    exclude group: "jakarta.annotation", module: "jakarta.annotation-api"
+  }
+  implementation "jakarta.annotation:jakarta.annotation-api:2.1.1", {
+    because "excluded in io.javali:javalin:7.0.0"
+  }
 
   // logging
   implementation "org.slf4j:slf4j-api"
