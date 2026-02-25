@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 abstract class MongoDbServiceTest extends AbstractMongoDbTest {
 
@@ -37,6 +39,7 @@ abstract class MongoDbServiceTest extends AbstractMongoDbTest {
     }
   }
 
+  @DisabledOnOs(OS.MAC)
   @DisabledIfEnvironmentVariable(
       named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
       matches = ".+",
@@ -48,6 +51,11 @@ abstract class MongoDbServiceTest extends AbstractMongoDbTest {
     }
   }
 
+  @DisabledOnOs(OS.MAC)
+  @DisabledIfEnvironmentVariable(
+      named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
+      matches = ".+",
+      disabledReason = "Don't execute multiple times with external database.")
   static class MongoDb50Test extends MongoDbServiceTest {
     @BeforeAll
     static void beforeAll() {
@@ -77,10 +85,6 @@ abstract class MongoDbServiceTest extends AbstractMongoDbTest {
     }
   }
 
-  @DisabledIfEnvironmentVariable(
-      named = OVERRIDE_MONGODB_CONNECTION_STRING_ENV_NAME,
-      matches = ".+",
-      disabledReason = "Don't execute multiple times with external database.")
   static class MongoDb80Test extends MongoDbServiceTest {
     @BeforeAll
     static void beforeAll() {
