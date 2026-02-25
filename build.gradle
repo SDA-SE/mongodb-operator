@@ -68,7 +68,7 @@ dependencies {
   annotationProcessor enforcedPlatform("io.netty:netty-bom:${nettyVersion}")
   implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
   annotationProcessor enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
-  implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:11.0.26')
+  implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:12.1.6')
   implementation enforcedPlatform('org.jetbrains.kotlin:kotlin-bom:2.3.10')
   implementation enforcedPlatform('org.bouncycastle:bc-jdk18on-bom:1.83')
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
