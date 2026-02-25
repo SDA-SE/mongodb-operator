@@ -9,6 +9,7 @@ import static org.awaitility.Awaitility.await;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.sdase.k8s.operator.mongodb.db.manager.AbstractMongoDbTest;
+import com.sdase.k8s.operator.mongodb.logging.LogConfigurer;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
@@ -47,6 +48,8 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
 
   @BeforeAll
   static void beforeAll() throws IOException {
+    // Jetty produce too much useless debug logs
+    LogConfigurer.configure(false);
     startDb();
     try (ServerSocket serverSocket = new ServerSocket(0)) {
       port = serverSocket.getLocalPort();
@@ -138,7 +141,9 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
     var request = new Request.Builder().url(pingEndpoint).get().build();
     var httpClient = new OkHttpClient();
     try (Response response = httpClient.newCall(request).execute()) {
-      assertThat(response.isSuccessful()).isTrue();
+      assertThat(response.isSuccessful())
+          .describedAs("Status %d is not successful", response.code())
+          .isTrue();
     } catch (IOException e) {
       fail("Could not access liveness endpoint", e);
     }
@@ -149,7 +154,9 @@ class MongoDbOperatorTest extends AbstractMongoDbTest {
     var request = new Request.Builder().url(pingEndpoint).get().build();
     var httpClient = new OkHttpClient();
     try (Response response = httpClient.newCall(request).execute()) {
-      assertThat(response.isSuccessful()).isTrue();
+      assertThat(response.isSuccessful())
+          .describedAs("Status %d is not successful", response.code())
+          .isTrue();
     } catch (IOException e) {
       fail("Could not access readiness endpoint", e);
     }
