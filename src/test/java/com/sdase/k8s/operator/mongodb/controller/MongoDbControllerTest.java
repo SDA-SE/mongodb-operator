@@ -35,6 +35,7 @@ import io.javaoperatorsdk.operator.api.config.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
 import io.javaoperatorsdk.operator.api.reconciler.IndexedResourceCache;
+import io.javaoperatorsdk.operator.api.reconciler.ResourceOperations;
 import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.managed.ManagedWorkflowAndDependentResourceContext;
@@ -45,6 +46,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -485,8 +487,13 @@ class MongoDbControllerTest {
     }
 
     @Override
-    public <T> Set<T> getSecondaryResources(Class<T> expectedType) {
-      return null;
+    public <R> Set<R> getSecondaryResources(Class<R> aClass, boolean b) {
+      return Set.of();
+    }
+
+    @Override
+    public <R> Stream<R> getSecondaryResourcesAsStream(Class<R> aClass, boolean b) {
+      return Stream.empty();
     }
 
     @Override
@@ -512,6 +519,11 @@ class MongoDbControllerTest {
     @Override
     public KubernetesClient getClient() {
       return kubernetesClientAdapterMock.getKubernetesClient();
+    }
+
+    @Override
+    public ResourceOperations<MongoDbCustomResource> resourceOperations() {
+      return null;
     }
 
     @Override
