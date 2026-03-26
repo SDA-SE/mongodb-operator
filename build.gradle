@@ -55,7 +55,7 @@ jib {
 project.ext {
   mongoDbDriverVersion = "5.6.4"
   slf4jVersion = "2.0.17"
-  operatorFrameworkVersion = "5.3.1"
+  operatorFrameworkVersion = "5.3.2"
   mockitoVersion = "5.2.0"
   jacksonVersion = "2.21.2"
   logbackContribVersion = "0.1.5"
