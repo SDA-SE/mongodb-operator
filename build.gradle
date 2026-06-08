@@ -80,6 +80,9 @@ dependencies {
   implementation enforcedPlatform("io.javaoperatorsdk:java-operator-sdk:${operatorFrameworkVersion}")
   implementation enforcedPlatform("io.javaoperatorsdk:operator-framework-bom:${operatorFrameworkVersion}")
   annotationProcessor enforcedPlatform("io.javaoperatorsdk:operator-framework-bom:${operatorFrameworkVersion}")
+  implementation enforcedPlatform("org.ow2.asm:asm-bom:9.10.1"), {
+    because "version conflict in jetty-ee10-annotations"
+  }
 
   implementation 'io.javaoperatorsdk:operator-framework'
   annotationProcessor 'io.javaoperatorsdk:operator-framework'
