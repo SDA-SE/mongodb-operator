@@ -104,7 +104,7 @@ public class MongoDbController
       createDatabaseTask(resource, conditions)
           .ifPresent(
               task -> {
-                var result = createDatabase(task, resource, conditions);
+                var result = createDatabase(task, conditions);
                 if (CreateDatabaseResult.CREATED == result) {
                   createSecret(task, resource, conditions);
                 } else if (CreateDatabaseResult.SKIPPED == result) {
@@ -129,9 +129,7 @@ public class MongoDbController
   }
 
   private CreateDatabaseResult createDatabase(
-      CreateDatabaseTask task,
-      MongoDbCustomResource resource,
-      MongoDbResourceConditions trackedConditions) {
+      CreateDatabaseTask task, MongoDbResourceConditions trackedConditions) {
     var databaseCreated =
         mongoDbService.createDatabaseWithUser(
             task.databaseName(), task.username(), task.password());
