@@ -94,6 +94,7 @@ The MongoDB Operator requires a `ServiceAccount` with some privileges for the Ku
   * `patch`
 * For the resource `secrets` the following verbs are required:
   * `create`
+  * `get`
   * `update`
   * `patch`
 * For the resource `customresourcedefinitions` with the resource name

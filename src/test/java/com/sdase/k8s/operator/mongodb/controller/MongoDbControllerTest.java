@@ -40,6 +40,8 @@ import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.managed.ManagedWorkflowAndDependentResourceContext;
 import io.javaoperatorsdk.operator.processing.event.EventSourceRetriever;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -399,15 +401,38 @@ class MongoDbControllerTest {
 
   @Test
   void shouldUpdateStatusOfExistingResourcesWithoutStatus() {
+    var secretArgumentCaptor = ArgumentCaptor.forClass(Secret.class);
     when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
         .thenReturn(CreateDatabaseResult.SKIPPED);
     when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
+    when(kubernetesClientAdapterMock.getSecretInNamespace("the-namespace", "the-name"))
+        .thenReturn(
+            Optional.of(
+                existingSecret(
+                    Map.of(
+                        "database",
+                        base64("the-namespace_the-name"),
+                        "username",
+                        base64("the-namespace_the-name"),
+                        "password",
+                        base64("existing-test-password"),
+                        "connectionString",
+                        base64(
+                            "mongodb://the-namespace_the-name:existing-test-password@some-documentdb.c123456.eu-central-1.docdb.amazonaws.com:27017/the-namespace_the-name")))));
+    doNothing()
+        .when(kubernetesClientAdapterMock)
+        .createOrReplaceSecretInNamespace(eq("the-namespace"), secretArgumentCaptor.capture());
 
     var givenMongoDbCr = new MongoDbCustomResource();
     givenMongoDbCr.setMetadata(
         new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
     givenMongoDbCr.setSpec(
-        new MongoDbSpec().setSecret(new SecretSpec().setUsernameKey("u").setPasswordKey("p")));
+        new MongoDbSpec()
+            .setSecret(
+                new SecretSpec()
+                    .setUsernameKey("u")
+                    .setPasswordKey("p")
+                    .setConnectionStringKey("MONGODB_CONNECTION_STRING")));
     var givenContext = new MongoDbCustomResourceContext();
 
     var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
@@ -415,9 +440,21 @@ class MongoDbControllerTest {
     verify(mongoDbServiceMock, times(1))
         .createDatabaseWithUser(
             "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
-    verifyNoInteractions(kubernetesClientAdapterMock);
+    verify(kubernetesClientAdapterMock, times(1)).getSecretInNamespace("the-namespace", "the-name");
+    verify(kubernetesClientAdapterMock, times(1))
+        .createOrReplaceSecretInNamespace(eq("the-namespace"), any(Secret.class));
     assertSoftly(
         softly -> {
+          softly
+              .assertThat(secretArgumentCaptor.getValue().getData())
+              .containsKeys("u", "p", "MONGODB_CONNECTION_STRING")
+              .doesNotContainKey("connectionString");
+          softly
+              .assertThat(
+                  decode(
+                      secretArgumentCaptor.getValue().getData().get("MONGODB_CONNECTION_STRING")))
+              .startsWith("mongodb://")
+              .contains("existing-test-password");
           softly.assertThat(actual.isPatchResource()).isFalse();
           softly.assertThat(actual.isPatchStatus()).isTrue();
           softly
@@ -477,6 +514,20 @@ class MongoDbControllerTest {
                 conditions.stream()
                     .collect(Collectors.toMap(Condition::getType, Condition::getStatus)))
         .orElse(new HashMap<>());
+  }
+
+  private Secret existingSecret(Map<String, String> data) {
+    var secret = new Secret();
+    secret.setData(data);
+    return secret;
+  }
+
+  private String base64(String value) {
+    return Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+  }
+
+  private String decode(String value) {
+    return new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8);
   }
 
   private class MongoDbCustomResourceContext implements Context<MongoDbCustomResource> {
