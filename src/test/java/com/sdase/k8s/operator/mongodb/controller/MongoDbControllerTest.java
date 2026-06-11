@@ -497,6 +497,193 @@ class MongoDbControllerTest {
     verifyNoInteractions(taskFactorySpy, mongoDbServiceMock, kubernetesClientAdapterMock);
   }
 
+  @Test
+  void shouldFailSecretCreationWhenExistingSecretIsMissing() {
+    when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
+        .thenReturn(CreateDatabaseResult.SKIPPED);
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
+    when(kubernetesClientAdapterMock.getSecretInNamespace("the-namespace", "the-name"))
+        .thenReturn(Optional.empty());
+
+    var givenMongoDbCr = new MongoDbCustomResource();
+    givenMongoDbCr.setMetadata(
+        new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
+    givenMongoDbCr.setSpec(
+        new MongoDbSpec()
+            .setSecret(
+                new SecretSpec()
+                    .setUsernameKey("u")
+                    .setPasswordKey("p")
+                    .setConnectionStringKey("MONGODB_CONNECTION_STRING")));
+    var givenContext = new MongoDbCustomResourceContext();
+
+    var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
+
+    verify(mongoDbServiceMock, times(1))
+        .createDatabaseWithUser(
+            "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
+    verify(kubernetesClientAdapterMock, times(1)).getSecretInNamespace("the-namespace", "the-name");
+    verifyNoMoreInteractions(kubernetesClientAdapterMock);
+    assertSoftly(
+        softly -> {
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isTrue();
+          softly
+              .assertThat(extractStatusConditions(actual))
+              .containsEntry("CreateUsername", "True")
+              .containsEntry("CreateDatabase", "True")
+              .containsEntry("CreateSecret", "False");
+          softly.assertThat(actual.isPatchResourceAndStatus()).isFalse();
+          softly.assertThat(actual.isNoUpdate()).isFalse();
+        });
+  }
+
+  @Test
+  void shouldFailSecretCreationWhenExistingSecretDoesNotContainPasswordKey() {
+    when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
+        .thenReturn(CreateDatabaseResult.SKIPPED);
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
+    when(kubernetesClientAdapterMock.getSecretInNamespace("the-namespace", "the-name"))
+        .thenReturn(
+            Optional.of(
+                existingSecret(
+                    Map.of(
+                        "database",
+                        base64("the-namespace_the-name"),
+                        "username",
+                        base64("the-namespace_the-name")))));
+
+    var givenMongoDbCr = new MongoDbCustomResource();
+    givenMongoDbCr.setMetadata(
+        new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
+    givenMongoDbCr.setSpec(
+        new MongoDbSpec()
+            .setSecret(
+                new SecretSpec()
+                    .setUsernameKey("u")
+                    .setPasswordKey("p")
+                    .setConnectionStringKey("MONGODB_CONNECTION_STRING")));
+    var givenContext = new MongoDbCustomResourceContext();
+
+    var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
+
+    verify(mongoDbServiceMock, times(1))
+        .createDatabaseWithUser(
+            "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
+    verify(kubernetesClientAdapterMock, times(1)).getSecretInNamespace("the-namespace", "the-name");
+    assertSoftly(
+        softly -> {
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isTrue();
+          softly
+              .assertThat(extractStatusConditions(actual))
+              .containsEntry("CreateUsername", "True")
+              .containsEntry("CreateDatabase", "True")
+              .containsEntry("CreateSecret", "False");
+        });
+  }
+
+  @Test
+  void shouldGenerateConnectionStringWhenExistingSecretDoesNotContainConnectionStringKey() {
+    var secretArgumentCaptor = ArgumentCaptor.forClass(Secret.class);
+    when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
+        .thenReturn(CreateDatabaseResult.SKIPPED);
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
+    when(kubernetesClientAdapterMock.getSecretInNamespace("the-namespace", "the-name"))
+        .thenReturn(
+            Optional.of(
+                existingSecret(
+                    Map.of(
+                        "database",
+                        base64("the-namespace_the-name"),
+                        "username",
+                        base64("the-namespace_the-name"),
+                        "p",
+                        base64("existing-test-password")))));
+    doNothing()
+        .when(kubernetesClientAdapterMock)
+        .createOrReplaceSecretInNamespace(eq("the-namespace"), secretArgumentCaptor.capture());
+
+    var givenMongoDbCr = new MongoDbCustomResource();
+    givenMongoDbCr.setMetadata(
+        new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
+    givenMongoDbCr.setSpec(
+        new MongoDbSpec()
+            .setSecret(
+                new SecretSpec()
+                    .setUsernameKey("u")
+                    .setPasswordKey("p")
+                    .setConnectionStringKey("MONGODB_CONNECTION_STRING")));
+    var givenContext = new MongoDbCustomResourceContext();
+
+    var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
+
+    verify(mongoDbServiceMock, times(1))
+        .createDatabaseWithUser(
+            "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
+    verify(kubernetesClientAdapterMock, times(1)).getSecretInNamespace("the-namespace", "the-name");
+    verify(kubernetesClientAdapterMock, times(1))
+        .createOrReplaceSecretInNamespace(eq("the-namespace"), any(Secret.class));
+    assertSoftly(
+        softly -> {
+          softly
+              .assertThat(secretArgumentCaptor.getValue().getData())
+              .containsKeys("u", "p", "MONGODB_CONNECTION_STRING")
+              .doesNotContainKey("connectionString");
+          softly
+              .assertThat(
+                  decode(
+                      secretArgumentCaptor.getValue().getData().get("MONGODB_CONNECTION_STRING")))
+              .startsWith("mongodb://")
+              .contains("existing-test-password");
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isTrue();
+          softly
+              .assertThat(extractStatusConditions(actual))
+              .containsEntry("CreateUsername", "True")
+              .containsEntry("CreateDatabase", "True")
+              .containsEntry("CreateSecret", "True");
+        });
+  }
+
+  @Test
+  void shouldFailSecretCreationWhenDecodeSecretValueHasNullData() {
+    when(mongoDbServiceMock.createDatabaseWithUser(anyString(), anyString(), anyString()))
+        .thenReturn(CreateDatabaseResult.SKIPPED);
+    when(mongoDbServiceMock.getConnectionString()).thenReturn(MONGODB_OPERATOR_CONNECTION_STRING);
+    when(kubernetesClientAdapterMock.getSecretInNamespace("the-namespace", "the-name"))
+        .thenReturn(Optional.of(existingSecret(null)));
+
+    var givenMongoDbCr = new MongoDbCustomResource();
+    givenMongoDbCr.setMetadata(
+        new ObjectMetaBuilder().withNamespace("the-namespace").withName("the-name").build());
+    givenMongoDbCr.setSpec(
+        new MongoDbSpec()
+            .setSecret(
+                new SecretSpec()
+                    .setUsernameKey("u")
+                    .setPasswordKey("p")
+                    .setConnectionStringKey("MONGODB_CONNECTION_STRING")));
+    var givenContext = new MongoDbCustomResourceContext();
+
+    var actual = mongoDbController.reconcile(givenMongoDbCr, givenContext);
+
+    verify(mongoDbServiceMock, times(1))
+        .createDatabaseWithUser(
+            "the-namespace_the-name", "the-namespace_the-name", "static-test-password");
+    verify(kubernetesClientAdapterMock, times(1)).getSecretInNamespace("the-namespace", "the-name");
+    assertSoftly(
+        softly -> {
+          softly.assertThat(actual.isPatchResource()).isFalse();
+          softly.assertThat(actual.isPatchStatus()).isTrue();
+          softly
+              .assertThat(extractStatusConditions(actual))
+              .containsEntry("CreateUsername", "True")
+              .containsEntry("CreateDatabase", "True")
+              .containsEntry("CreateSecret", "False");
+        });
+  }
+
   private boolean areAllStatusConditionsTrue(UpdateControl<MongoDbCustomResource> resource) {
     Map<String, String> conditionsByName = extractStatusConditions(resource);
     return !conditionsByName.isEmpty()
