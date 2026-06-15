@@ -5,7 +5,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["create", "get", "update", "patch"]
+    verbs: ["create", "update", "patch"]
   - apiGroups: ["persistence.sda-se.com"]
     resources: ["mongodbs"]
     verbs: ["watch", "list", "get", "update", "patch"]
