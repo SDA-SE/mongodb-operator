@@ -62,41 +62,6 @@ class KubernetesClientAdapterTest {
   }
 
   @Test
-  void shouldCallKubernetesClientToCreateOrReplaceSecret() {
-    when(secretNonNamespaceOperationMock.resource(createdSecretCaptor.capture()))
-        .thenReturn(secretResourceMock);
-
-    var givenSecret = new Secret();
-
-    kubernetesClientAdapter.createOrReplaceSecretInNamespace("the-namespace", givenSecret);
-
-    assertThat(namespaceCaptor.getAllValues()).containsExactly("the-namespace");
-    assertThat(createdSecretCaptor.getAllValues()).containsExactly(givenSecret);
-  }
-
-  @Test
-  void shouldGetSecretFromNamespace() {
-    var givenSecret = new Secret();
-    when(secretNonNamespaceOperationMock.withName("the-secret")).thenReturn(secretResourceMock);
-    when(secretResourceMock.get()).thenReturn(givenSecret);
-
-    var actual = kubernetesClientAdapter.getSecretInNamespace("the-namespace", "the-secret");
-
-    assertThat(namespaceCaptor.getAllValues()).containsExactly("the-namespace");
-    assertThat(actual).contains(givenSecret);
-  }
-
-  @Test
-  void shouldReturnEmptyOptionalWhenSecretIsMissing() {
-    when(secretNonNamespaceOperationMock.withName("the-secret")).thenReturn(secretResourceMock);
-
-    var actual = kubernetesClientAdapter.getSecretInNamespace("the-namespace", "the-secret");
-
-    assertThat(namespaceCaptor.getAllValues()).containsExactly("the-namespace");
-    assertThat(actual).isEmpty();
-  }
-
-  @Test
   void shouldPassThroughKubernetesClientExceptionWhenCreateSecretFails() {
     var givenException = new KubernetesClientException("Error");
     when(secretNonNamespaceOperationMock.resource(createdSecretCaptor.capture()))

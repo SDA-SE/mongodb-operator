@@ -2,12 +2,10 @@ package com.sdase.k8s.operator.mongodb.controller;
 
 import com.sdase.k8s.operator.mongodb.controller.tasks.CreateDatabaseTask;
 import com.sdase.k8s.operator.mongodb.controller.tasks.TaskFactory;
-import com.sdase.k8s.operator.mongodb.controller.tasks.util.ConnectionStringUtil;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.IllegalNameException;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService;
 import com.sdase.k8s.operator.mongodb.db.manager.MongoDbService.CreateDatabaseResult;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
-import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.javaoperatorsdk.operator.api.reconciler.Cleaner;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -16,9 +14,6 @@ import io.javaoperatorsdk.operator.api.reconciler.DeleteControl;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.RetryInfo;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,15 +97,9 @@ public class MongoDbController
       }
 
       createDatabaseTask(resource, conditions)
-          .ifPresent(
-              task -> {
-                var result = createDatabase(task, conditions);
-                if (CreateDatabaseResult.CREATED == result) {
-                  createSecret(task, resource, conditions);
-                } else if (CreateDatabaseResult.SKIPPED == result) {
-                  createOrRepairSecret(task, resource, conditions);
-                }
-              });
+          .filter(
+              task -> CreateDatabaseResult.CREATED == createDatabase(task, resource, conditions))
+          .ifPresent(task -> createSecret(task, resource, conditions));
 
       return conditions.createStatusUpdate(resource);
     }
@@ -129,12 +118,23 @@ public class MongoDbController
   }
 
   private CreateDatabaseResult createDatabase(
-      CreateDatabaseTask task, MongoDbResourceConditions trackedConditions) {
+      CreateDatabaseTask task,
+      MongoDbCustomResource resource,
+      MongoDbResourceConditions trackedConditions) {
     var databaseCreated =
         mongoDbService.createDatabaseWithUser(
             task.databaseName(), task.username(), task.password());
     if (databaseCreated == CreateDatabaseResult.FAILED) {
       trackedConditions.applyDatabaseCreationFailed();
+      return databaseCreated;
+    }
+    if (databaseCreated == CreateDatabaseResult.SKIPPED
+        && trackedConditions.hasEmptyStatus(resource)) {
+      // If database/user already exists and there is no status in the resource, we assume that
+      // the resource has been handled by an older version, where no status was tracked.
+      // We have to assume, that the secret has been successfully created, because the MongoDB
+      // Operator has no read access to secrets by default.
+      trackedConditions.applyDatabaseCreated().applySecretCreated();
       return databaseCreated;
     }
     trackedConditions.applyDatabaseCreated();
@@ -153,67 +153,5 @@ public class MongoDbController
     } catch (KubernetesClientException e) {
       trackedConditions.applySecretCreationFailed(e.getMessage()).createStatusUpdate(resource);
     }
-  }
-
-  private void createOrRepairSecret(
-      CreateDatabaseTask task,
-      MongoDbCustomResource resource,
-      MongoDbResourceConditions trackedConditions) {
-    var namespace = resource.getMetadata().getNamespace();
-    var name = resource.getMetadata().getName();
-    try {
-      var existingSecret = kubernetesClientAdapter.getSecretInNamespace(namespace, name);
-      if (existingSecret.isEmpty()) {
-        trackedConditions.applySecretCreationFailed(
-            "Secret is missing but database user already exists. Cannot recreate secret without existing password.");
-        return;
-      }
-
-      var password =
-          decodeSecretValue(
-                  existingSecret.get().getData(),
-                  resource.getSpec().getSecret().getPasswordKey(),
-                  new SecretSpec().getPasswordKey())
-              .orElseThrow(
-                  () ->
-                      new IllegalStateException(
-                          "Existing secret does not contain the configured or default password key."));
-
-      var connectionString =
-          decodeSecretValue(
-                  existingSecret.get().getData(),
-                  resource.getSpec().getSecret().getConnectionStringKey(),
-                  new SecretSpec().getConnectionStringKey())
-              .orElseGet(
-                  () ->
-                      ConnectionStringUtil.createConnectionString(
-                          task.databaseName(),
-                          task.username(),
-                          password,
-                          resource.getSpec().getDatabase().getConnectionStringOptions(),
-                          mongoDbService.getConnectionString()));
-
-      var repairedTask =
-          new CreateDatabaseTask(
-              resource, task.databaseName(), task.username(), password, connectionString);
-      var repairedSecret = v1SecretBuilder.createSecretForOwner(repairedTask);
-      kubernetesClientAdapter.createOrReplaceSecretInNamespace(namespace, repairedSecret);
-      trackedConditions.applySecretCreated();
-    } catch (RuntimeException e) {
-      trackedConditions.applySecretCreationFailed(e.getMessage());
-    }
-  }
-
-  private Optional<String> decodeSecretValue(Map<String, String> data, String... candidateKeys) {
-    if (data == null) {
-      return Optional.empty();
-    }
-    for (var key : candidateKeys) {
-      var value = data.get(key);
-      if (value != null) {
-        return Optional.of(new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8));
-      }
-    }
-    return Optional.empty();
   }
 }
