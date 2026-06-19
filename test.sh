@@ -7,16 +7,29 @@ sleep 15
 echo "  the operator should do the Job …"
 kubectl logs -n mongodb-operator -l serverpod=mongodb-operator
 
-echo "👀 then a secret should be created …"
+echo "👀 then a secret with defaults should be created …"
+
+secret="$(kubectl get secrets -n local-test local-test-defaults-db -o yaml)"
+echo "  Found secret:"
+echo "${secret}"
+usernameBase64="$(echo "${secret}" | yq .data.username)"
+echo "  Found base64 username in 'data.username': ${usernameBase64}"
+echo "${usernameBase64}" | grep -v "null" || exit 1
+connectionStringBase64="$(echo "${secret}" | yq .data.connectionString)"
+echo "  Found base64 connection string in 'data.connectionString': ${connectionStringBase64}"
+echo "${connectionStringBase64}" | grep -v "null" || exit 1
+
+echo "👀 then a secret with custom keys should be created …"
 
 secret="$(kubectl get secrets -n local-test local-test-db -o yaml)"
 echo "  Found secret:"
 echo "${secret}"
 usernameBase64="$(echo "${secret}" | yq .data.u)"
 echo "  Found base64 username in 'data.u': ${usernameBase64}"
+echo "${usernameBase64}" | grep "bG9jYWwtdGVzdF9sb2NhbC10ZXN0LWRi" || exit 1
 connectionStringBase64="$(echo "${secret}" | yq .data.c)"
 echo "  Found base64 connection string in 'data.c': ${connectionStringBase64}"
-echo "${secret}" | grep "bG9jYWwtdGVzdF9sb2NhbC10ZXN0LWRi" || exit 1
+echo "${connectionStringBase64}" | grep "bW9uZ29kYjovL2xvY2FsLXRlc3RfbG9jYWwtdGVzdC1kYjp2WEJiaXI0eC1wWTRjS3U2X1JBRy1jYSUyQy0zTWR4RldReVIzT0l3bkcwR0Jqel9WTlJoMWZka0NLa3lFZ0Btb25nb2RiLm1vbmdvZGIvbG9jYWwtdGVzdF9sb2NhbC10ZXN0LWRiP3JlYWRQcmVmZXJlbmNlPXNlY29uZGFyeVByZWZlcnJlZCZyZXRyeVdyaXRlcz1mYWxzZQ==" || exit 1
 
 echo "👀 then a database user should be created …"
 
