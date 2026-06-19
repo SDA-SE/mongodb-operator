@@ -96,6 +96,13 @@ The MongoDB Operator requires a `ServiceAccount` with some privileges for the Ku
   * `create`
   * `update`
   * `patch`
+
+Secret read permissions are intentionally not required.
+The operator follows a write-only model for Kubernetes Secrets so that the controller cannot read
+arbitrary Secrets from the cluster.
+Because of this, the operator can create new Secrets with custom keys, but it cannot safely inspect
+already existing Secrets.
+
 * For the resource `customresourcedefinitions` with the resource name
   `mongodbs.persistence.sda-se.com` the following verbs are required:
   * `get`
