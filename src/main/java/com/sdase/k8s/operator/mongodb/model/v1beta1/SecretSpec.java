@@ -2,18 +2,18 @@ package com.sdase.k8s.operator.mongodb.model.v1beta1;
 
 public class SecretSpec {
 
-  private static final String DEFAULT_DATABASE_KEY = "database";
-  private static final String DEFAULT_USERNAME_KEY = "username";
-  private static final String DEFAULT_PASSWORD_KEY = "password";
-  private static final String DEFAULT_CONNECTION_STRING_KEY = "connectionString";
+  public static final String DEFAULT_DATABASE_KEY = "database";
+  public static final String DEFAULT_USERNAME_KEY = "username";
+  public static final String DEFAULT_PASSWORD_KEY = "password";
+  public static final String DEFAULT_CONNECTION_STRING_KEY = "connectionString";
 
-  private String databaseKey = DEFAULT_DATABASE_KEY;
+  private String databaseKey;
 
-  private String usernameKey = DEFAULT_USERNAME_KEY;
+  private String usernameKey;
 
-  private String passwordKey = DEFAULT_PASSWORD_KEY;
+  private String passwordKey;
 
-  private String connectionStringKey = DEFAULT_CONNECTION_STRING_KEY;
+  private String connectionStringKey;
 
   public String getDatabaseKey() {
     return databaseKey;

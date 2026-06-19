@@ -2,6 +2,8 @@ package com.sdase.k8s.operator.mongodb.controller;
 
 import com.sdase.k8s.operator.mongodb.controller.tasks.CreateDatabaseTask;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -9,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class V1SecretBuilder {
 
@@ -19,15 +22,18 @@ public class V1SecretBuilder {
     var username = createDatabaseTask.username();
     var password = createDatabaseTask.password();
     var connectionString = createDatabaseTask.connectionString();
+    var secretSpec = Optional.ofNullable(owner.getSpec()).map(MongoDbSpec::getSecret);
     secret.setData(
         Map.of(
-            owner.getSpec().getSecret().getDatabaseKey(),
+            secretSpec.map(SecretSpec::getDatabaseKey).orElse(SecretSpec.DEFAULT_DATABASE_KEY),
             base64(database),
-            owner.getSpec().getSecret().getUsernameKey(),
+            secretSpec.map(SecretSpec::getUsernameKey).orElse(SecretSpec.DEFAULT_USERNAME_KEY),
             base64(username),
-            owner.getSpec().getSecret().getPasswordKey(),
+            secretSpec.map(SecretSpec::getPasswordKey).orElse(SecretSpec.DEFAULT_PASSWORD_KEY),
             base64(password),
-            owner.getSpec().getSecret().getConnectionStringKey(),
+            secretSpec
+                .map(SecretSpec::getConnectionStringKey)
+                .orElse(SecretSpec.DEFAULT_CONNECTION_STRING_KEY),
             base64(connectionString)));
     ObjectMeta secretMetadata = createMetaDataFromOwnerResource(owner);
     secret.setMetadata(secretMetadata);

@@ -10,10 +10,4 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Group("persistence.sda-se.com")
 @Kind("MongoDb")
 public class MongoDbCustomResource extends CustomResource<MongoDbSpec, MongoDbStatus>
-    implements Namespaced {
-
-  public MongoDbCustomResource() {
-    super();
-    setSpec(new MongoDbSpec());
-  }
-}
+    implements Namespaced {}
