@@ -114,7 +114,7 @@ class MongoDbControllerTest {
     givenMetadata.setName("the-name");
     var given = new MongoDbCustomResource();
     given.setMetadata(givenMetadata);
-    given.getSpec().getDatabase().setPruneAfterDelete(true);
+    given.setSpec(new MongoDbSpec().setDatabase(new DatabaseSpec().setPruneAfterDelete(true)));
 
     var retryInfoMock = mock(RetryInfo.class);
     when(retryInfoMock.isLastAttempt()).thenReturn(true);
@@ -160,7 +160,7 @@ class MongoDbControllerTest {
     givenMetadata.setName("the-name");
     var given = new MongoDbCustomResource();
     given.setMetadata(givenMetadata);
-    given.getSpec().getDatabase().setPruneAfterDelete(true);
+    given.setSpec(new MongoDbSpec().setDatabase(new DatabaseSpec().setPruneAfterDelete(true)));
 
     var actual = mongoDbController.cleanup(given, new MongoDbCustomResourceContext());
 
@@ -181,7 +181,7 @@ class MongoDbControllerTest {
     givenMetadata.setName("the-name");
     var given = new MongoDbCustomResource();
     given.setMetadata(givenMetadata);
-    given.getSpec().getDatabase().setPruneAfterDelete(true);
+    given.setSpec(new MongoDbSpec().setDatabase(new DatabaseSpec().setPruneAfterDelete(true)));
 
     var retryInfoMock = mock(RetryInfo.class);
     when(retryInfoMock.isLastAttempt()).thenReturn(false);
@@ -203,7 +203,7 @@ class MongoDbControllerTest {
     givenMetadata.setName("the-name" + StringUtils.repeat("-123456789", 3));
     var given = new MongoDbCustomResource();
     given.setMetadata(givenMetadata);
-    given.getSpec().getDatabase().setPruneAfterDelete(true);
+    given.setSpec(new MongoDbSpec().setDatabase(new DatabaseSpec().setPruneAfterDelete(true)));
 
     var givenContext = new MongoDbCustomResourceContext();
 

@@ -2,9 +2,9 @@ package com.sdase.k8s.operator.mongodb.model.v1beta1;
 
 public class MongoDbSpec {
 
-  private DatabaseSpec database = new DatabaseSpec();
+  private DatabaseSpec database;
 
-  private SecretSpec secret = new SecretSpec();
+  private SecretSpec secret;
 
   public DatabaseSpec getDatabase() {
     return database;
