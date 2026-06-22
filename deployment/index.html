@@ -870,6 +870,13 @@ Operator.</p>
 <li><code>patch</code></li>
 </ul>
 </li>
+</ul>
+<p>Secret read permissions are intentionally not required.
+The operator follows a write-only model for Kubernetes Secrets so that the controller cannot read
+arbitrary Secrets from the cluster.
+Because of this, the operator can create new Secrets with custom keys, but it cannot safely inspect
+already existing Secrets.</p>
+<ul>
 <li>For the resource <code>customresourcedefinitions</code> with the resource name
   <code>mongodbs.persistence.sda-se.com</code> the following verbs are required:<ul>
 <li><code>get</code></li>
