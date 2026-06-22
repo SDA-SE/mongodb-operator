@@ -13,8 +13,30 @@ updates:
   - SDA-SE/sda-workforce
   commit-message:
     prefix: fix
-    prefix-development: chore
     include: scope
+  groups:
+    plugins:
+      prefix: chore
+      patterns:
+        - org.sonarqube
+        - com.diffplug.spotless
+        - com.google.cloud.tools.jib
+        - org.cyclonedx.bom
+    test:
+      prefix: test
+      patterns:
+        - org.junit:junit-bom
+        - net.bytebuddy:byte-buddy-parent
+        - org.junit.jupiter:junit-jupiter
+        - org.junit-pioneer:junit-pioneer
+        - org.assertj:assertj-core
+        - de.flapdoodle.embed:de.flapdoodle.embed.mongo
+        - org.mockito:mockito-junit-jupiter
+        - uk.org.webcompere:system-stubs-jupiter
+        - org.mockito:mockito-inline
+        - org.awaitility:awaitility
+        - io.fabric8:kubernetes-server-mock
+        - com.squareup.okhttp3:okhttp
   ignore:
     - dependency-name: org.eclipse.jetty:jetty-bom
       update-types: ["version-update:semver-major"]
