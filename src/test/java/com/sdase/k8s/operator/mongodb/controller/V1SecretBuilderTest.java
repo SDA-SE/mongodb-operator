@@ -10,6 +10,7 @@ import com.sdase.k8s.operator.mongodb.controller.tasks.util.ConnectionStringUtil
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -148,11 +149,12 @@ class V1SecretBuilderTest {
     objectMeta.setUid(TEST_DB_UID);
     var mongoDbCustomResource = new MongoDbCustomResource();
     mongoDbCustomResource.setMetadata(objectMeta);
-    mongoDbCustomResource
-        .getSpec()
-        .setDatabase(
-            new DatabaseSpec()
-                .setConnectionStringOptions("readPreference=secondaryPreferred&retryWrites=false"));
+    mongoDbCustomResource.setSpec(
+        new MongoDbSpec()
+            .setDatabase(
+                new DatabaseSpec()
+                    .setConnectionStringOptions(
+                        "readPreference=secondaryPreferred&retryWrites=false")));
 
     return TaskFactory.customFactory(
             NamingUtil::fromNamespaceAndName,

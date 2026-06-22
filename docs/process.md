@@ -4,6 +4,7 @@ The MongoDB Operator reacts on reconcile requests of the Kubernetes API.
 
 When a `MongoDb` resource is reconciled, it checks the status and creates a new database user and
 the Kubernetes secret if needed.
+It does not read existing Secrets during reconciliation.
 
 On cleanup requests, it will delete the user and, if requested, removes the database.
 Kubernetes will care about deleting the secret when deletion of the `MongoDb` resource is requested.
@@ -53,3 +54,7 @@ k8s -> S !! : delete
 k8s -> MDB !! : delete
 deactivate k8s
 ```
+
+The operator is intentionally write-only for Kubernetes Secrets.
+This reduces cluster attack surface, but also means existing Secrets are not inspected or repaired
+during reconciliation.

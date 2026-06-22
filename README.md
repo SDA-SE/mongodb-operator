@@ -14,12 +14,15 @@
 A Kubernetes Operator that creates users and databases in existing MongoDB clusters based on a
 custom resource.
 
-Pleaser refer to the [deployment documentation](docs/deployment.md) for installing MongoDB Operator
-in a Kubernetes Cluster or to the [usage documentation](docs/usage) to see how to request a database
-for a workload.
+Please refer to the [deployment documentation](docs/deployment.md) for installing MongoDB Operator
+in a Kubernetes Cluster or to the [usage documentation](docs/usage.md) to see how to request a
+database for a workload.
 The full documentation is available on [GitHub Pages](https://sda-se.github.io/mongodb-operator/).
 If ArgoCD is used for deployment, the [provided custom health check](./health/argocd/README.md) can
 be used to include `MongoDb` resource in the application health.
+
+The operator follows a write-only model for Kubernetes Secrets.
+It creates Secrets for new `MongoDb` resources, but it does not read existing Secrets.
 
 The image is hosted at [quay.io/sdase/mongodb-operator](https://quay.io/repository/sdase/mongodb-operator).
 

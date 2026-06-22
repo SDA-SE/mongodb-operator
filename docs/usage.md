@@ -78,7 +78,7 @@ resource must be treated the same way as a Secret, because a Secret with the sam
 created by the MongoDB Operator.
 
 The following configuration needs to be added to the `kustomization.yaml`.
-It is derived from the built in `Secret` configuration. 
+It is derived from the built in `Secret` configuration.
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1

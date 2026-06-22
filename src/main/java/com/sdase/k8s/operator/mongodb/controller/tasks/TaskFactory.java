@@ -6,6 +6,7 @@ import com.sdase.k8s.operator.mongodb.controller.tasks.util.NamingUtil;
 import com.sdase.k8s.operator.mongodb.controller.tasks.util.PasswordUtil;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.DatabaseSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbCustomResource;
+import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
 import java.util.Optional;
 import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +46,8 @@ public class TaskFactory {
     var username = usernameCreator.apply(mongoDbCustomResource);
     var password = passwordCreator.apply(mongoDbCustomResource);
     var options =
-        Optional.ofNullable(mongoDbCustomResource.getSpec().getDatabase())
+        Optional.ofNullable(mongoDbCustomResource.getSpec())
+            .map(MongoDbSpec::getDatabase)
             .map(DatabaseSpec::getConnectionStringOptions)
             .filter(StringUtils::isNotBlank)
             .orElse(null);
@@ -62,6 +64,9 @@ public class TaskFactory {
         mongoDbCustomResource,
         databaseNameCreator.apply(mongoDbCustomResource),
         usernameCreator.apply(mongoDbCustomResource),
-        mongoDbCustomResource.getSpec().getDatabase().isPruneAfterDelete());
+        Optional.ofNullable(mongoDbCustomResource.getSpec())
+            .map(MongoDbSpec::getDatabase)
+            .map(DatabaseSpec::isPruneAfterDelete)
+            .orElse(false));
   }
 }
