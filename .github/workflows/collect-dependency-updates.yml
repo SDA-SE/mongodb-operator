@@ -20,3 +20,4 @@ jobs:
           labels: 'update_collection'
           pr_title: 'Combined Dependency Updates'
           combine_branch_name: 'dependencies/update-collection'
+          create_from_scratch: 'true'
