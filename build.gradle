@@ -73,7 +73,7 @@ dependencies {
   implementation enforcedPlatform('org.bouncycastle:bc-jdk18on-bom:1.84')
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
-  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.34'), {
+  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.5.35'), {
     // pulls old v5 Servlet API
     exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
   }
