@@ -23,8 +23,8 @@ jobs:
           repository: "argoproj/argo-cd"
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          # match argocd version in https://github.com/argoproj/argo-cd/blob/master/go.mod
-          go-version: '1.26.3'
+          # Use the Go version required by the checked out Argo CD revision.
+          go-version-file: argocd/go.mod
       - name: Prepare
         run: |
           rm mongodb-operator/health/argocd/persistence.sda-se.com/MongoDb/health_test.lua
