@@ -14,7 +14,6 @@ import com.sdase.k8s.operator.mongodb.ssl.util.SslUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.javaoperatorsdk.operator.Operator;
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import javax.net.ssl.SSLContext;
@@ -24,8 +23,7 @@ public class MongoDbOperator {
   public MongoDbOperator(
       EnvironmentConfig config, KubernetesClient kubernetesClient, int monitoringPort) {
     var operator = new Operator(overrider -> overrider.withKubernetesClient(kubernetesClient));
-    // timeout as in ConfigurationService.DEFAULT_TERMINATION_TIMEOUT_SECONDS
-    operator.installShutdownHook(Duration.ofSeconds(10L));
+    operator.installShutdownHook();
     var mongoDbService = createMongoDbService(config);
     var mongoDbPrivilegesCheck = verifyPrivileges(mongoDbService);
     operator.register(createMongoDbController(kubernetesClient, mongoDbService));
