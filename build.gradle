@@ -16,7 +16,7 @@ repositories {
   mavenCentral()
 }
 
-group "com.sdase.k8s.operator.mongodb"
+group = "com.sdase.k8s.operator.mongodb"
 
 idea.module.inheritOutputDirs = true
 
@@ -131,7 +131,7 @@ tasks.register('resolveAndLockAll') {
     assert gradle.startParameter.writeDependencyLocks
   }
   doLast {
-    configurations.findAll {
+    configurations.matching {
       it.canBeResolved
     }.each { it.resolve() }
   }
