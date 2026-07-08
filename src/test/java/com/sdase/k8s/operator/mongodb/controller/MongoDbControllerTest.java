@@ -26,6 +26,7 @@ import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbSpec;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.MongoDbStatus;
 import com.sdase.k8s.operator.mongodb.model.v1beta1.SecretSpec;
 import io.fabric8.kubernetes.api.model.Condition;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -499,6 +500,18 @@ class MongoDbControllerTest {
     @Override
     public <T> Optional<T> getSecondaryResource(Class<T> expectedType, String eventSourceName) {
       return Optional.empty();
+    }
+
+    @Override
+    public <R extends HasMetadata> Optional<R> getSecondaryResource(
+        Class<R> expectedType, String eventSourceName, String name, String namespace) {
+      return Optional.empty();
+    }
+
+    @Override
+    public <R> Stream<R> getSecondaryResourcesAsStream(
+        Class<R> expectedType, String eventSourceName) {
+      return Stream.empty();
     }
 
     @Override
