@@ -64,6 +64,15 @@ project.ext {
 
 dependencies {
 
+  constraints {
+    implementation('org.jspecify:jspecify') {
+      version {
+        strictly '1.0.1'
+      }
+      because 'Align JSpecify versions used by Micrometer and JUnit'
+    }
+  }
+
   implementation enforcedPlatform("io.netty:netty-bom:${nettyVersion}")
   annotationProcessor enforcedPlatform("io.netty:netty-bom:${nettyVersion}")
   implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
