@@ -57,7 +57,7 @@ project.ext {
   slf4jVersion = "2.0.20"
   operatorFrameworkVersion = "5.6.1"
   mockitoVersion = "5.2.0"
-  jacksonVersion = "2.22.2"
+  jacksonVersion = "2.22.3"
   logbackContribVersion = "0.1.5"
   nettyVersion = "4.2.18.Final"
 }
