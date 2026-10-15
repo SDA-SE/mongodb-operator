@@ -90,7 +90,7 @@ dependencies {
   //
   implementation enforcedPlatform('org.jetbrains.kotlin:kotlin-bom:2.4.21')
   //
-  implementation enforcedPlatform('org.bouncycastle:bc-jdk18on-bom:1.86.1')
+  implementation enforcedPlatform('org.bouncycastle:bc-jdk18on-bom:1.86.2')
   //
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
