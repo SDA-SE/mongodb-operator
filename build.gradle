@@ -88,7 +88,7 @@ dependencies {
   //
   implementation enforcedPlatform('org.eclipse.jetty:jetty-bom:12.1.13')
   //
-  implementation enforcedPlatform('org.jetbrains.kotlin:kotlin-bom:2.4.20')
+  implementation enforcedPlatform('org.jetbrains.kotlin:kotlin-bom:2.4.21')
   //
   implementation enforcedPlatform('org.bouncycastle:bc-jdk18on-bom:1.86.1')
   //
