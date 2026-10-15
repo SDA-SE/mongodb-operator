@@ -66,7 +66,7 @@ project.ext {
   //
   logbackContribVersion = "0.1.5"
   //
-  nettyVersion = "4.2.18.Final"
+  nettyVersion = "4.2.19.Final"
 }
 
 dependencies {
