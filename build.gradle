@@ -62,7 +62,7 @@ project.ext {
   //
   mockitoVersion = "5.2.0"
   //
-  jacksonVersion = "2.22.3"
+  jacksonVersion = "2.22.4"
   //
   logbackContribVersion = "0.1.5"
   //
