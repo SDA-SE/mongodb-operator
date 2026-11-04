@@ -94,7 +94,7 @@ dependencies {
   //
   annotationProcessor enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
   implementation enforcedPlatform("org.slf4j:slf4j-bom:${slf4jVersion}")
-  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.6.5'), {
+  implementation enforcedPlatform('ch.qos.logback:logback-parent:1.6.6'), {
     // pulls old v5 Servlet API
     exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
   }
